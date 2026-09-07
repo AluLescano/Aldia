@@ -54,6 +54,30 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
       ),
     },
     {
+      id: 'statistics',
+      label: 'Analytics',
+      icon: (active) => (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={active ? 2.5 : 1.75}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
+          />
+        </svg>
+      ),
+    },
+    {
       id: 'cards',
       label: 'Cards',
       icon: (active) => (
@@ -85,30 +109,6 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
       ),
     },
     {
-      id: 'statistics',
-      label: 'Analytics',
-      icon: (active) => (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={active ? 2.5 : 1.75}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
-          />
-        </svg>
-      ),
-    },
-    {
       id: 'settings',
       label: 'Settings',
       icon: (active) => (
@@ -135,7 +135,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-800/60 pb-[max(env(safe-area-inset-bottom),12px)] pt-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl border-t border-zinc-800/60 pb-[max(env(safe-area-inset-bottom),12px)] pt-2">
       <div className="max-w-md mx-auto flex items-center justify-around px-2">
         {navItems.map((item) => {
           const isActive = activeTab === item.id
