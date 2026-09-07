@@ -1,16 +1,13 @@
-import type { ButtonHTMLAttributes } from 'react'
-
-import Typography from '@/shared/ui/Typography/Typography'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 import styles from './Label.module.scss'
 
 interface LabelProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: string
-  size?: 'medium' | 'small'
+  children: ReactNode
   className?: string
 }
 
-const Label = ({ children, size = 'medium', className = '', ...rest }: LabelProps) => {
+const Label = ({ children, className = '', ...rest }: LabelProps) => {
   const { container } = styles
   return (
     <button
@@ -18,9 +15,7 @@ const Label = ({ children, size = 'medium', className = '', ...rest }: LabelProp
       type="button"
       className={`${container} px-2.5 py-1 rounded-full ${className}`}
     >
-      <Typography variant="label" size={size}>
-        {children}
-      </Typography>
+      {children}
     </button>
   )
 }

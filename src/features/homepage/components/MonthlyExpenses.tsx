@@ -40,16 +40,14 @@ const MonthlyExpenses = ({
       <div className={`${container} p-6`}>
         <div className="flex items-center justify-between">
           <Typography variant="overline">{title}</Typography>
-          <Label
-            size="small"
-            onClick={() => setIsSheetOpen(true)}
-            className={currencyPill}
-          >
+          <Label onClick={() => setIsSheetOpen(true)} className={currencyPill}>
             <span className="flex items-center gap-1.5">
               <span
                 className={`fi fi-${currentCountryCode} fi text-xs rounded-full inline-block`}
               />
-              <span>{selectedCurrency}</span>
+              <Typography variant="label" size="small">
+                {selectedCurrency}
+              </Typography>
             </span>
           </Label>
         </div>
