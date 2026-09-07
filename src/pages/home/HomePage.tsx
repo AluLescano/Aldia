@@ -17,8 +17,10 @@ export const HomePage: React.FC = () => {
       {/* Filter Tabs */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
         {['Todas', 'Streaming', 'Trabajo', 'Almacenamiento', 'Música'].map((tab, idx) => (
-          <Label key={idx} size="small">
-            {tab}
+          <Label key={idx}>
+            <Typography variant="label" size="small">
+              {tab}
+            </Typography>
           </Label>
         ))}
       </div>
