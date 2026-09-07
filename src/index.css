@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+@theme {
+  --font-sans:
+    'Red Hat Text', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+}
+
 @layer base {
   :root {
     --sat: env(safe-area-inset-top, 0px);
@@ -18,18 +24,9 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #09090b;
-    color: #f4f4f5;
-    font-family:
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      Roboto,
-      Oxygen,
-      Ubuntu,
-      Cantarell,
-      sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
     user-select: none;
     -webkit-user-select: none;
     overscroll-behavior-y: none;

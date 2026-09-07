@@ -1,0 +1,46 @@
+// ==============================================================================
+// Aldia Design System — Primitives
+// ==============================================================================
+
+// --- Phthalo Green (Brand) ---
+$phthalo-50: #eef8f2;
+$phthalo-100: #d2ecdf;
+$phthalo-200: #a1d6bb;
+$phthalo-300: #5cb386;
+$phthalo-400: #228a5c;
+$phthalo-500: #0f5c3e;
+$phthalo-600: #0a3d2c; // core brand anchor — light-mode brand, dark-mode ink
+$phthalo-700: #082a1f; // deepest — light-mode text ink
+
+// --- Champagne (Accent) ---
+$champagne-50: #fbf3e2;
+$champagne-100: #f5e5c4;
+$champagne-300: #e6c583;
+$champagne-500: #cf9f4f;
+$champagne-700: #93702e; // accessible bronze on light surfaces
+
+// --- Paper (Light-mode warm neutrals) ---
+$paper-0: #fffdf9; // reserved for elevated surfaces (modals/sheets)
+$paper-50: #faf7f0; // base card surface
+$paper-100: #f2ede1; // app canvas
+$paper-300: #cfc6b4; // dividers, strong borders
+
+// --- Charcoal (Dark-mode neutrals, subtle green undertone) ---
+$charcoal-900: #0a0f0c; // app canvas
+$charcoal-800: #131916; // base card surface
+$charcoal-700: #1d2620; // elevated surface
+$charcoal-500: #3a453d; // strong border/divider
+
+// --- Success (distinct from brand green — status meaning stays unambiguous) ---
+$success-100: #dcf3e5;
+$success-500: #2e9e63;
+$success-700: #1d6b42;
+
+// --- Warning ---
+$warning-100: #fbedd2;
+$warning-400: #e5ae49;
+$warning-700: #94650f;
+
+// --- Base ---
+$color-white: #ffffff;
+$color-black: #000000;
