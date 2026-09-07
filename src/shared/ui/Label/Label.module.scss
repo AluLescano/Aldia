@@ -1,0 +1,26 @@
+@use '@/styles/_variables.scss' as *;
+
+.container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+
+  &:hover,
+  &:active {
+    background-color: var(--bg-app);
+    color: var(--icon-hover);
+    border-color: var(--border-strong);
+  }
+}
