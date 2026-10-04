@@ -135,7 +135,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl border-t border-zinc-800/60 pb-[max(env(safe-area-inset-bottom),12px)] pt-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-app)]/90 backdrop-blur-xl border-t border-zinc-800/60 pb-[max(env(safe-area-inset-bottom),12px)] pt-2">
       <div className="max-w-md mx-auto flex items-center justify-around px-2">
         {navItems.map((item) => {
           const isActive = activeTab === item.id

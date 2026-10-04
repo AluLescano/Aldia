@@ -1,5 +1,5 @@
 // TYPES
-import type { Currency } from '@/features/settings/types'
+import type { Currency } from '@/shared/types'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
