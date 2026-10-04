@@ -1,0 +1,51 @@
+.skeleton {
+    background-color: var(--bg-surface);
+
+    .skeletonElement {
+      background-color: var(--bg-surface-elevated);
+    }
+}
+
+.container {
+    background-color: var(--bg-surface);
+    padding: 0.75rem 0.5rem 1.75rem;
+    box-shadow: 0 10px 15px 1px var(--shadow-md);
+}
+
+.subscriptionContainer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-surface-elevated);
+  box-shadow: 0px 10px 15px 1px var(--shadow-md);
+  transition:
+    box-shadow 200ms ease-out,
+    background-color 200ms ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent-color, transparent) 30%, transparent) 0%,
+      transparent 55%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  &:hover {
+    background-color: var(--bg-surface);
+    box-shadow: var(--shadow-md);
+  }
+
+  &.disabled {
+    filter: #{"grayscale(80%)"};
+  }
+}

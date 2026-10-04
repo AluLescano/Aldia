@@ -5,7 +5,6 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: hidden;
   gap: 0.5rem;
   cursor: pointer;
   user-select: none;
@@ -17,10 +16,15 @@
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
 
-  &:hover,
-  &:active {
-    background-color: var(--bg-app);
-    color: var(--icon-hover);
+  &:hover {
+    background-color: var(--overlay-hover);
     border-color: var(--border-strong);
+  }
+
+  &.active {
+    background-color: var(--brand-primary);
+    color: var(--text-on-brand);
+    border-color: transparent;
+    box-shadow: 0 0 0 3px var(--brand-subtle), var(--shadow-glow-brand);
   }
 }
