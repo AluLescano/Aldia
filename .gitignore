@@ -26,5 +26,6 @@ dist-ssr
 # AI assistant configs (local to each dev)
 .gemini/
 .claude/
+.qwen/
 .agents/
 .impeccable/
