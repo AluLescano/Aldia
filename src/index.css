@@ -56,3 +56,8 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
