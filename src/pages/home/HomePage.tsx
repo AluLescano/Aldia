@@ -1,81 +1,38 @@
 import React from 'react'
 
-interface HomePageProps {
-  onNewSubscription?: () => void
-}
+// COMPONENTS
+import Button from '@/shared/ui/Button/Button'
+import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses/MonthlyExpenses'
+import Typography from '@/shared/ui/Typography/Typography'
 
-export const HomePage: React.FC<HomePageProps> = ({ onNewSubscription }) => {
+export const HomePage: React.FC = () => {
   return (
-    <div className="flex flex-col gap-6 pb-24">
-      {/* Monthly Total Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900/60 via-zinc-900 to-zinc-950 p-6 border border-indigo-500/20 shadow-xl shadow-indigo-950/20">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            Monthly Expenses
-          </span>
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-            USD ($)
-          </span>
-        </div>
-
-        <div className="mt-4 flex items-baseline gap-2">
-          <span className="text-4xl font-extrabold tracking-tight text-white">$0.00</span>
-          <span className="text-sm text-zinc-400">/ month</span>
-        </div>
-
-        <p className="mt-2 text-xs text-zinc-400">0 active subscriptions tracked</p>
-
-        {/* Action Button to Add Subscription */}
-        <div className="mt-5 flex gap-3">
-          <button
-            type="button"
-            onClick={onNewSubscription}
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white font-medium py-3 px-4 rounded-2xl shadow-md shadow-indigo-600/25 transition-all text-sm"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
-            Add Subscription
-          </button>
-        </div>
-      </div>
-
+    <div className="flex flex-col gap-6">
+      <MonthlyExpenses
+        title="Gastos Mensuales"
+        monthlyAmount="0,00"
+        subscriptionAmount={0}
+      />
       {/* Filter Tabs */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-        {['All', 'Entertainment', 'Work', 'Cloud', 'Music'].map((tab, idx) => (
-          <button
-            key={tab}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-              idx === 0
-                ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
-                : 'bg-zinc-900/80 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
-            }`}
-          >
-            {tab}
-          </button>
+        {['Todas', 'Streaming', 'Trabajo', 'Almacenamiento', 'Música'].map((tab, idx) => (
+          <Label key={idx}>
+            <Typography variant="label" size="small">
+              {tab}
+            </Typography>
+          </Label>
         ))}
       </div>
 
       {/* Subscription List Section */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-base font-semibold text-zinc-200">Your Subscriptions</h2>
-          <span className="text-xs text-zinc-500">Sorted by charge date</span>
+          <Typography variant="title">Tus subscripciones</Typography>
         </div>
 
         {/* Empty State placeholder */}
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 p-8 text-center bg-zinc-900/30">
-          <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-zinc-500 mb-3 border border-zinc-800">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 border">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -90,11 +47,39 @@ export const HomePage: React.FC<HomePageProps> = ({ onNewSubscription }) => {
               />
             </svg>
           </div>
-          <p className="text-sm font-medium text-zinc-300">No subscriptions yet</p>
-          <p className="text-xs text-zinc-500 mt-1 max-w-xs">
+          <Typography variant="body" size="medium">
+            Sin subscripciones aún
+          </Typography>
+          <Typography variant="body">
             Add your recurring expenses to keep track of payment days and your total
             budget.
-          </p>
+          </Typography>
+        </div>
+      </div>
+
+      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md pointer-events-none z-30 px-5 flex justify-end">
+        <div className="pointer-events-auto">
+          <Button
+            variant="primary"
+            size="large"
+            aria-label="Agregar Subscripción"
+            onClick={() => console.log('Add subscription clicked')}
+            className="!rounded-full !py-6"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </Button>
         </div>
       </div>
     </div>

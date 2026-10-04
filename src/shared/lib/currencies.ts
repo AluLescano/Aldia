@@ -1,4 +1,4 @@
-import type { Currency } from '@/features/settings/types'
+import type { Currency } from '@/shared/types'
 
 export const DEFAULT_CURRENCIES: Currency[] = [
   { code: 'USD', name: 'US Dollar', symbol: 'U$S', countryCode: 'us' },
