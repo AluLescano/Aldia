@@ -1,0 +1,37 @@
+.skeleton {
+    background-color: var(--bg-surface);
+
+    .skeletonElement {
+      background-color: var(--bg-surface-elevated);
+    }
+}
+
+.container {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-featured);
+  border-radius: 1.5rem;
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-glow-brand);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-hero);
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+  
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .currencyPill {
+    background-color: var(--brand-subtle);
+    border-color: var(--border-featured);
+  }
+}
