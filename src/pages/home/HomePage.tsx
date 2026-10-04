@@ -1,10 +1,9 @@
 import React from 'react'
 
-/* COMPONENTS */
-import Typography from '@/shared/ui/Typography/Typography'
-import Label from '@/shared/ui/Label/Label'
+// COMPONENTS
 import Button from '@/shared/ui/Button/Button'
-import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses'
+import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses/MonthlyExpenses'
+import Typography from '@/shared/ui/Typography/Typography'
 
 export const HomePage: React.FC = () => {
   return (
