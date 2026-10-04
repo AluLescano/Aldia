@@ -61,14 +61,14 @@ const Typography = ({
 
     case 'currency': {
       const sizeClasses = {
-        large: 'text-3xl font-bold',
-        medium: 'text-xl font-bold',
+        large: 'text-3xl  font-semibold',
+        medium: 'text-xl  font-semibold',
         small: 'text-base font-semibold',
       }
       const decimalSizes = {
-        large: 'text-lg font-semibold',
-        medium: 'text-base font-medium',
-        small: 'text-sm font-normal',
+        large: 'text-base font-semibold',
+        medium: 'text-sm font-medium',
+        small: 'text-xs font-normal',
       }
 
       // Automatically extract integer & decimal!
@@ -78,7 +78,7 @@ const Typography = ({
         <div className={`inline-flex gap-0.5 ${className}`.trim()}>
           <span className={`${sizeClasses[size]}`}>{currencySymbol}</span>
           <span className={`${sizeClasses[size]}`}>{integerPart}</span>
-          {decimalPart && <span className={`${decimalSizes[size]}`}>{decimalPart}</span>}
+          {decimalPart && <span className={`mt-[0.15rem] ${decimalSizes[size]}`}>{decimalPart}</span>}
         </div>
       )
     }

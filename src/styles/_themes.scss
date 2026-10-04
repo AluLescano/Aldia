@@ -14,9 +14,9 @@
   --border-strong: #{$paper-300};
   --border-featured: #{rgba($phthalo-400, 0.4)};
 
-  --shadow-sm: 0 1px 2px #{rgba($phthalo-600, 0.06)};
-  --shadow-md: 0 4px 16px #{rgba($phthalo-600, 0.08)};
-  --shadow-lg: 0 12px 32px #{rgba($phthalo-600, 0.12)};
+  --shadow-sm: #{rgba($phthalo-600, 0.06)};
+  --shadow-md: #{rgba($phthalo-600, 0.08)};
+  --shadow-lg: #{rgba($phthalo-600, 0.12)};
   --shadow-glow-brand:
     0 20px 25px -5px #{rgba($phthalo-300, 0.1)},
     0 8px 10px -6px #{rgba($phthalo-300, 0.06)};
@@ -89,9 +89,9 @@
   --border-strong: #{$charcoal-500};
   --border-featured: #{rgba($phthalo-400, 0.5)};
 
-  --shadow-sm: 0 1px 2px #{rgba($color-black, 0.4)};
-  --shadow-md: 0 8px 20px #{rgba($color-black, 0.5)};
-  --shadow-lg: 0 16px 40px #{rgba($color-black, 0.6)};
+  --shadow-sm: #{rgba($color-black, 0.4)};
+  --shadow-md: #{rgba($color-black, 0.5)};
+  --shadow-lg: #{rgba($color-black, 0.6)};
   --shadow-glow-brand:
     0 20px 30px -10px #{rgba($phthalo-500, 0.35)},
     0 8px 10px -5px #{rgba($phthalo-500, 0.05)};
