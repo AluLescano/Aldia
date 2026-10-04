@@ -11,20 +11,21 @@ import Typography from '@/shared/ui/Typography/Typography'
 import Pill from '@/shared/ui/Pill/Pill'
 
 // ASSETS
-import { EmptySymbol } from '@/assets/icons/EmptySymbol'
+import { IconAddEmpty } from '@/assets/icons/IconAddEmpty'
 import styles from './SubscriptionList.module.scss'
 
 interface Props {
   subscriptions: Subscription[]
   isLoading?: boolean
+  onDelete: (arg0: Subscription) => void
 }
 
 const isDisabled = (status: string) => {
-  return status == 'cancelled' || status == 'paused'
+  return status == 'inactive'
 
 }
 
-const SubscriptionList = ({ subscriptions, isLoading }: Props) => {
+const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
   const { container } = styles
   const hasSubscriptions = (subscriptions ?? []).length > 0
   const [activeTab, setActiveTab] = useState('Todas')
@@ -40,7 +41,7 @@ const SubscriptionList = ({ subscriptions, isLoading }: Props) => {
       ? subscriptions
       : activeTab === 'Inactivas'
         ? subscriptions.filter(
-            (sub) => 'cancelled' == sub.status || 'paused' == sub.status,
+            (sub) => 'inactive' == sub.status
           )
         : subscriptions.filter((sub) => activeTab == sub.categoryId)
 
@@ -80,7 +81,7 @@ const SubscriptionList = ({ subscriptions, isLoading }: Props) => {
         {!hasSubscriptions ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 border">
-              <EmptySymbol />
+              <IconAddEmpty />
             </div>
             <Typography variant="body" size="medium">
               Sin subscripciones aún
@@ -93,7 +94,7 @@ const SubscriptionList = ({ subscriptions, isLoading }: Props) => {
         ) : (
           <div className="flex flex-col items-center justify-center gap-3 align-middle">
             {sortedSubscriptions.map((sub) => (
-              <SubscriptionCard key={sub.id} subscription={sub} />
+              <SubscriptionCard key={sub.id} subscription={sub} onDelete={onDelete} />
             ))}
           </div>
         )}
