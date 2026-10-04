@@ -2,7 +2,7 @@ interface Props {
   className?: string
 }
 
-export const AddSymbol = ({ className = 'w-6 h-6' }: Props) => {
+export const IconAdd = ({ className = 'w-6 h-6' }: Props) => {
   return (
     <svg
       className={className}
