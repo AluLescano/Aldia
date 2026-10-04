@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# AI assistant configs (local to each dev)
+.gemini/
+.claude/
+.agents/
+.impeccable/
