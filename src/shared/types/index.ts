@@ -64,7 +64,7 @@ export type BillingCycle =
   | 'semiannual'
   | 'yearly'
 
-export type SubscriptionStatus = 'active' | 'trial' | 'paused' | 'cancelled'
+export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
 export interface TrialConfig {
   startDate: string // YYYY-MM-DD

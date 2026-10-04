@@ -1,0 +1,10 @@
+.container {
+    background-color: var(--bg-surface-elevated);
+}
+
+:global {
+  @keyframes shrink {
+      from {width: 100%;}    
+      to {width: 0%;}
+  }
+}
