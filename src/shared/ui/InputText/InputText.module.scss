@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+
+  cursor: text;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &:disabled {
+    color: var(--text-disabled);
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}

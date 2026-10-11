@@ -1,0 +1,83 @@
+.base {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-input);
+  border-radius: 1rem;
+  background-color: transparent;
+  justify-content: center;
+
+  &:focus-within {
+    border-color: var(--focus-ring);
+  }
+
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.sizeLarge {
+  min-height: 3rem;
+}
+
+.sizeMedium {
+  min-height: 2.5rem;
+}
+
+.widthFull {
+  width: 100%;
+}
+
+.widthFit {
+  width: fit-content;
+}
+
+.labelContainer {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  padding: 0 0.25rem;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 2rem);
+}
+
+.base:focus-within .labelContainer,
+.base.floated .labelContainer {
+  background-color: var(--field-surface, var(--bg-surface));
+  transform: translateY(-150%) scale(0.78);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .base .labelContainer {
+    transition: transform 150ms ease;
+  }
+}
+
+.info {
+  font-size: 0.75rem;
+  color: var(--text-accent);
+  margin-left: 0.5rem;
+}
+
+.error {
+  font-size: 0.75rem;
+  color: var(--error-text);
+  margin-left: 0.5rem;
+}
+
+.base.errorState {
+  border-color: var(--error-border);
+
+  .labelContainer {
+    color: var(--error-text);
+  }
+}
