@@ -56,13 +56,7 @@ export interface SubscriptionReminder {
 // ==========================================
 // SUBSCRIPTIONS / PAYMENT METHODS
 // ==========================================
-export type BillingCycle =
-  | 'one-time'
-  | 'weekly'
-  | 'monthly'
-  | 'bimonthly'
-  | 'semiannual'
-  | 'yearly'
+export type BillingCycle = 'one-time' | 'weekly' | 'monthly' | 'bimonthly' | 'semiannual' | 'yearly'
 
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
