@@ -13,17 +13,18 @@ Aldia is inspired by [Tilla](https://play.google.com/store/apps/details?id=com.p
 | ---------------- | -------------------------------------------------------------------- |
 | **UI Framework** | React 19 + TypeScript 6                                              |
 | **Build Tool**   | Vite 8                                                               |
-| **Mobile Shell** | Capacitor 8 (Android)                                                |
-| **State**        | Zustand 5 (lightweight, slice-based stores with `persist` middleware) |
-| **Styling**      | Tailwind CSS v4 + SCSS Modules (design tokens in CSS Custom Props)   |
-| **Icons/Assets** | flag-icons (currency flags), custom SVGs                             |
+| **Mobile Shell** | Capacitor 8 (installed; the Android platform is not set up yet)      |
+| **State**        | Zustand 5 (lightweight stores, `persist` middleware for subscriptions) |
+| **Styling**      | SCSS Modules (design tokens in CSS Custom Props)                     |
+| **Animation**    | motion 14                                                            |
+| **Icons/Assets** | flag-icons (currency flags), custom SVGs, `.webp` brand logos        |
 | **Code Quality** | ESLint 10 · Prettier 3 · Commitizen (Conventional Commits)          |
 
 ### Why this stack?
 
 - **React + Capacitor** lets us write a single web codebase and ship it as a native Android app using Capacitor's native bridge. Unlike React Native, the same codebase can later target **desktop via Electron or Tauri** with zero rewrite.
 - **Zustand** over Redux because this is a single-user, offline app — Zustand's minimal API (`create` + slices) eliminates boilerplate while providing fine-grained reactivity.
-- **Tailwind + SCSS Modules** — Tailwind handles layout/spacing/responsive, while SCSS Modules handle complex component-scoped styles (animations, pseudo-elements, theme-aware keyframes) that are awkward in utility classes.
+- **SCSS Modules** — every component owns its styles, scoped by default, with design tokens shared through CSS custom properties. This keeps JSX free of long utility-class strings and makes theme-aware keyframes and pseudo-elements straightforward.
 
 ---
 
@@ -44,7 +45,7 @@ Aldia is inspired by [Tilla](https://play.google.com/store/apps/details?id=com.p
 - **Subscription Management**
   - Add from 17+ preset services (Netflix, Spotify, ChatGPT Plus, Claude Pro, etc.) — user only fills day, price, category, payment method
   - Create fully custom subscriptions with name, icon, brand color
-  - Track billing cycle: one-time, weekly, monthly, bimonthly, semiannual, yearly
+  - Track billing cycle: one-time, weekly, monthly, bimonthly, semiannual, yearly (all unlocked in v1; `PRODUCT.md` plans to gate one-time, bimonthly, semiannual and trials behind a paid unlock later)
   - Support for trials with start/end dates
   - Pause, cancel, or reactivate subscriptions without deleting
 
@@ -80,19 +81,19 @@ This project follows a **Feature-Driven Architecture**. Full details in [`docs/a
 
 ```
 src/
-├── app/                        # Global providers & app-level wrappers
-├── features/                   # Domain modules (each owns its components, hooks, types, utils)
-│   ├── homepage/               # Monthly expenses widget, subscription list
-│   ├── subscriptions/          # (planned) Subscription CRUD, preset picker, form
-│   ├── cards/                  # (planned) Payment method management
-│   ├── calendar/               # (planned) Calendar grid, date projections
-│   ├── statistics/             # (planned) Category breakdowns, charts
-│   ├── settings/               # Currency store, preferences
-│   └── navigation/             # Bottom tab bar
-├── pages/                      # Screen-level orchestrators (import + compose features)
+├── App.tsx                     # Tab switch, bottom nav and overlay renderer
+├── assets/icons/               # Icon* components (SVG)
+├── features/                   # Domain modules (each owns its components and stores)
+│   ├── homepage/               # Monthly expenses widget, subscription list and cards
+│   ├── subscriptions/          # Preset card + subscription store (add form is next)
+│   ├── settings/               # Currency picker + settings store
+│   ├── navigation/             # Bottom tab bar
+│   └── (planned)               # cards/, calendar/, statistics/
+├── pages/                      # Screen-level orchestrators (home, calendar, cards, statistics, settings, presetPicker)
 ├── shared/
-│   ├── ui/                     # Reusable primitives: Button, BottomSheet, Pill, Typography
-│   ├── lib/                    # Pure utilities: storage, currencies, presets
+│   ├── ui/                     # Primitives: Button, BottomSheet, BackdropFilter, Pill, Toast, Typography
+│   ├── lib/                    # Utilities: storage, currencies, presets
+│   ├── store/                  # uiStore (overlay stack)
 │   └── types/                  # Domain interfaces & type definitions
 └── styles/                     # Design tokens (_variables.scss) + themes (_themes.scss)
 ```
@@ -135,6 +136,7 @@ src/
 | `BackdropFilter` | Blur overlay for modals                                   |
 | `Pill`           | Clickable rounded chip for filters and selections         |
 | `Typography`     | Semantic text with `title`, `body`, `overline`, `currency` variants |
+| `Toast`          | Animated notification with hover pause (used for delete undo)       |
 
 ---
 
@@ -192,10 +194,10 @@ Data is stored under versioned keys to support future migrations:
 
 | Key                        | Contents                            |
 | -------------------------- | ----------------------------------- |
-| `aldia_settings`           | Currency prefs, theme, reminders    |
+| `aldia_settings`           | Selected currency and favorites (theme and reminders planned) |
 | `aldia_subscriptions_v1`   | All subscription records            |
-| `aldia_cards_v1`           | Payment methods                     |
-| `aldia_categories_v1`      | Custom + default categories         |
+| `aldia_cards_v1`           | (planned) Payment methods           |
+| `aldia_categories_v1`      | (planned) Custom + default categories |
 
 ---
 
@@ -203,8 +205,12 @@ Data is stored under versioned keys to support future migrations:
 
 ### v1.0 — MVP (Current)
 - [ ] Subscription CRUD (add from presets + custom creation)
-- [ ] Filterable subscription list with category pills
-- [ ] Monthly cost calculation with multi-currency display
+- [x] Subscription list with active/inactive states
+- [x] Monthly cost calculation
+- [x] Preset picker overlay
+- [x] Swipe-to-delete with undo toast
+- [ ] Initialize the Capacitor Android platform
+- [ ] Multi-currency support
 - [ ] Calendar view with charge day markers
 - [ ] Statistics screen with category % breakdown
 - [ ] Payment method cards with expiry tracking

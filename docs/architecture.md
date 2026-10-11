@@ -2,14 +2,14 @@
 
 ## 1. Vision & Technical Principles
 
-**Aldia** is an offline-first subscription and recurring expense tracker designed for Android (via Capacitor) and Desktop (via Electron).
+**Aldia** is an offline-first subscription and recurring expense tracker designed for Android (via Capacitor) and Desktop (via Electron or Tauri, planned for v2).
 
 ### Guiding Principles
 
 1. **Zero Spaghetti Code (Strict Separation of Concerns):**
    - **UI components** (`components/`): Present data and handle user events. They _never_ calculate exchange rates, parse dates, or directly touch storage.
-   - **Custom Hooks** (`hooks/`): Encapsulate stateful logic, side effects, and calculations.
-   - **Services / Utilities** (`lib/` or `services/`): Pure TypeScript functions with no React dependency (easily testable and portable).
+   - **Stores** (`store/` or `store.ts`): Zustand stores hold state and the actions that change it.
+   - **Utilities** (`shared/lib/`): Pure TypeScript functions with no React dependency (easily testable and portable).
 2. **Local-First & Privacy-Focused:**
    - All user data remains on the device.
    - Backups are plain, versioned JSON files that can be exported or synced directly with Google Drive without an intermediary backend server.
@@ -26,75 +26,73 @@ The codebase is organized by business features rather than generic file types. T
 
 ```text
 src/
-├── app/                      # Application entry, global wrappers & providers
-│   ├── providers/            # AppSettingsContext, CurrencyContext
-│   └── styles/               # Global CSS & theme tokens
+├── App.tsx                   # Tab switch (TabType), bottom nav and overlay renderer
+├── main.tsx
+├── assets/icons/             # Icon* components (SVG)
 │
 ├── features/                 # Domain-driven feature modules
-│   ├── subscriptions/        # Subscription catalog, tracker, calculations
-│   │   ├── components/       # SubscriptionCard, PresetPicker, SubscriptionForm
-│   │   ├── hooks/            # useSubscriptions.ts, useBillingMath.ts
-│   │   ├── services/         # presetsData.ts, subscriptionStorage.ts
-│   │   └── types/            # Subscription, BillingCycle
-│   │
-│   ├── cards/                # Mock credit cards & payment methods
-│   │   ├── components/       # CardVisual, AddCardSheet
-│   │   ├── hooks/            # useCards.ts
-│   │   └── types/            # PaymentMethod, CardBrand
-│   │
-│   ├── calendar/             # Monthly calendar & charge projection
-│   │   ├── components/       # CalendarGrid, DayDetailsSheet
-│   │   └── utils/            # dateProjections.ts
-│   │
-│   ├── statistics/           # Category breakdowns, charts & % monthly costs
-│   │   ├── components/       # CategoryBreakdown, CostDistributionBar
-│   │   └── utils/            # statisticsMath.ts
-│   │
-│   └── navigation/           # App navigation & bottom tab bar
-│       ├── components/       # BottomNavBar.tsx, TopHeader.tsx
-│       └── types/            # TabType ('home' | 'calendar' | 'cards' | 'stats' | 'settings')
+│   ├── homepage/
+│   │   └── components/       # MonthlyExpenses, SubscriptionList, SubscriptionCard, skeletons
+│   ├── subscriptions/
+│   │   ├── components/       # PresetCard
+│   │   └── store/            # subscriptionStore.ts (Zustand + persist)
+│   ├── settings/
+│   │   ├── components/       # CurrencyPicker
+│   │   └── store.ts          # useSettingsStore (selected + favorite currencies)
+│   └── navigation/
+│       └── components/       # BottomNavBar
+│   (planned: cards/, calendar/, statistics/)
 │
 ├── pages/                    # Screen level views (orchestrate feature components)
 │   ├── home/HomePage.tsx
 │   ├── calendar/CalendarPage.tsx
 │   ├── cards/CardsPage.tsx
 │   ├── statistics/StatisticsPage.tsx
-│   └── settings/SettingsPage.tsx
+│   ├── settings/SettingsPage.tsx
+│   └── presetPicker/PresetPicker.tsx   # Opened as an overlay, not a tab
 │
-└── shared/                   # Generic code that has NO domain knowledge
-    ├── ui/                   # Reusable UI primitives (Button, Modal, BottomSheet, Input, Badge)
-    ├── lib/                  # General utilities (formatters, dates, storage helpers)
-    ├── types/                # Universal shared TypeScript types
-    └── assets/               # Static logos, vector icons, preset brand SVGs
+├── shared/                   # Generic code that has NO domain knowledge
+│   ├── ui/                   # Button, BottomSheet, BackdropFilter, Pill, Toast, Typography
+│   ├── lib/                  # currencies.ts, presets.ts, storage.ts
+│   ├── store/                # uiStore.ts (overlay stack)
+│   └── types/                # index.ts (all domain types)
+│
+└── styles/                   # _variables.scss (design tokens) and _themes.scss (light/dark)
 ```
+
+Each component lives in its own folder with a matching `*.module.scss` file (SCSS Modules). Styling is SCSS only.
 
 ---
 
 ## 3. Data Models (Domain Entities)
 
-All domain types are strictly typed in `src/shared/types/index.ts`:
+All domain types are strictly typed in `src/shared/types/index.ts`. That file is the source of truth; the summary below may lag behind it.
 
 ### A. Subscription Entity
 
 ```typescript
-export type BillingCycle = 'weekly' | 'monthly' | 'quarterly' | 'biannual' | 'yearly'
+export type BillingCycle = 'one-time' | 'weekly' | 'monthly' | 'bimonthly' | 'semiannual' | 'yearly'
+export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
 export interface Subscription {
-  id: string // UUID v4
-  name: string // e.g. "Netflix Standard"
-  description?: string
-  price: number // e.g. 15.99
-  currency: string // ISO 4217, e.g. "USD", "EUR", "ARS"
-  billingCycle: BillingCycle // Frequency
-  firstBillDate: string // "YYYY-MM-DD"
-  nextBillDate: string // Calculated dynamically based on billingCycle & firstBillDate
-  categoryId: string // Reference to Category.id
-  paymentMethodId?: string // Reference to PaymentMethod.id (Card / Bank)
-  reminderDaysBefore?: number // Notification trigger (e.g. 1 or 2 days prior)
-  iconUrl?: string // Preset SVG or custom uploaded icon
-  brandColor?: string // Hex accent for the card background
-  isActive: boolean // Can be paused without deleting
-  notes?: string
+  id: string
+  name: string
+  price: number
+  currency: CurrencyCode // 'USD' | 'EUR' | 'ARS' | 'CLP' | 'GBP' | any string
+  billingCycle: BillingCycle
+
+  firstBillDate: string // YYYY-MM-DD
+  nextBillDate: string // YYYY-MM-DD
+  endDate?: string // YYYY-MM-DD
+  trial?: TrialConfig // { startDate, endDate }
+
+  categoryId: string
+  paymentMethodId?: string
+  reminders: SubscriptionReminder[]
+
+  iconUrl?: string
+  brandColor?: string
+  status: SubscriptionStatus
   createdAt: string
 }
 ```
@@ -102,17 +100,16 @@ export interface Subscription {
 ### B. Payment Method (Cards / Accounts)
 
 ```typescript
-export type PaymentMethodType = 'credit' | 'debit' | 'bank_account' | 'cash' | 'other'
+export type PaymentMethodType = 'credit' | 'bank_account'
 export type CardBrand = 'visa' | 'mastercard' | 'amex' | 'discover' | 'generic'
 
 export interface PaymentMethod {
   id: string
-  name: string // e.g. "Nubank Mastercard", "Main Checking"
+  name: string
   type: PaymentMethodType
-  last4?: string // e.g. "4582"
-  expiryDate?: string // "MM/YY" - used for expiration reminders on calendar
-  brand: CardBrand
-  colorGradient: string // e.g. "from-purple-600 to-indigo-800"
+  brand?: CardBrand // Optional for bank accounts
+  last4Digits?: string
+  expiryDate?: string // MM/YY, cards only
 }
 ```
 
@@ -121,47 +118,52 @@ export interface PaymentMethod {
 ```typescript
 export interface Category {
   id: string
-  name: string // e.g. "Entertainment", "Work", "Utilities"
-  icon: string // Icon identifier
-  color: string // Hex or Tailwind color token
+  name: string
+  color: string // Hex, used by the Statistics page
+  isCustom?: boolean
 }
 ```
 
-### D. Currency & Preferences
+### D. Currency, Reminders and Templates
 
 ```typescript
-export interface CurrencyConfig {
-  code: string // "USD", "EUR", "ARS", etc.
-  symbol: string // "$", "€", "AR$"
-  name: string // "US Dollar", "Euro"
+export interface Currency {
+  code: CurrencyCode
+  name: string
+  symbol: string
+  countryCode: string // flag-icons code, e.g. 'us', 'eu', 'ar'
 }
 
-export interface AppSettings {
-  primaryCurrency: string // Base currency for total sums
-  favoriteCurrencies: string[] // 5 pinned currencies in top switch
-  theme: 'dark' | 'light' | 'system'
-  reminderTime: string // "09:00"
-  notificationsEnabled: boolean
+export interface SubscriptionReminder {
+  id: string
+  daysBefore: number // 0 = same day
+  time: string // HH:MM AM/PM
+  target: 'billing' | 'trial_end'
+  isEnabled: boolean
+}
+
+export interface SubscriptionTemplate {
+  id: string
+  name: string
+  defaultCategoryId?: string
+  iconUrl: string
+  brandColor?: string
 }
 ```
+
+User preferences currently live in `useSettingsStore` (`selectedCurrency`, `favoriteCurrencies`). Theme and reminder settings are planned.
 
 ---
 
-## 4. State Management Strategy & Educational Progression
+## 4. State Management
 
-### Phase 1: Native React (Current)
+State lives in **Zustand** stores:
 
-- Custom hooks (`useSubscriptions`, `useCards`, `useSettings`) managing state with `useState` and syncing via `localStorage`.
-- Storage logic is isolated into `src/shared/lib/storage.ts`.
-- **Benefit:** Direct understanding of state lifecycles, re-renders, and custom hook composition.
+- `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription`, `updateSubscription`. Uses the `persist` middleware, so it saves itself to `localStorage` under `aldia_subscriptions_v1`.
+- `useSettingsStore` (`features/settings/store.ts`): selected and favorite currencies. Loads from and saves to `localStorage` by hand through `shared/lib/storage.ts`, under `aldia_settings`.
+- `useUIStore` (`shared/store/uiStore.ts`): a stack of overlays (`preset-picker`, `subscription-form`) with `pushOverlay`, `popOverlay` and `closeAllOverlays`. `App.tsx` renders the top of the stack.
 
-### Phase 2: Lightweight Store (`zustand`)
-
-- When ready, migrating is a 1:1 replacement: the hooks simply delegate to `useSubscriptionStore` without touching any UI component!
-- **Why Zustand is great for this app:**
-  - No Redux boilerplate (`actions`, `reducers`, `dispatch`).
-  - Out-of-the-box `persist` middleware.
-  - Zero component re-renders for unselected state slices.
+Why Zustand: no Redux boilerplate (`actions`, `reducers`, `dispatch`), an out-of-the-box `persist` middleware, and components only re-render for the state slices they select.
 
 ---
 
@@ -171,12 +173,12 @@ export interface AppSettings {
 
 Data is saved under versioned keys:
 
-- `aldia_subscriptions_v1`
-- `aldia_cards_v1`
-- `aldia_categories_v1`
-- `aldia_settings_v1`
+- `aldia_subscriptions_v1` (in use)
+- `aldia_settings` (in use)
+- `aldia_cards_v1` (planned)
+- `aldia_categories_v1` (planned)
 
-### Backup JSON Format
+### Backup JSON Format (planned)
 
 ```json
 {
@@ -191,7 +193,7 @@ Data is saved under versioned keys:
 }
 ```
 
-- **Drive Sync:** The user will authorize with Google OAuth2. The app simply uploads this versioned JSON blob to an app-private `appDataFolder` on Google Drive, requiring zero external database hosting.
+- **Drive Sync (planned, v1.1):** The user will authorize with Google OAuth2. The app simply uploads this versioned JSON blob to an app-private `appDataFolder` on Google Drive, requiring zero external database hosting.
 
 ---
 
@@ -199,8 +201,9 @@ Data is saved under versioned keys:
 
 When you want to build a new screen or component:
 
-1. **Define Types First:** Add your interfaces to `src/features/<feature>/types/`.
-2. **Create Pure Utilities:** Put math, formatters, and data transformation in `src/features/<feature>/utils/`.
+1. **Define Types First:** Add shared interfaces to `src/shared/types/index.ts`.
+2. **Create Pure Utilities:** Put math, formatters, and data transformation in `src/shared/lib/` (or `src/features/<feature>/utils/` when they belong to one feature).
 3. **Build UI Primitives in `shared/ui/`:** If you need a reusable badge, switch, or button, create it in `src/shared/ui/`.
-4. **Create Domain Components:** Build feature components in `src/features/<feature>/components/`.
-5. **Assemble in `pages/`:** The page file only imports and arranges the feature components.
+4. **Add State When Needed:** Create a Zustand store in `src/features/<feature>/store/`.
+5. **Create Domain Components:** Build feature components in `src/features/<feature>/components/`, each with its own `*.module.scss`.
+6. **Assemble in `pages/`:** The page file only imports and arranges the feature components.

@@ -1,7 +1,5 @@
 # Product
 
-<!-- impeccable:product-schema 1 -->
-
 ## Platform
 
 android
@@ -83,7 +81,7 @@ The app language is **Spanish** (UI copy: "Agregar Subscripción", "Formato del 
 ## Evidence on Hand
 
 - Figma design file with screens for: Home (empty + populated), Add Subscription (preset picker, form, selectors), Calendar (grid + day details sheet), Statistics (donut chart), and all bottom sheet sub-flows (datepicker, billing format, notifications, categories, payment methods).
-- Working partial codebase: React 19 + Vite 8 + Capacitor 8 + Zustand 5 + Tailwind v4 + SCSS Modules.
+- Working partial codebase: React 19 + Vite 8 + Capacitor 8 + Zustand 5 + SCSS Modules.
 - 17 preset subscription services defined in code.
 - 8 default categories defined in code.
 - 5 default currencies defined in code (USD, EUR, ARS, CLP, GBP).
