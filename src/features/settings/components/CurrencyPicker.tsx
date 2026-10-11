@@ -3,6 +3,7 @@ import type { Currency } from '@/shared/types'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
+import styles from './CurrencyPicker.module.scss'
 
 interface CurrencyPickerProps {
   currencies: Currency[]
@@ -18,8 +19,20 @@ const CurrencyPicker = ({
   onSelect,
   className = '',
 }: CurrencyPickerProps) => {
+  const {
+    list,
+    button,
+    selected,
+    unselected,
+    leftSection,
+    flag,
+    currencyInfo,
+    mutedText,
+    rightSection,
+  } = styles
+
   return (
-    <ul className={`flex flex-col gap-1.5 py-1 mx-1.5 ${className}`}>
+    <ul className={`${list} ${className}`}>
       {currencies.map((currency) => {
         const isSelected = currency.code === selectedCode
 
@@ -28,36 +41,32 @@ const CurrencyPicker = ({
             <button
               type="button"
               onClick={() => onSelect?.(currency.code)}
-              className={`flex items-center justify-between w-full px-3.5 py-3 rounded-xl transition-colors text-left ${
-                isSelected
-                  ? 'bg-[var(--brand-subtle)] text-[var(--text-primary)]'
-                  : 'hover:bg-[var(--overlay-hover)] text-[var(--text-primary)]'
-              }`}
+              className={`${button} ${isSelected ? selected : unselected}`}
             >
               {/* Left: Flag + Code + Name */}
-              <div className="flex items-center gap-4">
+              <div className={leftSection}>
                 <span
-                  className={`fi fi-${currency.countryCode} fis text-3xl rounded-full inline-block`}
+                  className={`fi fi-${currency.countryCode} fis ${flag}`}
                 />
-                <div className="flex flex-col">
+                <div className={currencyInfo}>
                   <Typography variant="body" size="medium">
                     {currency.code}
                   </Typography>
                   <Typography
                     variant="label"
                     size="small"
-                    className="text-[var(--text-muted)]"
+                    className={mutedText}
                   >
                     {currency.name}
                   </Typography>
                 </div>
               </div>
               {/* Right: Symbol */}
-              <div className="flex items-center gap-3">
+              <div className={rightSection}>
                 <Typography
                   variant="body"
                   size="medium"
-                  className="text-[var(--text-muted)]"
+                  className={mutedText}
                 >
                   {currency.symbol}
                 </Typography>

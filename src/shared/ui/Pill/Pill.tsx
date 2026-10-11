@@ -14,7 +14,7 @@ const Pill = ({ children, className = '', isActive, ...rest }: PillProps) => {
     <button
       {...rest}
       type="button"
-      className={`${container} px-2.5 py-1 rounded-full ${isActive ? active : ''} ${className}`}
+      className={`${container} ${isActive ? active : ''} ${className || ''}`.trim()}
     >
       {children}
     </button>

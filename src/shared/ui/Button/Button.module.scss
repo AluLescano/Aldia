@@ -6,6 +6,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--border-subtle);
   gap: 0.5rem;
   cursor: pointer;
   user-select: none;
@@ -75,4 +76,26 @@
     transform: translate(-50%, -50%) scale(8);
     opacity: 0;
   }
+}
+
+.sizeLarge {
+  min-height: 3rem;
+  padding: 0.75rem 1.5rem;
+}
+.sizeMedium {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+}
+.sizeSmall {
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+}
+.widthFull {
+  width: 100%;
+}
+.widthFit {
+  width: fit-content;
+}
+.base {
+  border-radius: 0.75rem;
 }

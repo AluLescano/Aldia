@@ -10,19 +10,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string
 }
 
-const { ButtonPrimary, ButtonSecondary } = styles
-
-const BUTTON_SIZE_CLASSES = {
-  large: 'min-h-[3rem] py-3 px-6',
-  medium: 'min-h-[2.5rem] py-2 px-4',
-  small: 'min-h-[2rem] py-1 px-3',
-} as const
-
-const BUTTON_VARIANTS = {
-  primary: ButtonPrimary,
-  secondary: ButtonSecondary,
-} as const
-
 interface Ripple {
   id: number
   x: number
@@ -39,6 +26,34 @@ const Button = ({
   className,
   ...rest
 }: ButtonProps) => {
+  const {
+    ButtonPrimary,
+    ButtonSecondary,
+    sizeLarge,
+    sizeMedium,
+    sizeSmall,
+    widthFull,
+    widthFit,
+    base,
+    ripple,
+  } = styles
+
+  const buttonSizeClasses = {
+    large: sizeLarge,
+    medium: sizeMedium,
+    small: sizeSmall,
+  }
+
+  const buttonWidthClasses = {
+    full: widthFull,
+    fit: widthFit,
+  }
+
+  const buttonVariants = {
+    primary: ButtonPrimary,
+    secondary: ButtonSecondary,
+  }
+
   const [ripples, setRipples] = useState<Ripple[]>([])
   const rippleIdRef = useRef(0)
 
@@ -54,7 +69,7 @@ const Button = ({
   }
 
   const removeRipple = (id: number) => {
-    setRipples((prev) => prev.filter((ripple) => ripple.id !== id))
+    setRipples((prev) => prev.filter((r) => r.id !== id))
   }
 
   return (
@@ -62,15 +77,15 @@ const Button = ({
       {...rest}
       type={type}
       onClick={handleClick}
-      className={`${BUTTON_SIZE_CLASSES[size]} ${BUTTON_VARIANTS[variant]} ${width === 'full' ? 'w-full' : 'w-fit'} rounded-xl ${className}`}
+      className={`${buttonSizeClasses[size]} ${buttonVariants[variant]} ${buttonWidthClasses[width]} ${base} ${className || ''}`.trim()}
     >
       {children}
-      {ripples.map((ripple) => (
+      {ripples.map((r) => (
         <span
-          key={ripple.id}
-          className={styles.ripple}
-          style={{ left: ripple.x, top: ripple.y }}
-          onAnimationEnd={() => removeRipple(ripple.id)}
+          key={r.id}
+          className={ripple}
+          style={{ left: r.x, top: r.y }}
+          onAnimationEnd={() => removeRipple(r.id)}
         />
       ))}
     </button>

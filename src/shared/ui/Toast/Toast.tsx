@@ -27,11 +27,23 @@ const Toast = ({
   onDismiss,
   className = '',
 }: Props) => {
-  const { container } = styles
+  const {
+    container,
+    iconAlert,
+    iconSuccess,
+    iconInfo,
+    positionTop,
+    positionBottom,
+    contentWrapper,
+    closeWrapper,
+    closeButton,
+    closeIcon,
+    progressBar,
+  } = styles
   const icon = {
-    alert: <IconAlert classname="w-5 h-5" />,
-    success: <IconSuccess classname="w-5 h-5" />,
-    info: <IconInfo classname="w-5 h-5" />,
+    alert: <IconAlert classname={iconAlert} />,
+    success: <IconSuccess classname={iconSuccess} />,
+    info: <IconInfo classname={iconInfo} />,
   }[type]
 
   const progressBarColor = {
@@ -44,12 +56,12 @@ const Toast = ({
     top: { 
       initial: { y: -20, opacity: 0 }, 
       exit: { y: -20, opacity: 0 }, 
-      className: 'fixed top-6 right-4'
+      className: positionTop
     },
     bottom: { 
       initial: { y: 10, opacity: 0 }, 
       exit: { y: 10, opacity: 0 }, 
-      className: 'fixed bottom-36 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(448px-2rem)]' 
+      className: positionBottom
     },
   }[position]
 
@@ -99,28 +111,28 @@ const Toast = ({
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
-      className={`z-50 flex items-center justify-between py-3.5 px-4 ${container} rounded-xl shadow-2xl overflow-hidden ${positionData.className} ${className}`}
+      className={`${container} ${positionData.className} ${className || ''}`.trim()}
     >
-      <div className="flex w-full items-center gap-3">
+      <div className={contentWrapper}>
         {icon}
         <>
           {message}
         </>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className={closeWrapper}>
         <button 
           onClick={onDismiss} 
-          className="p-1 text-zinc-400 hover:text-white transition-colors"
+          className={closeButton}
           aria-label="Close"
         >
-          <IconClose classname="w-5 h-5" />
+          <IconClose classname={closeIcon} />
         </button>
       </div>
 
       {/* Status Timer bar at the absolute bottom edge */}
       <div
-        className="absolute bottom-0 left-0 h-1 w-full"
+        className={progressBar}
         style={{ 
           backgroundColor: progressBarColor, 
           animation: `shrink ${duration}ms linear forwards`,

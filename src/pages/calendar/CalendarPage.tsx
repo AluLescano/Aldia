@@ -1,19 +1,22 @@
 import React from 'react'
+import styles from './CalendarPage.module.scss'
 
 export const CalendarPage: React.FC = () => {
+  const { container, header, title, subtitle, card, iconContainer, icon, cardTitle, cardText } = styles
+
   return (
-    <div className="flex flex-col gap-6 pb-24">
-      <div className="flex flex-col">
-        <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Calendar</h1>
-        <p className="text-xs text-zinc-400 mt-1">
+    <div className={container}>
+      <div className={header}>
+        <h1 className={title}>Calendar</h1>
+        <p className={subtitle}>
           View charges scheduled for each day of the month
         </p>
       </div>
 
-      <div className="rounded-3xl bg-zinc-900/60 border border-zinc-800 p-6 flex flex-col items-center justify-center text-center py-16">
-        <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 flex items-center justify-center text-zinc-400 mb-3">
+      <div className={card}>
+        <div className={iconContainer}>
           <svg
-            className="w-6 h-6"
+            className={icon}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -26,8 +29,8 @@ export const CalendarPage: React.FC = () => {
             />
           </svg>
         </div>
-        <p className="text-sm font-semibold text-zinc-200">Interactive Calendar View</p>
-        <p className="text-xs text-zinc-400 mt-1 max-w-xs">
+        <p className={cardTitle}>Interactive Calendar View</p>
+        <p className={cardText}>
           Charge days and card expiration dates will be displayed here in a monthly grid.
         </p>
       </div>

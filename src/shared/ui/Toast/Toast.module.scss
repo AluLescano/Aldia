@@ -1,5 +1,82 @@
 .container {
     background-color: var(--bg-surface-elevated);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.iconAlert {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #B23333;
+}
+
+.iconSuccess {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #7BAA39;
+}
+
+.iconInfo {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.positionTop {
+  position: fixed;
+  top: 1.5rem;
+  right: 1rem;
+}
+
+.positionBottom {
+  position: fixed;
+  bottom: 9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: calc(448px - 2rem);
+}
+
+.contentWrapper {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.closeWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.closeButton {
+  padding: 0.25rem;
+  color: #a1a1aa;
+  transition: color 150ms ease-in-out;
+  
+  &:hover {
+    color: #fff;
+  }
+}
+
+.closeIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 0.25rem;
+  width: 100%;
 }
 
 :global {

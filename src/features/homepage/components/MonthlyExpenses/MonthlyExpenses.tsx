@@ -12,7 +12,6 @@ import Pill from '@/shared/ui/Pill/Pill'
 
 // ASSETS
 import { DEFAULT_CURRENCIES } from '@/shared/lib/currencies'
-
 import styles from './MonthlyExpenses.module.scss'
 
 interface Props {
@@ -28,7 +27,7 @@ const MonthlyExpenses = ({
   subscriptionAmount = 0,
   isLoading
 }: Props) => {
-  const { container, currencyPill } = styles
+  const { container, currencyPill, header, flagWrapper, flag, amounts } = styles
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { selectedCurrency, setSelectedCurrency } = useSettingsStore()
 
@@ -44,13 +43,13 @@ const MonthlyExpenses = ({
 
   return (
     <>
-      <div className={`${container} p-6`}>
-        <div className="flex items-center justify-between">
+      <div className={container}>
+        <div className={header}>
           <Typography variant="overline">{title}</Typography>
           <Pill onClick={() => setIsSheetOpen(true)} className={currencyPill}>
-            <span className="flex items-center gap-1.5">
+            <span className={flagWrapper}>
               <span
-                className={`fi fi-${currentCountryCode} fi text-xs rounded-full inline-block`}
+                className={`fi fi-${currentCountryCode} fi ${flag}`}
               />
               <Typography variant="label" size="small">
                 {selectedCurrency}
@@ -59,7 +58,7 @@ const MonthlyExpenses = ({
           </Pill>
         </div>
 
-        <div className="mt-2 flex flex-col gap-2">
+        <div className={amounts}>
           <Typography variant="currency" size="large">
             {monthlyAmount}
           </Typography>

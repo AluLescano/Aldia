@@ -1,3 +1,5 @@
+import styles from './Typography.module.scss'
+
 interface TypographyProps {
   size?: 'large' | 'medium' | 'small'
   variant: 'title' | 'body' | 'overline' | 'label' | 'currency'
@@ -30,20 +32,39 @@ const Typography = ({
   currencySymbol = '$',
   className = '',
 }: TypographyProps) => {
+  const {
+    large,
+    medium,
+    small,
+    titleLarge,
+    titleMedium,
+    titleSmall,
+    trackingWidest,
+    uppercase,
+    currencyLarge,
+    currencyMedium,
+    currencySmall,
+    currencyDecimalLarge,
+    currencyDecimalMedium,
+    currencyDecimalSmall,
+    currencyWrapper,
+    currencyDecimalWrapper,
+  } = styles
+
   const sizeClasses = {
-    large: 'text-xl',
-    medium: 'text-base',
-    small: 'text-xs',
+    large: large,
+    medium: medium,
+    small: small,
   }
 
   switch (variant) {
     case 'title': {
-      const sizeClasses = {
-        large: 'text-2xl font-bold',
-        medium: 'text-lg font-semibold',
-        small: 'text-sm font-medium',
+      const titleSizeClasses = {
+        large: titleLarge,
+        medium: titleMedium,
+        small: titleSmall,
       }
-      return <h1 className={`${sizeClasses[size]} ${className}`.trim()}>{children}</h1>
+      return <h1 className={`${titleSizeClasses[size]} ${className}`.trim()}>{children}</h1>
     }
 
     case 'body':
@@ -53,32 +74,32 @@ const Typography = ({
     case 'label':
       return (
         <span
-          className={`${sizeClasses[size]} tracking-widest ${variant === 'overline' ? 'uppercase' : ''} ${className}`.trim()}
+          className={`${sizeClasses[size]} ${trackingWidest} ${variant === 'overline' ? uppercase : ''} ${className}`.trim()}
         >
           {children}
         </span>
       )
 
     case 'currency': {
-      const sizeClasses = {
-        large: 'text-3xl  font-semibold',
-        medium: 'text-xl  font-semibold',
-        small: 'text-base font-semibold',
+      const currencySizeClasses = {
+        large: currencyLarge,
+        medium: currencyMedium,
+        small: currencySmall,
       }
       const decimalSizes = {
-        large: 'text-base font-semibold',
-        medium: 'text-sm font-medium',
-        small: 'text-xs font-normal',
+        large: currencyDecimalLarge,
+        medium: currencyDecimalMedium,
+        small: currencyDecimalSmall,
       }
 
       // Automatically extract integer & decimal!
       const { integerPart, decimalPart } = splitCurrency(children)
 
       return (
-        <div className={`inline-flex gap-0.5 ${className}`.trim()}>
-          <span className={`${sizeClasses[size]}`}>{currencySymbol}</span>
-          <span className={`${sizeClasses[size]}`}>{integerPart}</span>
-          {decimalPart && <span className={`mt-[0.15rem] ${decimalSizes[size]}`}>{decimalPart}</span>}
+        <div className={`${currencyWrapper} ${className}`.trim()}>
+          <span className={`${currencySizeClasses[size]}`}>{currencySymbol}</span>
+          <span className={`${currencySizeClasses[size]}`}>{integerPart}</span>
+          {decimalPart && <span className={`${currencyDecimalWrapper} ${decimalSizes[size]}`}>{decimalPart}</span>}
         </div>
       )
     }

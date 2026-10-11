@@ -8,6 +8,8 @@
   gap: 0.5rem;
   cursor: pointer;
   user-select: none;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
   transition:
     background-color 150ms ease-out,
     color 150ms ease-out;

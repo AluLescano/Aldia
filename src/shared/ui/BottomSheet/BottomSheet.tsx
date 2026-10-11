@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 
 import Typography from '@/shared/ui/Typography/Typography'
 import BackdropFilter from '../BackdropFilter/BackdropFilter'
-
 import styles from './BottomSheet.module.scss'
 
 interface BottomSheetProps {
@@ -21,7 +20,7 @@ const BottomSheet = ({
   children,
   className = '',
 }: BottomSheetProps) => {
-  const { container, collapsed, expanded, closing } = styles
+  const { container, collapsed, expanded, closing, dragArea, dragHandle, content } = styles
 
   // State
   const [isExpanded, setIsExpanded] = useState(false)
@@ -79,9 +78,9 @@ const BottomSheet = ({
         <div
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="cursor-grab select-none pt-3 pb-2 flex flex-col items-center touch-none"
+          className={dragArea}
         >
-          <div className="w-10 h-1 rounded-full bg-[var(--border-strong)] mb-2" />
+          <div className={dragHandle} />
           {title && (
             <Typography variant="title" size="large">
               {title}
@@ -90,7 +89,7 @@ const BottomSheet = ({
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-4 pb-6">{children}</div>
+        <div className={content}>{children}</div>
       </div>
     </>,
     document.body,

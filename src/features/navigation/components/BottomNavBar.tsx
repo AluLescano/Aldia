@@ -1,5 +1,6 @@
 import React from 'react'
 import type { TabType } from '@/shared/types'
+import styles from './BottomNavBar.module.scss'
 
 interface BottomNavBarProps {
   activeTab: TabType
@@ -13,13 +14,25 @@ interface NavItem {
 }
 
 export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectTab }) => {
+  const {
+    icon,
+    navContainer,
+    navWrapper,
+    navItem,
+    active: activeStyle,
+    inactive: inactiveStyle,
+    iconWrapper,
+    activeIndicator,
+    label: labelStyle,
+  } = styles
+
   const navItems: NavItem[] = [
     {
       id: 'home',
       label: 'Home',
       icon: (active) => (
         <svg
-          className="w-5 h-5"
+          className={icon}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -39,7 +52,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
       label: 'Calendar',
       icon: (active) => (
         <svg
-          className="w-5 h-5"
+          className={icon}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -58,7 +71,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
       label: 'Analytics',
       icon: (active) => (
         <svg
-          className="w-5 h-5"
+          className={icon}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -82,7 +95,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
       label: 'Cards',
       icon: (active) => (
         <svg
-          className="w-5 h-5"
+          className={icon}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -113,7 +126,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
       label: 'Settings',
       icon: (active) => (
         <svg
-          className="w-5 h-5"
+          className={icon}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -135,27 +148,23 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-app)]/90 backdrop-blur-xl border-t border-zinc-800/60 pb-[max(env(safe-area-inset-bottom),12px)] pt-2">
-      <div className="max-w-md mx-auto flex items-center justify-around px-2">
+    <nav className={navContainer}>
+      <div className={navWrapper}>
         {navItems.map((item) => {
           const isActive = activeTab === item.id
           return (
             <button
               key={item.id}
               onClick={() => onSelectTab(item.id)}
-              className={`flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-xl transition-all duration-200 active:scale-95 ${
-                isActive
-                  ? 'text-indigo-400 font-medium'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
+              className={`${navItem} ${isActive ? activeStyle : inactiveStyle}`}
             >
-              <div className="relative">
+              <div className={iconWrapper}>
                 {item.icon(isActive)}
                 {isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-400 rounded-full" />
+                  <span className={activeIndicator} />
                 )}
               </div>
-              <span className="text-[11px] mt-1 tracking-tight">{item.label}</span>
+              <span className={labelStyle}>{item.label}</span>
             </button>
           )
         })}

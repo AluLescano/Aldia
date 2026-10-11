@@ -1,67 +1,84 @@
 import React from 'react'
+import styles from './SettingsPage.module.scss'
 
 export const SettingsPage: React.FC = () => {
+  const {
+    container,
+    title,
+    subtitle,
+    section,
+    sectionTitle,
+    list,
+    listItem,
+    itemTitle,
+    itemDesc,
+    badge,
+    textValue,
+    badgeDisabled,
+    button,
+  } = styles
+
   return (
-    <div className="flex flex-col gap-6 pb-24">
+    <div className={container}>
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Settings</h1>
-        <p className="text-xs text-zinc-400 mt-1">Preferences, currencies, and backups</p>
+        <h1 className={title}>Settings</h1>
+        <p className={subtitle}>Preferences, currencies, and backups</p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold text-zinc-500 uppercase px-1">
+      <div className={section}>
+        <span className={sectionTitle}>
           Currencies
         </span>
-        <div className="rounded-2xl bg-zinc-900/70 border border-zinc-800/80 divide-y divide-zinc-800/60">
-          <div className="flex items-center justify-between p-4">
+        <div className={list}>
+          <div className={listItem}>
             <div>
-              <p className="text-sm font-medium text-zinc-200">Default Currency</p>
-              <p className="text-xs text-zinc-400">Currency used for monthly cost sums</p>
+              <p className={itemTitle}>Default Currency</p>
+              <p className={itemDesc}>Currency used for monthly cost sums</p>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 bg-zinc-800 text-zinc-300 rounded-lg">
+            <span className={badge}>
               USD ($)
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-4">
+          <div className={listItem}>
             <div>
-              <p className="text-sm font-medium text-zinc-200">Favorite Currencies</p>
-              <p className="text-xs text-zinc-400">Top 5 currencies in quick switcher</p>
+              <p className={itemTitle}>Favorite Currencies</p>
+              <p className={itemDesc}>Top 5 currencies in quick switcher</p>
             </div>
-            <span className="text-xs text-indigo-400 font-medium">
+            <span className={textValue}>
               USD, EUR, ARS, BRL, GBP
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold text-zinc-500 uppercase px-1">
+      <div className={section}>
+        <span className={sectionTitle}>
           Data & Storage
         </span>
-        <div className="rounded-2xl bg-zinc-900/70 border border-zinc-800/80 divide-y divide-zinc-800/60">
-          <div className="flex items-center justify-between p-4">
+        <div className={list}>
+          <div className={listItem}>
             <div>
-              <p className="text-sm font-medium text-zinc-200">Google Drive Backup</p>
-              <p className="text-xs text-zinc-400">
+              <p className={itemTitle}>Google Drive Backup</p>
+              <p className={itemDesc}>
                 Sync offline data to private Google Drive storage
               </p>
             </div>
-            <span className="text-xs px-2.5 py-1 bg-zinc-800 text-zinc-400 rounded-lg">
+            <span className={badgeDisabled}>
               Not Connected
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-4">
+          <div className={listItem}>
             <div>
-              <p className="text-sm font-medium text-zinc-200">Export / Import JSON</p>
-              <p className="text-xs text-zinc-400">
+              <p className={itemTitle}>Export / Import JSON</p>
+              <p className={itemDesc}>
                 Save your subscriptions to a local file
               </p>
             </div>
             <button
               type="button"
-              className="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-lg transition-all"
+              className={button}
             >
               Export
             </button>
