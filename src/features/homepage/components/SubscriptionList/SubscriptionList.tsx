@@ -1,5 +1,6 @@
 // HOOKS
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 
 // TYPES
 import { type Subscription } from '@/shared/types'
@@ -26,7 +27,19 @@ const isDisabled = (status: string) => {
 }
 
 const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
-  const { container } = styles
+  const {
+    container,
+    wrapper,
+    filterTabs,
+    filterPill,
+    header,
+    listArea,
+    emptyState,
+    emptyStateIcon,
+    cardsContainer,
+    cardMotionWrapper,
+  } = styles
+
   const hasSubscriptions = (subscriptions ?? []).length > 0
   const [activeTab, setActiveTab] = useState('Todas')
 
@@ -60,44 +73,58 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
   }
 
   return (
-    <div className={`flex flex-col gap-4`}>
+    <div className={wrapper}>
       {/* Filter Tabs */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar">
+      <div className={filterTabs}>
         {categories.map((cat) => (
-          <Pill key={cat} isActive={activeTab === cat} onClick={() => setActiveTab(cat)} className="shrink-0">
+          <Pill key={cat} isActive={activeTab === cat} onClick={() => setActiveTab(cat)} className={filterPill}>
             <Typography variant="label" size="small">
               {cat}
             </Typography>
           </Pill>
         ))}
       </div>
+      
       {/* Subscription List Section */}
-      <div className={`flex flex-col ${container} gap-3 rounded-2xl`}>
-        <div className="flex items-center justify-between px-1">
+      <div className={container}>
+        <div className={header}>
           <Typography variant="title">Tus subscripciones</Typography>
         </div>
 
-        {/* Empty State placeholder */}
-        {!hasSubscriptions ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 border">
-              <IconAddEmpty />
+        {/* Scrollable List Area */}
+        <div className={listArea}>
+          {!hasSubscriptions ? (
+            <div className={emptyState}>
+              <div className={emptyStateIcon}>
+                <IconAddEmpty />
+              </div>
+              <Typography variant="body" size="medium">
+                Sin subscripciones aún
+              </Typography>
+              <Typography variant="body">
+                Agrega tus gastos mensuales para mantenerte al tanto de tus días de pago y
+                tu gasto total.
+              </Typography>
             </div>
-            <Typography variant="body" size="medium">
-              Sin subscripciones aún
-            </Typography>
-            <Typography variant="body">
-              Agrega tus gastos mensuales para mantenerte al tanto de tus días de pago y
-              tu gasto total.
-            </Typography>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-3 align-middle">
-            {sortedSubscriptions.map((sub) => (
-              <SubscriptionCard key={sub.id} subscription={sub} onDelete={onDelete} />
-            ))}
-          </div>
-        )}
+          ) : (
+            <motion.div layout className={cardsContainer}>
+              <AnimatePresence mode="popLayout" initial={false}>
+                {sortedSubscriptions.map((sub) => (
+                  <motion.div
+                    key={sub.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9, filter: 'blur(4px)' }}
+                    animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, scale: 0.9, filter: 'blur(4px)', transition: { duration: 0.2 } }}
+                    className={cardMotionWrapper}
+                  >
+                    <SubscriptionCard subscription={sub} onDelete={onDelete} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )

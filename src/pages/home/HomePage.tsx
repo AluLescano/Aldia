@@ -1,5 +1,9 @@
 // DEPENDENCIES
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+
+// STORAGE
+import { useUIStore } from '@/shared/store/uiStore'
+import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 
 // COMPONENTS
 import Button from '@/shared/ui/Button/Button'
@@ -64,53 +68,74 @@ const MOCKED_SUBS: Subscription[] = [
   },
 ]
 
-export const HomePage: React.FC = () => {
-  const [pendingDelete, setPendingDelete] = useState<Subscription | null>(null)
-  const [subs, setSubs] = useState(MOCKED_SUBS)
+import styles from './HomePage.module.scss'
 
-  const NonDeletedSubList = subs.filter((sub) => sub.id !== pendingDelete?.id)
-  const ActiveSubsAmount = NonDeletedSubList.filter(
-    (sub) => sub.status == 'active',
-  ).length
+export const HomePage: React.FC = () => {
+  const { container, header, toastContent, undoButton, fabWrapper, fabContainer, fabButton } = styles
+  const [lastDeleted, setLastDeleted] = useState<Subscription | null>(null)
+
+  const subs = useSubscriptionStore((state) => state.subscriptions)
+  const addSubscription = useSubscriptionStore((state) => state.addSubscription)
+  const deleteSubscription = useSubscriptionStore((state) => state.deleteSubscription)
+  const pushOverlay = useUIStore((state) => state.pushOverlay)
+
+  const handleDelete = (sub: Subscription) => {
+    deleteSubscription(sub.id)
+    setLastDeleted(sub)
+  }
+
+  const handleUndo = () => {
+    addSubscription(lastDeleted!)
+    setLastDeleted(null)
+  }
+
+  useEffect(() => {
+    if (useSubscriptionStore.getState().subscriptions.length === 0) {
+      MOCKED_SUBS.forEach((sub) => {
+        addSubscription(sub)
+      })
+    }
+  }, [addSubscription])
+
+  const ActiveSubsAmount = subs.filter((sub) => sub.status == 'active').length
+
   const MonthlyCost = () => {
     let sum = 0
-    NonDeletedSubList.forEach((sub) => {
+    subs.forEach((sub) => {
       if (sub.status == 'active') {
         sum += sub.price
       }
     })
     return sum.toString()
   }
-  return (
-    <div className="flex flex-col gap-6">
-      <MonthlyExpenses
-        title="Gastos Mensuales"
-        monthlyAmount={MonthlyCost()}
-        subscriptionAmount={ActiveSubsAmount}
-      />
 
-      <SubscriptionList
-        subscriptions={NonDeletedSubList}
-        onDelete={(sub) => setPendingDelete(sub)}
-      />
+  return (
+    <div className={container}>
+      <header className={header}>
+        <MonthlyExpenses
+          title="Gastos Mensuales"
+          monthlyAmount={MonthlyCost()}
+          subscriptionAmount={ActiveSubsAmount}
+        />
+      </header>
+
+      <SubscriptionList subscriptions={subs} onDelete={handleDelete} />
       <AnimatePresence>
-        {pendingDelete && (
+        {lastDeleted && (
           <Toast
             position="bottom"
             type="success"
             onDismiss={() => {
-              console.log(`Permanently deleting ${pendingDelete.id}...`)
-              setSubs(subs.filter(sub => sub.id !== pendingDelete.id))
-              setPendingDelete(null) // <--- CRITICAL FIX! Hide the toast
+              setLastDeleted(null)
             }}
             message={
-              <div className="flex w-full items-center justify-between mr-3">
-                <Typography variant='body' size='small' >
-                  {`Se eliminó ${pendingDelete.name} exitosamente`}
+              <div className={toastContent}>
+                <Typography variant="body" size="medium">
+                  {`Se eliminó ${lastDeleted.name} exitosamente`}
                 </Typography>
                 <button
-                  onClick={() => setPendingDelete(null)} // Cancel the delete
-                  className="flex items-center gap-1 hover:text-[#7BAA39] transition-colors"
+                  onClick={handleUndo}
+                  className={undoButton}
                 >
                   <IconUndo classname="w-5 h-5" />
                 </button>
@@ -119,14 +144,14 @@ export const HomePage: React.FC = () => {
           />
         )}
       </AnimatePresence>
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md pointer-events-none z-30 px-5 flex justify-end">
-        <div className="pointer-events-auto">
+      <div className={fabWrapper}>
+        <div className={fabContainer}>
           <Button
             variant="primary"
             size="large"
             aria-label="Agregar Subscripción"
-            onClick={() => console.log('Add subscription clicked')}
-            className="!rounded-full !py-6"
+            onClick={() => pushOverlay('preset-picker')}
+            className={fabButton}
           >
             <IconAdd />
           </Button>

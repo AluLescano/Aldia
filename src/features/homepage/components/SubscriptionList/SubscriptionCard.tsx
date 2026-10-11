@@ -14,6 +14,7 @@ import type { Subscription } from '@/shared/types'
 // ASSETS
 import { IconDelete } from '@/assets/icons/IconDelete'
 import styles from './SubscriptionList.module.scss'
+import Button from '@/shared/ui/Button/Button'
 
 interface Props {
   subscription: Subscription
@@ -21,7 +22,19 @@ interface Props {
 }
 
 const SubscriptionCard = ({ subscription, onDelete }: Props) => {
-  const { subscriptionContainer, disabled } = styles
+  const {
+    subscriptionContainer,
+    disabled,
+    cardWrapper,
+    deleteLayer,
+    deleteButton,
+    deleteIcon,
+    cardImg,
+    opacity50,
+    cardInfo,
+    cardPrice,
+  } = styles
+
   const [dynamicColor, setDynamicColor] = useState<string | undefined>(
     subscription.brandColor,
   )
@@ -51,17 +64,20 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
   const controls = useAnimation()
 
   return (
-    <div className="relative w-full h-fit rounded-2xl touch-pan-y bg-red-500">
+    <div className={cardWrapper}>
       {/* 1. BACKGROUND LAYER (The Delete Button) */}
       {/* Absolute positioned to fill the parent. It sits at z-index 0. */}
-      <div className="absolute inset-0 flex items-center justify-end px-4 z-0">
-        <button
+      <div className={deleteLayer}>
+        <Button
+          variant="primary"
+          size="large"
+          width="fit"
           onClick={handleDelete}
-          className="h-full flex items-center justify-center w-12"
+          className={deleteButton}
           aria-label="Delete subscription"
         >
-          <IconDelete classname='w-6 h-6'/>
-        </button>
+          <IconDelete classname={deleteIcon} />
+        </Button>
       </div>
 
       {/* 2. FOREGROUND LAYER (The Draggable Card) */}
@@ -80,7 +96,7 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
             controls.start({ x: 0 })
           }
         }}
-        className={`relative z-10 flex w-full h-fit items-center rounded-2xl p-3 ${subscriptionContainer} ${isDisabled ? disabled : ''}`}
+        className={`${subscriptionContainer} ${isDisabled ? disabled : ''}`}
         style={
           !isDisabled
             ? dynamicColor
@@ -91,16 +107,16 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
       >
         <img
           ref={imgRef}
-          className={`w-10 h-10 rounded-full mr-3 shrink-0 ${isDisabled ? `opacity-50` : ``}`}
+          className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
           src={subscription.iconUrl}
           crossOrigin="anonymous"
           onLoad={handleImageLoad}
         />
-        <div className={`flex flex-col w-full min-w-0`}>
+        <div className={cardInfo}>
           <Typography
             variant="label"
             size="medium"
-            className={`${isDisabled ? `opacity-50` : ``}`}
+            className={isDisabled ? opacity50 : ''}
           >
             {subscription.name}
           </Typography>
@@ -127,11 +143,11 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
             </Typography>
           )}
         </div>
-        <div className="w-20 shrink-0 flex justify-start pl-2">
+        <div className={cardPrice}>
           <Typography
             variant="currency"
             size="medium"
-            className={isDisabled ? `opacity-50` : ``}
+            className={isDisabled ? opacity50 : ''}
           >
             {subscription.price}
           </Typography>

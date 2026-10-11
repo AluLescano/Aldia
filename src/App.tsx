@@ -1,15 +1,31 @@
+// DEPENDENCIES
 import { useState } from 'react'
-import type { TabType } from '@/shared/types'
-import Typography from '@/shared/ui/Typography/Typography'
+
+// COMPONENTS
 import { BottomNavBar } from '@/features/navigation/components/BottomNavBar'
+
+// TYPES
+import type { TabType } from '@/shared/types'
+
+// HOOKS
+import { useUIStore } from './shared/store/uiStore'
+
+// PAGES
 import { HomePage } from '@/pages/home/HomePage'
 import { CalendarPage } from '@/pages/calendar/CalendarPage'
 import { CardsPage } from '@/pages/cards/CardsPage'
 import { StatisticsPage } from '@/pages/statistics/StatisticsPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
+import { PresetPicker } from './pages/presetPicker/PresetPicker'
+
+// ASSETS
+import styles from './App.module.scss'
 
 function App() {
+  const { appContainer, appWrapper, mainContent, overlayContainer } = styles
   const [activeTab, setActiveTab] = useState<TabType>('home')
+  const overlays = useUIStore((state) => state.overlays)
+  const activeOverlay = overlays[overlays.length - 1]
 
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -29,21 +45,21 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex justify-center">
-      {/* Mobile-centric frame container (max-w-md creates an app preview feel on desktop while filling mobile screens) */}
-      <div className="w-full max-w-md min-h-screen flex flex-col px-4 pt-[max(env(safe-area-inset-top),20px)] relative shadow-2xl border-x border-zinc-900/50">
-        {/* Top Header */}
-        <header className="flex items-center justify-center pb-4 pt-1">
-          <Typography variant="overline" size="small" className="tracking-[0.25em]">
-            Aldia
-          </Typography>
-        </header>
-
-        {/* Main Screen Content */}
-        <main className="flex-1 overflow-y-auto pt-2">{renderActiveScreen()}</main>
+    <div className={appContainer}>
+      <div className={appWrapper}>
+        <main className={mainContent}>{renderActiveScreen()}</main>
 
         {/* Fixed Mobile Bottom Navigation */}
         <BottomNavBar activeTab={activeTab} onSelectTab={setActiveTab} />
+        
+        {/* Overlay Renderer */}
+        {activeOverlay && (
+          <div className={overlayContainer}>
+            {activeOverlay.type === 'preset-picker' && (
+              <PresetPicker/>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
