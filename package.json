@@ -20,14 +20,12 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.5.1",
-    "@tailwindcss/vite": "^4.3.3",
     "colorthief": "^3.5.0",
     "fast-average-color": "^9.6.0",
     "flag-icons": "^7.5.0",
     "motion": "^14.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tailwindcss": "^4.3.3",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
