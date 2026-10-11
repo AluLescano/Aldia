@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "commit": "cz",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize-logos": "node scripts/compress-images.mjs"
   },
   "config": {
     "commitizen": {
