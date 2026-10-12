@@ -33,7 +33,7 @@ const isValidDate = (date: string) => {
 
 export function parsePrice(raw: string): number | null {
   const normalized = raw.trim().replace(',', '.')
-  if (!/^\d+(\.\d+)?$/.test(normalized)) return null
+  if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return null
   const value = Number(normalized)
   return Number.isFinite(value) ? value : null
 }
@@ -44,9 +44,7 @@ export function validateSubscriptionForm(values: SubscriptionFormValues): FormEr
     errors.name = 'El nombre no puede estar vacío'
   }
   /* If price == 0, it's cause it's a gift or it's a trial */
-  if (
-    parsePrice(values.price) === null
-  ) {
+  if (parsePrice(values.price) === null) {
     errors.price = 'Ingrese un número válido (ej: 20000,00)'
   }
   if (values.currency === '') {
