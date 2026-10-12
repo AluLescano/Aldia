@@ -15,6 +15,7 @@ import type { Subscription } from '@/shared/types'
 import { IconDelete } from '@/assets/icons/IconDelete'
 import styles from './SubscriptionList.module.scss'
 import Button from '@/shared/ui/Button/Button'
+import { formatDate } from '@/shared/lib/formatDate'
 
 interface Props {
   subscription: Subscription
@@ -122,24 +123,7 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
           </Typography>
           {!isDisabled && (
             <Typography variant="label" size="small">
-              {(() => {
-                const [year, month, day] = subscription.nextBillDate.split('-')
-                const months = [
-                  'Ene',
-                  'Feb',
-                  'Mar',
-                  'Abr',
-                  'May',
-                  'Jun',
-                  'Jul',
-                  'Aug',
-                  'Sep',
-                  'Oct',
-                  'Nov',
-                  'Dic',
-                ]
-                return `${day} ${months[parseInt(month, 10) - 1]} ${year.substring(2, 4)}`
-              })()}
+              {formatDate(subscription.nextBillDate)}
             </Typography>
           )}
         </div>
