@@ -1,4 +1,10 @@
-import { useId, type ChangeEvent, type InputHTMLAttributes } from 'react'
+import type { ChangeEvent, InputHTMLAttributes } from 'react'
+
+// HOOKS
+import { useFieldIds } from '@/shared/hooks/useFieldIds'
+
+// ANIMATIONS
+import { useShake } from '@/shared/hooks/useShake'
 
 //COMPONENTS
 import Field from '../Field/Field'
@@ -11,10 +17,9 @@ interface Props extends Omit<
   'size' | 'width' | 'value' | 'onChange'
 > {
   id?: string
-  label: string
+  label?: string
   value: string
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
-  currencySymbol?: string
   size?: 'large' | 'medium'
   width?: 'full' | 'fit'
   subText?: string
@@ -35,8 +40,9 @@ const InputText = ({
   const { container } = styles
 
   const filled = Boolean(value)
-  const generatedId = useId()
-  const fieldId = id ?? generatedId
+  const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
+
+  const boxRef = useShake<HTMLDivElement>(Boolean(errorMessage))
 
   return (
     <Field
@@ -47,6 +53,7 @@ const InputText = ({
       filled={filled}
       subText={subText}
       errorMessage={errorMessage}
+      ref={boxRef}
       disabled={rest.disabled}
     >
       <input
@@ -57,7 +64,7 @@ const InputText = ({
         onChange={onChange}
         className={container}
         aria-invalid={!!errorMessage || undefined}
-        aria-describedby={errorMessage || subText ? `${fieldId}-description` : undefined}
+        aria-describedby={describedBy}
       />
     </Field>
   )

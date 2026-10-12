@@ -1,11 +1,16 @@
-import { useId, type ChangeEvent, type InputHTMLAttributes } from 'react'
+import type { ChangeEvent, InputHTMLAttributes } from 'react'
+
+// HOOKS
+import { useFieldIds } from '@/shared/hooks/useFieldIds'
+
+// ANIMATIONS
+import { useShake } from '@/shared/hooks/useShake'
 
 //COMPONENTS
 import Field from '../Field/Field'
 
 // ASSETS
 import styles from './InputAmount.module.scss'
-import { useShake } from '@/shared/hooks/useShake'
 
 // Digits with at most one "," or "." separator and two decimals
 const AMOUNT_TYPING_PATTERN = /^\d*[.,]?\d{0,2}$/
@@ -15,7 +20,7 @@ interface Props extends Omit<
   'size' | 'width' | 'value' | 'onChange'
 > {
   id?: string
-  label: string
+  label?: string
   value: string
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
   currencySymbol?: string
@@ -40,8 +45,7 @@ const InputAmount = ({
   const { container } = styles
 
   const filled = Boolean(value)
-  const generatedId = useId()
-  const fieldId = id ?? generatedId
+  const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
 
   const boxRef = useShake<HTMLDivElement>(Boolean(errorMessage))
 
@@ -71,7 +75,7 @@ const InputAmount = ({
         onChange={handleChange}
         className={container}
         aria-invalid={!!errorMessage || undefined}
-        aria-describedby={errorMessage || subText ? `${fieldId}-description` : undefined}
+        aria-describedby={describedBy}
       />
     </Field>
   )

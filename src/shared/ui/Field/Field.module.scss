@@ -1,12 +1,14 @@
+$label-scale: 0.78;
+$label-transition: 150ms ease;
+
 .base {
+  --field-radius: 5rem;
+
   position: relative;
   display: flex;
-  flex-direction: row;
   align-items: center;
   border: 1px solid var(--border-input);
-  border-radius: 1rem;
-  background-color: transparent;
-  justify-content: center;
+  border-radius: var(--field-radius);
 
   &:focus-within {
     border-color: var(--focus-ring);
@@ -17,12 +19,13 @@
     cursor: not-allowed;
     pointer-events: none;
   }
+}
 
+.sizeLarge {
+  min-height: 3.5rem;
+
+  // The label sits where the symbol goes, so the symbol waits for focus or content
   .adornmentContainer {
-    position: absolute;
-    font-size: 1.15rem;
-    left: 0.75rem;
-    color: var(--text-secondary);
     opacity: 0;
   }
 
@@ -32,12 +35,8 @@
   }
 }
 
-.sizeLarge {
-  min-height: 3rem;
-}
-
 .sizeMedium {
-  min-height: 2.5rem;
+  min-height: 2.625rem;
 }
 
 .widthFull {
@@ -46,47 +45,62 @@
 
 .widthFit {
   width: fit-content;
+  min-width: 9rem;
+
+  input {
+    width: auto;
+    field-sizing: content;
+  }
+}
+
+.adornmentContainer {
+  position: absolute;
+  left: 0.75rem;
+  font-size: 1.15rem;
+  color: var(--text-secondary);
 }
 
 .labelContainer {
   position: absolute;
-  left: 1rem;
   top: 50%;
-  border-radius: 1rem;
+  left: 1rem;
+  max-width: calc(100% - 2rem);
+  padding: 0 0.25rem;
   font-size: 0.875rem;
   color: var(--text-secondary);
-  padding: 0 0.25rem;
   transform: translateY(-50%);
   transform-origin: left center;
   pointer-events: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc(100% - 2rem);
-}
 
-.base:focus-within .labelContainer,
-.base.floated .labelContainer {
-  background-color: var(--field-surface, var(--bg-surface));
-  transform: translateY(-150%) scale(0.78);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .base .labelContainer {
-    transition: transform 150ms ease;
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      top $label-transition,
+      transform $label-transition;
   }
 }
 
-.info {
-  font-size: 0.75rem;
-  color: var(--text-accent);
-  margin-left: 0.5rem;
+// Floated: the label sits centered on the top border, whatever the height
+.base:focus-within .labelContainer,
+.base.floated .labelContainer {
+  top: 0;
+  background-color: var(--field-surface, var(--bg-surface));
+  transform: translateY(-50%) scale($label-scale);
 }
 
-.error {
-  font-size: 0.75rem;
-  color: var(--error-text);
-  margin-left: 0.5rem;
+.description {
+  width: 0;
+  min-width: 100%;
+
+  .info {
+    color: var(--text-accent);
+  }
+
+  .error {
+    color: var(--error-text);
+  }
 }
 
 .base.errorState {
