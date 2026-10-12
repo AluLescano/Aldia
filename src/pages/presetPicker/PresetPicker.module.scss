@@ -25,11 +25,12 @@
         padding: 0.75rem;
         background-color: var(--bg-surface-elevated);
         transition: transform 250ms ease-in-out;
+        color: var(--text-secondary);
 
         &:active {
-            transform: scale(105%);
+          transform: scale(105%);
         }
-        
+
         svg {
           width: 1.25rem;
           height: 1.25rem;
@@ -63,7 +64,7 @@
         right: 5%;
         color: var(--text-muted);
         pointer-events: none;
-        
+
         svg {
           width: 1.25rem;
           height: 1.25rem;

@@ -72,7 +72,7 @@ export const PresetPicker = () => {
 
       <div className={`${listContainer} no-scrollbar`}>
         <div>
-          <Typography variant="label" size="medium">
+          <Typography variant="label" size="small">
             Subscripciones Populares
           </Typography>
         </div>
