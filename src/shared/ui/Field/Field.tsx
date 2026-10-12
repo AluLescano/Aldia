@@ -1,6 +1,11 @@
-import type { ReactNode } from 'react'
-import styles from './Field.module.scss'
+// DEPENDENCIES
+import type { ReactNode, Ref } from 'react'
+
+// COMPONENTS
 import Typography from '../Typography/Typography'
+
+// ASSETS
+import styles from './Field.module.scss'
 
 interface Props {
   id: string
@@ -10,6 +15,8 @@ interface Props {
   filled?: boolean
   subText?: string
   errorMessage?: string
+  ref?: Ref<HTMLDivElement>
+  startAdornment?: ReactNode
   children: ReactNode
   disabled?: boolean
   className?: string
@@ -23,6 +30,8 @@ const Field = ({
   filled,
   subText,
   errorMessage,
+  ref,
+  startAdornment,
   children,
   disabled,
   className,
@@ -35,6 +44,7 @@ const Field = ({
     widthFit,
     labelContainer,
     floated,
+    adornmentContainer,
     error,
     errorState,
     info,
@@ -56,6 +66,7 @@ const Field = ({
   return (
     <div>
       <div
+        ref={ref}
         aria-disabled={disabled || undefined}
         className={`${base} ${fieldSizeClasses[size]} ${fieldWidthClasses[width]} ${filled ? floated : ''} ${errorMessage ? errorState : ''} ${className || ''}`}
       >
@@ -64,6 +75,7 @@ const Field = ({
             {label}
           </label>
         )}
+        <div className={adornmentContainer}>{startAdornment}</div>
         {children}
       </div>
       {message && (

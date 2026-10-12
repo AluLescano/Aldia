@@ -1,7 +1,8 @@
 .base {
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   border: 1px solid var(--border-input);
   border-radius: 1rem;
   background-color: transparent;
@@ -15,6 +16,19 @@
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
+  }
+
+  .adornmentContainer {
+    position: absolute;
+    font-size: 1.15rem;
+    left: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0;
+  }
+
+  &:focus-within .adornmentContainer,
+  &.floated .adornmentContainer {
+    opacity: 1;
   }
 }
 
@@ -56,6 +70,7 @@
   background-color: var(--field-surface, var(--bg-surface));
   transform: translateY(-150%) scale(0.78);
 }
+
 @media (prefers-reduced-motion: no-preference) {
   .base .labelContainer {
     transition: transform 150ms ease;
