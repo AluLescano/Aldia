@@ -1,5 +1,6 @@
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
+import Button from '@/shared/ui/Button/Button'
 
 // ASSETS
 import styles from './PresetCard.module.scss'
@@ -15,7 +16,7 @@ const PresetCard = ({ name, logo, onClick, className }: Props) => {
   const { container, text } = styles
 
   return (
-    <div
+    <Button
       onClick={onClick}
       className={`${container} ${className || ''}`}
     >
@@ -27,7 +28,7 @@ const PresetCard = ({ name, logo, onClick, className }: Props) => {
           {name}
         </Typography>
       </div>
-    </div>
+    </Button>
   )
 }
 
