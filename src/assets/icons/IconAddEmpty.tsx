@@ -1,15 +1,12 @@
-import styles from './IconAddEmpty.module.scss'
-
 interface Props {
   className?: string
 }
 
 export const IconAddEmpty = ({ className }: Props) => {
-  const { icon } = styles
 
   return (
     <svg
-      className={className ?? icon}
+      className={className}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
