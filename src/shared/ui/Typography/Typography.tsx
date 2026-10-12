@@ -33,6 +33,7 @@ const Typography = ({
   className = '',
 }: TypographyProps) => {
   const {
+    font,
     large,
     medium,
     small,
@@ -64,17 +65,17 @@ const Typography = ({
         medium: titleMedium,
         small: titleSmall,
       }
-      return <h1 className={`${titleSizeClasses[size]} ${className}`.trim()}>{children}</h1>
+      return <h1 className={`${font} ${titleSizeClasses[size]} ${className}`.trim()}>{children}</h1>
     }
 
     case 'body':
-      return <p className={`${sizeClasses[size]} ${className}`.trim()}>{children}</p>
+      return <p className={`${font} ${sizeClasses[size]} ${className}`.trim()}>{children}</p>
 
     case 'overline':
     case 'label':
       return (
         <span
-          className={`${sizeClasses[size]} ${trackingWidest} ${variant === 'overline' ? uppercase : ''} ${className}`.trim()}
+          className={`${font} ${sizeClasses[size]} ${trackingWidest} ${variant === 'overline' ? uppercase : ''} ${className}`.trim()}
         >
           {children}
         </span>
@@ -97,9 +98,9 @@ const Typography = ({
 
       return (
         <div className={`${currencyWrapper} ${className}`.trim()}>
-          <span className={`${currencySizeClasses[size]}`}>{currencySymbol}</span>
-          <span className={`${currencySizeClasses[size]}`}>{integerPart}</span>
-          {decimalPart && <span className={`${currencyDecimalWrapper} ${decimalSizes[size]}`}>{decimalPart}</span>}
+          <span className={`${font} ${currencySizeClasses[size]}`}>{currencySymbol}</span>
+          <span className={`${font} ${currencySizeClasses[size]}`}>{integerPart}</span>
+          {decimalPart && <span className={`${font} ${currencyDecimalWrapper} ${decimalSizes[size]}`}>{decimalPart}</span>}
         </div>
       )
     }
