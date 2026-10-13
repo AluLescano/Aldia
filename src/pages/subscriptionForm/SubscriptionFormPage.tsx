@@ -47,8 +47,9 @@ export const SubscriptionFormPage = ({ preset }: Props) => {
     currency: selectedCurrency,
     billingCycle: 'monthly',
     firstBillDate: todayISO(),
-    categoryId: preset?.defaultCategoryId ?? 'Others',
     reminders: [],
+    categoryId: preset?.defaultCategoryId ?? 'Others',
+    iconUrl: preset?.iconUrl
   }
 
   const handleSubmit = (values: SubscriptionFormValues) => {
@@ -68,7 +69,7 @@ export const SubscriptionFormPage = ({ preset }: Props) => {
       trial: values.trial,
       categoryId: values.categoryId,
       reminders: values.reminders,
-      iconUrl: preset?.iconUrl,
+      iconUrl: values?.iconUrl,
       brandColor: preset?.brandColor,
       status: 'active',
       createdAt: new Date().toISOString(),

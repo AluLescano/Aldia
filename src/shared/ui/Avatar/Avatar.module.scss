@@ -1,0 +1,28 @@
+.base {
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sizeMedium {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.sizeLarge {
+  width: 6rem;
+  height: 6rem;
+}
+
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  font-size: 1rem;
+
+  &.sizeLarge {
+    font-size: 2.5rem;
+  }
+}

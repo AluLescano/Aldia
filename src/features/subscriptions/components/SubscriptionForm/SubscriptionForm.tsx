@@ -18,6 +18,7 @@ import InputSelect from '@/shared/ui/InputSelect/InputSelect'
 import InputDate from '@/shared/ui/InputDate/InputDate'
 import Switch from '@/shared/ui/Switch/Switch'
 import Button from '@/shared/ui/Button/Button'
+import Avatar from '@/shared/ui/Avatar/Avatar'
 
 // ANIMATIONS
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
@@ -34,7 +35,7 @@ interface Props {
 }
 
 const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
-  const { container, inputContainer, collapse, buttonContainer, buttonNotification } =
+  const { logoWrapper, container, inputContainer, collapse, buttonContainer, buttonNotification } =
     styles
   const [values, setValues] = useState(initialValues)
   const [touched, setTouched] = useState<
@@ -73,6 +74,9 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
 
   return (
     <form onSubmit={handleSubmit}>
+      <div className={logoWrapper}>
+        <Avatar src={values.iconUrl} name={values.name} size="large" />
+      </div>
       <div className={container}>
         <div className={inputContainer}>
           <Typography variant="body" size="medium">

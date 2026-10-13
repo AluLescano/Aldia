@@ -4,6 +4,12 @@ form {
   flex-direction: column;
   padding: 0 1rem;
 
+  .logoWrapper {
+    display: flex;
+    justify-content: center;
+    margin: 0.75rem 0 2.5rem;
+  }
+
   .container {
     display: flex;
     flex: 1;
