@@ -1,3 +1,4 @@
+import { parseISODate, toISODate } from '@/shared/lib/isoDate'
 import type { BillingCycle, CurrencyCode, SubscriptionReminder } from '@/shared/types'
 
 export interface SubscriptionFormValues {
@@ -27,8 +28,8 @@ export interface SubscriptionFormValues {
 export type FormErrors = Partial<Record<keyof SubscriptionFormValues, string>>
 
 const isValidDate = (date: string) => {
-  const test = new Date(date)
-  return !isNaN(test.getTime()) && test.toISOString().substring(0, 10) === date
+  const test = parseISODate(date)
+  return !isNaN(test!.getTime()) && toISODate(test!) === date
 }
 
 export function parsePrice(raw: string): number | null {
@@ -45,7 +46,7 @@ export function validateSubscriptionForm(values: SubscriptionFormValues): FormEr
   }
   /* If price == 0, it's cause it's a gift or it's a trial */
   if (parsePrice(values.price) === null) {
-    errors.price = 'Ingrese un número válido (ej: 20000,00)'
+    errors.price = 'Ingrese un número válido (ej: 2000,00)'
   }
   if (values.currency === '') {
     errors.currency = 'El tipo de moneda no puede estar vacío'
