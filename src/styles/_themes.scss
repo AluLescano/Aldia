@@ -114,7 +114,7 @@
   --text-secondary: #{$bone-300};
   --text-muted: #{$bone-400};
   --text-disabled: #{rgba($paper-0, 0.25)};
-  --text-on-brand: #{$phthalo-700};
+  --text-on-brand: #{$color-white};
   --text-accent: #{$champagne-300};
 
   --icon-default: #{rgba($paper-0, 0.75)};
@@ -122,14 +122,14 @@
   --icon-muted: #{rgba($paper-0, 0.35)};
 
   /* 3. Brand */
-  --brand-primary: #{$phthalo-300};
-  --brand-primary-hover: #{$phthalo-200};
+  --brand-primary: #{$phthalo-500};
+  --brand-primary-hover: #{$phthalo-400};
   --brand-subtle: #{rgba($phthalo-400, 0.15)};
   --brand-on-subtle: #{$phthalo-300};
 
   /* 4. Error */
   --error-fill: #{$brick-300};
-  --text-on-error: #{$charcoal-900};
+  --text-on-error: #{$color-white};
   --error-bg: #{rgba($brick-300, 0.14)};
   --error-border: #{$brick-300};
   --error-text: #{$brick-300};
