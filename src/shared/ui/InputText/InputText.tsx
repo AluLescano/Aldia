@@ -31,7 +31,7 @@ const InputText = ({
   label,
   value,
   onChange,
-  size = 'medium',
+  size = 'large',
   width = 'full',
   subText,
   errorMessage,

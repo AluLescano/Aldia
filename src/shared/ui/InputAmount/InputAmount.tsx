@@ -35,7 +35,7 @@ const InputAmount = ({
   label,
   value,
   onChange,
-  size = 'medium',
+  size = 'large',
   width = 'full',
   subText,
   currencySymbol = '$',

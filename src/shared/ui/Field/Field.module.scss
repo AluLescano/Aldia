@@ -55,7 +55,11 @@ $label-transition: 150ms ease;
 
 .adornmentContainer {
   position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   left: 0.75rem;
+  display: flex;
+  align-items: center;
   font-size: 1.15rem;
   color: var(--text-secondary);
 }

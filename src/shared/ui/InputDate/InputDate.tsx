@@ -21,7 +21,6 @@ interface Props extends Omit<
 > {
   id?: string
   label?: string
-  placeholder: string
   value: string
   onClick: () => void
   size?: 'large' | 'medium'
@@ -33,7 +32,6 @@ interface Props extends Omit<
 const InputDate = ({
   id,
   label,
-  placeholder,
   value,
   onClick,
   size = 'large',
@@ -56,7 +54,7 @@ const InputDate = ({
       width={width}
       label={label}
       filled={filled}
-      startAdornment={<IconCalendar className={calendarIcon}/>}
+      startAdornment={<IconCalendar className={calendarIcon} />}
       subText={subText}
       errorMessage={errorMessage}
       ref={boxRef}
@@ -72,7 +70,7 @@ const InputDate = ({
         aria-invalid={!!errorMessage || undefined}
         aria-describedby={describedBy}
       >
-        {formatDate(value) || placeholder}
+        {formatDate(value)}
       </button>
     </Field>
   )
