@@ -5,8 +5,13 @@ import React, { useEffect, useState } from 'react'
 import { useUIStore } from '@/shared/store/uiStore'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 
+// ANIMATIONS
+import { AnimatePresence } from 'motion/react'
+
 // COMPONENTS
+import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
+import Toast from '@/shared/ui/Toast/Toast'
 import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses/MonthlyExpenses'
 import SubscriptionList from '@/features/homepage/components/SubscriptionList/SubscriptionList'
 
@@ -16,9 +21,9 @@ import type { Subscription } from '@/shared/types'
 // ASSETS
 import { IconAdd } from '@/assets/icons/IconAdd'
 import { IconUndo } from '@/assets/icons/IconUndo'
-import { AnimatePresence } from 'motion/react'
-import Toast from '@/shared/ui/Toast/Toast'
-import Typography from '@/shared/ui/Typography/Typography'
+
+import styles from './HomePage.module.scss'
+
 
 const MOCKED_SUBS: Subscription[] = [
   {
@@ -67,8 +72,6 @@ const MOCKED_SUBS: Subscription[] = [
     createdAt: '2026-09-28',
   },
 ]
-
-import styles from './HomePage.module.scss'
 
 export const HomePage: React.FC = () => {
   const { container, header, toastContent, undoButton, fabWrapper, fabContainer, fabButton } = styles
@@ -133,12 +136,12 @@ export const HomePage: React.FC = () => {
                 <Typography variant="body" size="medium">
                   {`Se eliminó ${lastDeleted.name} exitosamente`}
                 </Typography>
-                <button
+                <Button
                   onClick={handleUndo}
                   className={undoButton}
                 >
-                  <IconUndo classname="w-5 h-5" />
-                </button>
+                  <IconUndo />
+                </Button>
               </div>
             }
           />

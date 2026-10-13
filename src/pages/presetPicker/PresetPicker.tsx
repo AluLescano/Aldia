@@ -13,7 +13,7 @@ import Button from '@/shared/ui/Button/Button'
 import PresetCard from '@/features/subscriptions/components/PresetCard/PresetCard'
 
 // ASSETS
-import { IconArrowLeft } from '@/assets/icons/IconArrowLeft'
+import { IconArrow } from '@/assets/icons/IconArrow'
 import { IconAdd } from '@/assets/icons/IconAdd'
 import { IconSearch } from '@/assets/icons/IconSearch'
 
@@ -42,7 +42,7 @@ export const PresetPicker = () => {
             onClick={popOverlay}
             className={button}
           >
-            <IconArrowLeft />
+            <IconArrow />
           </Button>
           <Typography variant="title" size="small">
             Agregar Subscripción

@@ -2,6 +2,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
 
+// COMPONENTS
+import Button from '../Button/Button'
+
 // ASSETS
 import { IconAlert } from '@/assets/icons/IconAlert'
 import { IconInfo } from '@/assets/icons/IconInfo'
@@ -37,13 +40,12 @@ const Toast = ({
     contentWrapper,
     closeWrapper,
     closeButton,
-    closeIcon,
     progressBar,
   } = styles
   const icon = {
-    alert: <IconAlert classname={iconAlert} />,
-    success: <IconSuccess classname={iconSuccess} />,
-    info: <IconInfo classname={iconInfo} />,
+    alert: <IconAlert className={iconAlert} />,
+    success: <IconSuccess className={iconSuccess} />,
+    info: <IconInfo className={iconInfo} />,
   }[type]
 
   const progressBarColor = {
@@ -53,15 +55,17 @@ const Toast = ({
   }[type]
 
   const positionData = {
-    top: { 
-      initial: { y: -20, opacity: 0 }, 
-      exit: { y: -20, opacity: 0 }, 
-      className: positionTop
+    top: {
+      initial: { x: '120%', opacity: 0 },
+      animate: { x: 0, opacity: 1 },
+      exit: { x: '120%', opacity: 0 },
+      className: positionTop,
     },
-    bottom: { 
-      initial: { y: 10, opacity: 0 }, 
-      exit: { y: 10, opacity: 0 }, 
-      className: positionBottom
+    bottom: {
+      initial: { y: 20, opacity: 0 },
+      animate: { y: 0, opacity: 1 },
+      exit: { y: 20, opacity: 0 },
+      className: positionBottom,
     },
   }[position]
 
@@ -104,7 +108,7 @@ const Toast = ({
   return (
     <motion.div
       initial={positionData.initial}
-      animate={{ x: 0, y: 60, opacity: 1 }}
+      animate={positionData.animate}
       exit={positionData.exit}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       onMouseEnter={() => setIsPaused(true)}
@@ -115,28 +119,22 @@ const Toast = ({
     >
       <div className={contentWrapper}>
         {icon}
-        <>
-          {message}
-        </>
+        <>{message}</>
       </div>
 
       <div className={closeWrapper}>
-        <button 
-          onClick={onDismiss} 
-          className={closeButton}
-          aria-label="Close"
-        >
-          <IconClose classname={closeIcon} />
-        </button>
+        <Button onClick={onDismiss} className={closeButton} aria-label="Close">
+          <IconClose />
+        </Button>
       </div>
 
       {/* Status Timer bar at the absolute bottom edge */}
       <div
         className={progressBar}
-        style={{ 
-          backgroundColor: progressBarColor, 
+        style={{
+          backgroundColor: progressBarColor,
           animation: `shrink ${duration}ms linear forwards`,
-          animationPlayState: isPaused ? 'paused' : 'running'
+          animationPlayState: isPaused ? 'paused' : 'running',
         }}
       />
     </motion.div>

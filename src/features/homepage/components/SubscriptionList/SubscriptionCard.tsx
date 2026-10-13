@@ -4,18 +4,19 @@ import { motion, useAnimation } from 'motion/react'
 // HOOKS
 import { useState, useRef } from 'react'
 import { FastAverageColor } from 'fast-average-color'
+import { formatDate } from '@/shared/lib/formatDate'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
+import Button from '@/shared/ui/Button/Button'
 
 // TYPES
 import type { Subscription } from '@/shared/types'
 
 // ASSETS
 import { IconDelete } from '@/assets/icons/IconDelete'
+
 import styles from './SubscriptionList.module.scss'
-import Button from '@/shared/ui/Button/Button'
-import { formatDate } from '@/shared/lib/formatDate'
 
 interface Props {
   subscription: Subscription
@@ -67,7 +68,6 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
   return (
     <div className={cardWrapper}>
       {/* 1. BACKGROUND LAYER (The Delete Button) */}
-      {/* Absolute positioned to fill the parent. It sits at z-index 0. */}
       <div className={deleteLayer}>
         <Button
           variant="primary"
@@ -77,7 +77,7 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
           className={deleteButton}
           aria-label="Delete subscription"
         >
-          <IconDelete classname={deleteIcon} />
+          <IconDelete className={deleteIcon} />
         </Button>
       </div>
 
