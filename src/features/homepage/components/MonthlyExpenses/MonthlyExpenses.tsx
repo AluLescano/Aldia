@@ -5,7 +5,7 @@ import { useSettingsStore } from '@/features/settings/store'
 
 // COMPONENTS
 import MonthlyExpensesSkeleton from './MonthylExpensesSkeleton'
-import CurrencyPicker from '@/features/settings/components/CurrencyPicker'
+import CurrencyPicker from '@/shared/ui/CurrencyPicker/CurrencyPicker'
 import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
 import Typography from '@/shared/ui/Typography/Typography'
 import Pill from '@/shared/ui/Pill/Pill'

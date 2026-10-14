@@ -49,7 +49,7 @@ const CurrencyPicker = ({
                   className={`fi fi-${currency.countryCode} fis ${flag}`}
                 />
                 <div className={currencyInfo}>
-                  <Typography variant="body" size="medium">
+                  <Typography variant="label" size="medium">
                     {currency.code}
                   </Typography>
                   <Typography
