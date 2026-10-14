@@ -1,5 +1,9 @@
 // HOOKS
-import { type SubmitEvent, useState } from 'react'
+import { type ReactNode, type SubmitEvent, useState } from 'react'
+import { useCategoryEditor } from '@/features/categories/useCategoryEditor'
+
+// TYPES
+import type { BillingCycle } from '@/shared/types'
 
 // TYPES
 import {
@@ -8,9 +12,13 @@ import {
 } from '../../utils/validateSubscriptionForm'
 
 // DATA
-import { addCycles, BILLING_CYCLE_LABELS } from '../../utils/billingCycle'
+import { addCycles, formatBillingCycle } from '../../utils/billingCycle'
+import { daysBetween } from '@/shared/lib/isoDate'
+import { DEFAULT_CURRENCIES } from '@/shared/lib/currencies'
+import { OTHERS_ID, useCategoryStore } from '@/features/categories/categoryStore'
 
 // COMPONENTS
+import Avatar from '@/shared/ui/Avatar/Avatar'
 import Typography from '@/shared/ui/Typography/Typography'
 import InputText from '@/shared/ui/InputText/InputText'
 import InputAmount from '@/shared/ui/InputAmount/InputAmount'
@@ -18,7 +26,13 @@ import InputSelect from '@/shared/ui/InputSelect/InputSelect'
 import InputDate from '@/shared/ui/InputDate/InputDate'
 import Switch from '@/shared/ui/Switch/Switch'
 import Button from '@/shared/ui/Button/Button'
-import Avatar from '@/shared/ui/Avatar/Avatar'
+import BillingCyclePicker, {
+  type BillingChoice,
+} from '../BillingCyclePicker/BillingCyclePicker'
+import CurrencyPicker from '@/shared/ui/CurrencyPicker/CurrencyPicker'
+import CategoryPicker from '../CategoryPicker/CategoryPicker'
+import CategoryFooter from '../CategoryPicker/CategoryFooter'
+import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
 
 // ANIMATIONS
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
@@ -28,6 +42,8 @@ import { IconArrow } from '@/assets/icons/IconArrow'
 
 import styles from './SubscriptionForm.module.scss'
 
+type SheetName = 'billingCycle' | 'currency' | 'categoryId' // add the others when they exist
+
 interface Props {
   initialValues: SubscriptionFormValues
   submitLabel: string
@@ -35,8 +51,14 @@ interface Props {
 }
 
 const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
-  const { logoWrapper, container, inputContainer, collapse, buttonContainer, buttonNotification } =
-    styles
+  const {
+    logoWrapper,
+    container,
+    inputContainer,
+    collapse,
+    buttonContainer,
+    buttonNotification,
+  } = styles
   const [values, setValues] = useState(initialValues)
   const [touched, setTouched] = useState<
     Partial<Record<keyof SubscriptionFormValues, boolean>>
@@ -45,6 +67,68 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
 
   const errors = validateSubscriptionForm(values)
   const reduceMotion = useReducedMotion()
+
+  const [openSheet, setOpenSheet] = useState<SheetName | null>(null)
+
+  const categoryName = useCategoryStore(
+    (state) => state.categories.find((c) => c.id === values.categoryId)?.name ?? '',
+  )
+
+  // The hook lives here, not inside the picker, so the sheet footer can use it too.
+  // Because the form owns it, it does not reset by itself when the sheet closes (see closeSheet).
+  const categoryEditor = useCategoryEditor({
+    onCreated: (category) => pick('categoryId', category.id),
+    onDeleted: (id) => {
+      if (id === values.categoryId) pick('categoryId', OTHERS_ID)
+    },
+  })
+
+  const closeSheet = (field: keyof SubscriptionFormValues) => {
+    setTouched((current) => ({ ...current, [field]: true }))
+    setOpenSheet(null)
+    categoryEditor.reset() // reopening the category sheet always starts in the plain list
+  }
+
+  const trialDays = values.trial
+    ? daysBetween(values.trial.startDate, values.trial.endDate)
+    : undefined
+
+  const handleBillingChange = (choice: BillingChoice) => {
+    setValues((current) => {
+      if (choice.mode === 'one-time') {
+        return { ...current, billingCycle: { type: 'one-time' }, trial: undefined }
+      }
+      if (choice.mode === 'every') {
+        const { interval, unit } = choice
+        return {
+          ...current,
+          billingCycle: { type: 'every', interval, unit },
+          trial: undefined,
+        }
+      }
+      // Trial: the cycle stays as it is, it applies once the trial is over
+      const trialCycle: BillingCycle = {
+        type: 'every',
+        interval: choice.days,
+        unit: 'day',
+      }
+      return {
+        ...current,
+        trial: {
+          startDate: current.firstBillDate,
+          endDate: addCycles(current.firstBillDate, trialCycle, 1),
+        },
+      }
+    })
+  }
+
+  const pick =<K extends keyof SubscriptionFormValues>(
+    field: K,
+    value: SubscriptionFormValues[K],
+  ) => {
+    setValues((current) => ({ ...current, [field]: value }))
+    closeSheet(field)
+  }
 
   const handleEndDateToggle = (checked: boolean) => {
     setHasEndDate(checked)
@@ -58,6 +142,45 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
     }))
     setTouched((current) => ({ ...current, endDate: false }))
   }
+
+  const sheets: Record<
+    SheetName,
+    { title: string; content: ReactNode; footer?: ReactNode }
+  > = {
+    billingCycle: {
+      title: 'Formato del cobro',
+      content: (
+        <BillingCyclePicker
+          cycle={values.billingCycle}
+          trialDays={trialDays}
+          onChange={handleBillingChange}
+        />
+      ),
+    },
+    currency: {
+      title: 'Tipo de moneda',
+      content: (
+        <CurrencyPicker
+          currencies={DEFAULT_CURRENCIES}
+          selectedCode={values.currency}
+          onSelect={(code) => pick('currency', code)}
+        />
+      ),
+    },
+    categoryId: {
+      title: 'Categoría',
+      content: (
+        <CategoryPicker
+          value={values.categoryId}
+          onSelect={(id) => pick('categoryId', id)}
+          editor={categoryEditor}
+        />
+      ),
+      footer: <CategoryFooter editor={categoryEditor} />,
+    },
+  }
+
+  const sheet = openSheet ? sheets[openSheet] : null
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -104,9 +227,14 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
             size="medium"
             width="fit"
             placeholder={'Formato del Cobro'}
-            value={values.billingCycle ? BILLING_CYCLE_LABELS[values.billingCycle] : ''}
-            onClick={() => {}}
+            value={
+              trialDays !== undefined
+                ? `Prueba ${trialDays} d`
+                : formatBillingCycle(values.billingCycle)
+            }
+            onClick={() => setOpenSheet('billingCycle')}
             errorMessage={touched.billingCycle ? errors.billingCycle : undefined}
+            style={{ minWidth: 0, padding: '0 1rem' }}
           />
         </div>
         <div className={inputContainer}>
@@ -168,8 +296,9 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
             width="fit"
             placeholder={'Moneda'}
             value={values.currency}
-            onClick={() => {}}
+            onClick={() => setOpenSheet('currency')}
             errorMessage={touched.currency ? errors.currency : undefined}
+            style={{ minWidth: 0, padding: '0 1rem' }}
           />
         </div>
         <div className={inputContainer}>
@@ -210,9 +339,10 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
             size="medium"
             width="fit"
             placeholder={'Categoría'}
-            value={values.categoryId}
-            onClick={() => {}}
+            value={categoryName}
+            onClick={() => setOpenSheet('categoryId')}
             errorMessage={touched.categoryId ? errors.categoryId : undefined}
+            style={{ minWidth: 0, padding: '0 1rem' }}
           />
         </div>
         <div className={inputContainer}>
@@ -234,6 +364,14 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
           {submitLabel}
         </Button>
       </div>
+      <BottomSheet
+        isOpen={sheet !== null}
+        title={sheet?.title}
+        onClose={() => openSheet && closeSheet(openSheet)}
+        footer={sheet?.footer}
+      >
+        {sheet?.content}
+      </BottomSheet>
     </form>
   )
 }

@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from 'motion/react'
 // TYPES
 import { type Subscription } from '@/shared/types'
 
+// STORE
+import { useCategoryStore } from '@/features/categories/categoryStore'
+
 // COMPONENTS
 import SubscriptionListSkeleton from './SubscriptionListSkeleton'
 import SubscriptionCard from './SubscriptionCard'
@@ -43,6 +46,12 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
   const hasSubscriptions = (subscriptions ?? []).length > 0
   const [activeTab, setActiveTab] = useState('Todas')
 
+  const storedCategories = useCategoryStore((state) => state.categories)
+
+  // Tabs hold the category ID, but show its name (renaming a category changes the label)
+  const tabLabel = (tab: string) =>
+    storedCategories.find((category) => category.id === tab)?.name ?? tab
+
   // All Unique Filter tabs + 'All' tab
   const categories = [
     'Todas',
@@ -79,7 +88,7 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
         {categories.map((cat) => (
           <Pill key={cat} isActive={activeTab === cat} onClick={() => setActiveTab(cat)} className={filterPill}>
             <Typography variant="label" size="small">
-              {cat}
+              {tabLabel(cat)}
             </Typography>
           </Pill>
         ))}

@@ -2,15 +2,15 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Subscription } from '@/shared/types'
 
-// 1. Define the shape of our store
 interface SubscriptionState {
   subscriptions: Subscription[]
   addSubscription: (sub: Subscription) => void
   deleteSubscription: (id: string) => void
   updateSubscription: (id: string, updatedSub: Partial<Subscription>) => void
+  // Moves every subscription of one category to another (used when a category is deleted)
+  reassignCategory: (fromId: string, toId: string) => void
 }
 
-// 2. Create the store
 export const useSubscriptionStore = create<SubscriptionState>()(
   // 3. We use the 'persist' middleware to automatically save to localStorage
   persist(
@@ -36,6 +36,13 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           // Map over the array, update the matching one, leave the rest alone
           subscriptions: state.subscriptions.map((sub) =>
             sub.id === id ? { ...sub, ...updatedSub } : sub,
+          ),
+        })),
+
+      reassignCategory: (fromId, toId) =>
+        set((state) => ({
+          subscriptions: state.subscriptions.map((sub) =>
+            sub.categoryId === fromId ? { ...sub, categoryId: toId } : sub,
           ),
         })),
     }),

@@ -14,6 +14,8 @@ import SubscriptionForm from '@/features/subscriptions/components/SubscriptionFo
 // HOOKS
 import { nextBillDate } from '@/features/subscriptions/utils/billingCycle'
 import { todayISO } from '@/shared/lib/isoDate'
+import { createId } from '@/shared/lib/id'
+import { OTHERS_ID } from '@/features/categories/categoryStore'
 
 // TYPES
 import {
@@ -45,19 +47,19 @@ export const SubscriptionFormPage = ({ preset }: Props) => {
     name: preset?.name ?? '',
     price: '',
     currency: selectedCurrency,
-    billingCycle: 'monthly',
+    billingCycle: { type: 'every', interval: 1, unit: 'month' },
     firstBillDate: todayISO(),
     reminders: [],
-    categoryId: preset?.defaultCategoryId ?? 'Others',
-    iconUrl: preset?.iconUrl
+    categoryId: preset?.defaultCategoryId ?? OTHERS_ID,
+    iconUrl: preset?.iconUrl,
   }
 
   const handleSubmit = (values: SubscriptionFormValues) => {
     const price = parsePrice(values.price)
-    if (price === null || values.currency === '' || values.billingCycle === '') return
+    if (price === null || values.currency === '') return
 
     addSubscription({
-      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`, /* Replace with crypto.randomUUID() after testing */
+      id: `${createId()}`,
       name: values.name.trim(),
       price,
       currency: values.currency,
@@ -71,7 +73,7 @@ export const SubscriptionFormPage = ({ preset }: Props) => {
       reminders: values.reminders,
       iconUrl: values?.iconUrl,
       brandColor: preset?.brandColor,
-      status: 'active',
+      status: values.trial ? 'trial' : 'active',
       createdAt: new Date().toISOString(),
     })
     showToast(`¡Se ha agregado la subscripción!`, 'success')

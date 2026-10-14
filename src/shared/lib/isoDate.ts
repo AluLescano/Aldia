@@ -17,3 +17,10 @@ export function todayISO() {
     const currentDate = new Date()
     return toISODate(currentDate)
 }
+export function daysBetween(from: string, to: string) {
+  const start = parseISODate(from)
+  const end = parseISODate(to)
+  if (!start || !end) return 0
+  // Math.round absorbs the 1 hour shift of daylight saving
+  return Math.round((end.getTime() - start.getTime()) / 86_400_000)
+}

@@ -5,7 +5,7 @@ export interface SubscriptionFormValues {
   name: string
   price: string
   currency: CurrencyCode | ''
-  billingCycle: BillingCycle | ''
+  billingCycle: BillingCycle
 
   // Fechas de cobro y vigencia
   firstBillDate: string // YYYY-MM-DD
@@ -77,8 +77,11 @@ export function validateSubscriptionForm(values: SubscriptionFormValues): FormEr
       errors.trial = 'La fecha de fin debe ser posterior a la fecha de inicio'
     }
   }
-  if (values.billingCycle === '') {
-    errors.billingCycle = 'El tipo de cobro no puede estar vacío'
+  if (values.billingCycle.type === 'every') {
+    const { interval } = values.billingCycle
+    if (!Number.isInteger(interval) || interval < 1) {
+      errors.billingCycle = 'El intervalo debe ser un número entero mayor a 0'
+    }
   }
   if (values.categoryId.trim().length === 0) {
     errors.categoryId = 'Necesita seleccionar una categoría'
