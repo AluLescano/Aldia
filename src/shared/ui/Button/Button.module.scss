@@ -51,11 +51,11 @@
 }
 
 .ButtonSecondary {
-  @include button-base(var(--brand-subtle), var(--brand-primary));
-  border: 1px solid var(--border-strong);
+  @include button-base(var(--bg-surface-elevated), var(--text-on-brand));
+  border: none;
 
   &:hover {
-    background-color: var(--bg-surface-subtle);
+    background-color: var(--border-subtle);
   }
 }
 

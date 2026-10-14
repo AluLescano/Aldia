@@ -59,6 +59,7 @@ const InputSelect = ({
       errorMessage={errorMessage}
       ref={boxRef}
       disabled={rest.disabled}
+      styles={rest.style}
     >
       <button
         id={fieldId}

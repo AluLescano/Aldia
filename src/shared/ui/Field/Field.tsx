@@ -1,5 +1,5 @@
 // DEPENDENCIES
-import type { ReactNode, Ref } from 'react'
+import type { CSSProperties, ReactNode, Ref } from 'react'
 
 // COMPONENTS
 import Typography from '../Typography/Typography'
@@ -38,6 +38,7 @@ interface Props {
   children: ReactNode
   disabled?: boolean
   className?: string
+  styles?: CSSProperties
 }
 
 const sizeClasses: Record<Size, string> = {
@@ -63,6 +64,7 @@ const Field = ({
   children,
   disabled,
   className,
+  styles,
 }: Props) => {
   // Only the large size floats its label; medium rows get theirs from FormRow
   const showLabel = Boolean(label) && size === 'large'
@@ -83,7 +85,7 @@ const Field = ({
 
   return (
     <div>
-      <div ref={ref} aria-disabled={disabled || undefined} className={classes}>
+      <div ref={ref} aria-disabled={disabled || undefined} className={classes} style={styles}>
         {showLabel && (
           <label htmlFor={id} className={labelContainer}>
             {label}

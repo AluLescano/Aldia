@@ -71,6 +71,7 @@ const InputAmount = ({
         id={fieldId}
         type="text"
         inputMode="decimal"
+        placeholder='0.00'
         value={value}
         onChange={handleChange}
         className={container}
