@@ -29,6 +29,7 @@ import Button from '@/shared/ui/Button/Button'
 import BillingCyclePicker, {
   type BillingChoice,
 } from '../BillingCyclePicker/BillingCyclePicker'
+import DatePicker from '@/shared/ui/DatePicker/DatePicker'
 import CurrencyPicker from '@/shared/ui/CurrencyPicker/CurrencyPicker'
 import CategoryPicker from '../CategoryPicker/CategoryPicker'
 import CategoryFooter from '../CategoryPicker/CategoryFooter'
@@ -42,7 +43,7 @@ import { IconArrow } from '@/assets/icons/IconArrow'
 
 import styles from './SubscriptionForm.module.scss'
 
-type SheetName = 'billingCycle' | 'currency' | 'categoryId' // add the others when they exist
+type SheetName = 'billingCycle' | 'firstBillDate' | 'endDate' | 'currency' | 'categoryId' // add the others when they exist
 
 interface Props {
   initialValues: SubscriptionFormValues
@@ -122,7 +123,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
     })
   }
 
-  const pick =<K extends keyof SubscriptionFormValues>(
+  const pick = <K extends keyof SubscriptionFormValues>(
     field: K,
     value: SubscriptionFormValues[K],
   ) => {
@@ -145,7 +146,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
 
   const sheets: Record<
     SheetName,
-    { title: string; content: ReactNode; footer?: ReactNode }
+    { title?: string; content: ReactNode; footer?: ReactNode }
   > = {
     billingCycle: {
       title: 'Formato del cobro',
@@ -154,6 +155,27 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
           cycle={values.billingCycle}
           trialDays={trialDays}
           onChange={handleBillingChange}
+        />
+      ),
+    },
+    firstBillDate: {
+      content: (
+        <DatePicker
+          value={values.firstBillDate}
+          onSelect={(iso) => pick('firstBillDate', iso)}
+        />
+      ),
+    },
+    endDate: {
+      content: (
+        <DatePicker
+          value={values.endDate ?? values.firstBillDate}
+          min={addCycles(
+            values.firstBillDate,
+            { type: 'every', interval: 1, unit: 'day' },
+            1,
+          )}
+          onSelect={(iso) => pick('endDate', iso)}
         />
       ),
     },
@@ -245,7 +267,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
             size="medium"
             width="fit"
             value={values.firstBillDate}
-            onClick={() => {}}
+            onClick={() => setOpenSheet('firstBillDate')}
             errorMessage={touched.firstBillDate ? errors.firstBillDate : undefined}
           />
         </div>
@@ -277,7 +299,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
                   size="medium"
                   width="fit"
                   value={values.endDate ?? ''}
-                  onClick={() => {}}
+                  onClick={() => setOpenSheet('endDate')}
                   errorMessage={touched.endDate ? errors.endDate : undefined}
                 />
               </div>
