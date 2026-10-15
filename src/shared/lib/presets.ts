@@ -1,8 +1,11 @@
+import type { IconKey } from '../types'
+
 export interface PresetSubscription {
   id: string
   name: string
   defaultCategoryId: string
-  iconUrl: string // path like '/logos/netflix.svg'
+  iconUrl?: string // path like '/logos/netflix.svg'
+  iconKey?: IconKey
 }
 
 export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
@@ -11,6 +14,12 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
     name: 'Adobe Creative Cloud',
     defaultCategoryId: 'productivity',
     iconUrl: '/logos/logo_adobe_creative_cloud.webp',
+  },
+  {
+    id: 'water',
+    name: 'Agua Corriente',
+    defaultCategoryId: 'bills',
+    iconKey: 'water',
   },
   {
     id: 'amazon-prime',
@@ -95,6 +104,18 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
     name: 'EA Play',
     defaultCategoryId: 'gaming',
     iconUrl: '/logos/logo_ea_play.webp',
+  },
+  {
+    id: 'electricity',
+    name: 'Electricidad',
+    defaultCategoryId: 'bills',
+    iconKey: 'electricity',
+  },
+  {
+    id: 'gas',
+    name: 'Gas',
+    defaultCategoryId: 'bills',
+    iconKey: 'gas',
   },
   {
     id: 'geforce-now',
@@ -204,7 +225,13 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
     defaultCategoryId: 'gaming',
     iconUrl: '/logos/logo_playstation.webp',
   },
-    {
+  {
+    id: 'rent',
+    name: 'Alquiler',
+    defaultCategoryId: 'bills',
+    iconKey: 'rent',
+  },
+  {
     id: 'proton-vpn',
     name: 'Proton VPN',
     defaultCategoryId: 'technology',
@@ -247,10 +274,10 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
     iconUrl: '/logos/logo_strava.webp',
   },
   {
-    id: 'tinder-gold',
-    name: 'Tinder Gold',
-    defaultCategoryId: 'lifestyle',
-    iconUrl: '/logos/logo_tinder.webp',
+    id: 'phone',
+    name: 'Teléfono',
+    defaultCategoryId: 'bills',
+    iconKey: 'phone',
   },
   {
     id: 'twitch-turbo',

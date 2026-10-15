@@ -84,6 +84,7 @@ export const PresetPicker = () => {
               key={preset.id}
               name={preset.name}
               logo={preset.iconUrl}
+              iconKey={preset.iconKey}
               onClick={() => pushOverlay('subscription-form', { preset })}
             />
           ))}

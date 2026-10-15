@@ -42,6 +42,11 @@
   color: var(--text-secondary);
   font-size: 1rem;
 
+  svg {
+    width: 50%;
+    height: 50%;
+  }
+
   &.sizeLarge {
     font-size: 2.5rem;
   }

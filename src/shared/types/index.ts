@@ -68,6 +68,8 @@ export interface TrialConfig {
   endDate: string // YYYY-MM-DD
 }
 
+export type IconKey = 'electricity' | 'water' | 'gas' | 'phone' | 'rent'
+
 export interface Subscription {
   id: string
   name: string
@@ -89,7 +91,7 @@ export interface Subscription {
 
   // Branding
   iconUrl?: string
-  brandColor?: string
+  iconKey?: IconKey
 
   status: SubscriptionStatus
   createdAt: string
@@ -102,6 +104,6 @@ export interface SubscriptionTemplate {
   id: string
   name: string
   defaultCategoryId?: string
-  iconUrl: string
-  brandColor?: string
+  iconUrl?: string
+  iconKey?: IconKey
 }

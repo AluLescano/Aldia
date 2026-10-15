@@ -32,8 +32,20 @@
     transition: transform 350ms ease-in-out;
   }
 
+  svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.5rem;
+    border-radius: 100%;
+    background-color: var(--bg-surface);
+    color: var(--text-secondary);
+    transition: transform 350ms ease-in-out;
+  }
+
   &:hover img,
-  &:active img {
+  &:active img,
+  &:hover svg,
+  &:active svg {
     transform: scale(125%);
   }
 

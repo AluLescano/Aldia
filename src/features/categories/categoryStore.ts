@@ -32,6 +32,7 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: 'shopping', name: 'Compras', color: '#E0846B' },
   { id: 'storage', name: 'Almacén', color: '#6E7F94' },
   { id: 'technology', name: 'Tecnología', color: '#4C9BD5' },
+  { id: 'bills', name: 'Servicios', color: '#C79A3E' },
   { id: OTHERS_ID, name: 'Otros', color: '#8E9FAF' },
 ]
 

@@ -8,6 +8,7 @@ import { formatDate } from '@/shared/lib/formatDate'
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
+import Avatar from '@/shared/ui/Avatar/Avatar'
 
 // TYPES
 import type { Subscription } from '@/shared/types'
@@ -80,10 +81,18 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
         className={`${subscriptionContainer} ${isDisabled ? disabled : ''}`}
       >
         <div style={{ '--image': `url("${subscription.iconUrl}")` } as CSSProperties}>
-          <img
-            src={subscription.iconUrl}
-            className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
-          />
+          {subscription.iconUrl ? (
+            <img
+              src={subscription.iconUrl}
+              className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
+            />
+          ) : (
+            <Avatar
+              iconKey={subscription.iconKey}
+              name={subscription.name}
+              className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
+            />
+          )}
           <div className={cardInfo}>
             <Typography
               variant="label"

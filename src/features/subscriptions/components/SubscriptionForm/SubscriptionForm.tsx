@@ -230,7 +230,12 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
   return (
     <form ref={formRef} onSubmit={handleSubmit}>
       <div className={logoWrapper}>
-        <Avatar src={values.iconUrl} name={values.name} size="large" />
+        <Avatar
+          src={values.iconUrl}
+          iconKey={values.iconKey}
+          name={values.name}
+          size="large"
+        />
       </div>
       <div className={container}>
         <div className={inputContainer}>

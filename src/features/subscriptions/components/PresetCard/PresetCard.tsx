@@ -1,3 +1,9 @@
+// TYPE
+import type { IconKey } from '@/shared/types'
+
+// DATA
+import { ICONS } from '@/shared/lib/icons'
+
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
@@ -7,22 +13,20 @@ import styles from './PresetCard.module.scss'
 
 interface Props {
   name: string
-  logo: string
+  logo?: string
+  iconKey?: IconKey
   onClick: () => void
   className?: string
 }
 
-const PresetCard = ({ name, logo, onClick, className }: Props) => {
+const PresetCard = ({ name, logo, iconKey, onClick, className }: Props) => {
   const { container, text } = styles
+  const Icon = iconKey ? ICONS[iconKey] : null
 
   return (
-    <Button
-      onClick={onClick}
-      className={`${container} ${className || ''}`}
-    >
-      <img
-        src={logo}
-      />
+    <Button onClick={onClick} className={`${container} ${className || ''}`}>
+      {logo && <img src={logo} alt="" />}
+      {Icon && <Icon />}
       <div className={text}>
         <Typography variant="body" size="small">
           {name}

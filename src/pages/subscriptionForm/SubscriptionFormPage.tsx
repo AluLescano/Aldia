@@ -52,6 +52,7 @@ export const SubscriptionFormPage = ({ preset }: Props) => {
     reminders: [],
     categoryId: preset?.defaultCategoryId ?? OTHERS_ID,
     iconUrl: preset?.iconUrl,
+    iconKey: preset?.iconKey,
   }
 
   const handleSubmit = (values: SubscriptionFormValues) => {
@@ -72,7 +73,7 @@ export const SubscriptionFormPage = ({ preset }: Props) => {
       categoryId: values.categoryId,
       reminders: values.reminders,
       iconUrl: values?.iconUrl,
-      brandColor: preset?.brandColor,
+      iconKey: values.iconKey,
       status: values.trial ? 'trial' : 'active',
       createdAt: new Date().toISOString(),
     })

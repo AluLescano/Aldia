@@ -1,5 +1,10 @@
 import { parseISODate, toISODate } from '@/shared/lib/isoDate'
-import type { BillingCycle, CurrencyCode, SubscriptionReminder } from '@/shared/types'
+import type {
+  BillingCycle,
+  CurrencyCode,
+  IconKey,
+  SubscriptionReminder,
+} from '@/shared/types'
 
 export interface SubscriptionFormValues {
   name: string
@@ -23,6 +28,7 @@ export interface SubscriptionFormValues {
 
   // Branding
   iconUrl?: string
+  iconKey?: IconKey
 }
 
 export type FormErrors = Partial<Record<keyof SubscriptionFormValues, string>>
