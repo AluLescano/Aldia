@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { type CSSProperties, useState } from 'react'
 
 import styles from './Avatar.module.scss'
 
-const { base, sizeMedium, sizeLarge, fallback } = styles
+const { base, image, sizeMedium, sizeLarge, fallback } = styles
 
 interface Props {
   src?: string
@@ -23,9 +23,16 @@ const Avatar = ({ src, name, size = 'medium', className }: Props) => {
 
   const classes = [base, sizeClasses[size], className].filter(Boolean).join(' ')
 
-  if (showImage) {
-    return <img src={src} alt="" className={classes} onError={() => setFailedSrc(src ?? null)} />
-  }
+if (showImage) {
+  return (
+    <div
+      className={classes}
+      style={{ '--avatar': `url("${src}")` } as CSSProperties}
+    >
+      <img src={src} alt="" className={image} onError={() => setFailedSrc(src ?? null)} />
+    </div>
+  )
+}
 
   return (
     <div className={`${classes} ${fallback}`} aria-hidden="true">

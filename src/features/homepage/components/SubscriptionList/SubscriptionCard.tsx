@@ -1,9 +1,8 @@
 // DEPENDENCIES
 import { motion, useAnimation } from 'motion/react'
+import type { CSSProperties } from 'react'
 
 // HOOKS
-import { useState, useRef } from 'react'
-import { FastAverageColor } from 'fast-average-color'
 import { formatDate } from '@/shared/lib/formatDate'
 
 // COMPONENTS
@@ -37,26 +36,7 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     cardPrice,
   } = styles
 
-  const [dynamicColor, setDynamicColor] = useState<string | undefined>(
-    subscription.brandColor,
-  )
-  const imgRef = useRef<HTMLImageElement>(null)
-
   const isDisabled = subscription.status == 'inactive'
-
-  const handleImageLoad = () => {
-    try {
-      if (imgRef.current) {
-        const fac = new FastAverageColor()
-        const color = fac.getColor(imgRef.current)
-        if (color && color.hex) {
-          setDynamicColor(color.hex)
-        }
-      }
-    } catch (err) {
-      console.warn('Failed to extract color', err)
-    }
-  }
 
   const handleDelete = () => {
     onDelete(subscription)
@@ -98,43 +78,35 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
           }
         }}
         className={`${subscriptionContainer} ${isDisabled ? disabled : ''}`}
-        style={
-          !isDisabled
-            ? dynamicColor
-              ? ({ '--accent-color': dynamicColor } as React.CSSProperties)
-              : undefined
-            : undefined
-        }
       >
-        <img
-          ref={imgRef}
-          className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
-          src={subscription.iconUrl}
-          crossOrigin="anonymous"
-          onLoad={handleImageLoad}
-        />
-        <div className={cardInfo}>
-          <Typography
-            variant="label"
-            size="medium"
-            className={isDisabled ? opacity50 : ''}
-          >
-            {subscription.name}
-          </Typography>
-          {!isDisabled && (
-            <Typography variant="label" size="small">
-              {formatDate(subscription.nextBillDate)}
+        <div style={{ '--image': `url("${subscription.iconUrl}")` } as CSSProperties}>
+          <img
+            src={subscription.iconUrl}
+            className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
+          />
+          <div className={cardInfo}>
+            <Typography
+              variant="label"
+              size="medium"
+              className={isDisabled ? opacity50 : ''}
+            >
+              {subscription.name}
             </Typography>
-          )}
-        </div>
-        <div className={cardPrice}>
-          <Typography
-            variant="currency"
-            size="medium"
-            className={isDisabled ? opacity50 : ''}
-          >
-            {subscription.price}
-          </Typography>
+            {!isDisabled && (
+              <Typography variant="label" size="small">
+                {formatDate(subscription.nextBillDate)}
+              </Typography>
+            )}
+          </div>
+          <div className={cardPrice}>
+            <Typography
+              variant="currency"
+              size="medium"
+              className={isDisabled ? opacity50 : ''}
+            >
+              {subscription.price}
+            </Typography>
+          </div>
         </div>
       </motion.div>
     </div>

@@ -172,7 +172,6 @@
 
 .subscriptionContainer {
   position: relative;
-  z-index: 10;
   display: flex;
   width: 100%;
   height: max-content;
@@ -185,18 +184,27 @@
     box-shadow 200ms ease-out,
     background-color 200ms ease-out;
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--accent-color, transparent) 30%, transparent) 0%,
-      transparent 55%
-    );
-    pointer-events: none;
-    border-radius: inherit;
-    z-index: 0;
+  z-index: 10;
+
+  & > div:first-child {
+    position: relative;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-evenly;
+    isolation: isolate;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -2rem auto -2rem -2rem;
+      width: 25%;
+      background: var(--image) center / cover;
+      filter: blur(50px) saturate(2);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: -1;
+    }
   }
 
   > * {
