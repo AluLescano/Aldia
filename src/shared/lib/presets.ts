@@ -3,6 +3,7 @@ import type { IconKey } from '../types'
 export interface PresetSubscription {
   id: string
   name: string
+  keywords?: string[]
   defaultCategoryId: string
   iconUrl?: string // path like '/logos/netflix.svg'
   iconKey?: IconKey
@@ -18,6 +19,7 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
   {
     id: 'water',
     name: 'Agua Corriente',
+    keywords: ['aysa', 'absa', 'aguas andinas'],
     defaultCategoryId: 'bills',
     iconKey: 'water',
   },
@@ -108,12 +110,14 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
   {
     id: 'electricity',
     name: 'Electricidad',
+    keywords: ['edenor', 'edesur', 'eden', 'enel', 'cge'],
     defaultCategoryId: 'bills',
     iconKey: 'electricity',
   },
   {
     id: 'gas',
     name: 'Gas',
+    keywords: ['metrogas', 'naturgy', 'lipigas', 'abastible', 'gasco'],
     defaultCategoryId: 'bills',
     iconKey: 'gas',
   },
@@ -140,6 +144,26 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
     name: 'iCloud+',
     defaultCategoryId: 'storage',
     iconUrl: '/logos/logo_icloud.webp',
+  },
+  {
+    id: 'internet',
+    name: 'Internet',
+    keywords: [
+      'claro',
+      'personal',
+      'movistar',
+      'telered',
+      'telecentro',
+      'jumpnet',
+      'starlink',
+      'entel',
+      'vtr',
+      'mundo',
+      'wom',
+      'gtd',
+    ],
+    defaultCategoryId: 'home',
+    iconKey: 'internet',
   },
   {
     id: 'linkedin-premium',
@@ -262,12 +286,6 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
     iconUrl: '/logos/logo_sportclub.webp',
   },
   {
-    id: 'starlink',
-    name: 'Starlink',
-    defaultCategoryId: 'technology',
-    iconUrl: '/logos/logo_starlink.webp',
-  },
-  {
     id: 'strava',
     name: 'Strava',
     defaultCategoryId: 'lifestyle',
@@ -276,6 +294,17 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
   {
     id: 'phone',
     name: 'Teléfono',
+    keywords: [
+      'personal',
+      'claro',
+      'movistar',
+      'tuenti',
+      'cti',
+      'wom',
+      'entel',
+      'virgin',
+      'vtr',
+    ],
     defaultCategoryId: 'bills',
     iconKey: 'phone',
   },

@@ -4,6 +4,9 @@ import { useState } from 'react'
 // ZUSTAND
 import { useUIStore } from '@/shared/store/uiStore'
 
+// HOOKS
+import { normalizeText } from '@/shared/lib/normalizeText'
+
 // DATA
 import { PRESET_SUBSCRIPTIONS } from '@/shared/lib/presets'
 
@@ -20,28 +23,24 @@ import { IconSearch } from '@/assets/icons/IconSearch'
 import styles from './PresetPicker.module.scss'
 
 export const PresetPicker = () => {
-  const {container, header, searchbar, button, listContainer, presetGrid} = styles
+  const { container, header, searchbar, button, listContainer, presetGrid } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const pushOverlay = useUIStore((state) => state.pushOverlay)
 
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Filter presets based on search
+  const term = normalizeText(searchTerm)
   const filteredPresets = PRESET_SUBSCRIPTIONS.filter((sub) =>
-    sub.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    [sub.name, ...(sub.keywords ?? [])].some((text) =>
+      normalizeText(text).includes(term),
+    ),
   )
 
   return (
-    <div
-      className={container}
-    >
+    <div className={container}>
       <header className={header}>
         <div>
-          <Button
-            size="small"
-            onClick={popOverlay}
-            className={button}
-          >
+          <Button size="small" onClick={popOverlay} className={button}>
             <IconArrow />
           </Button>
           <Typography variant="title" size="small">

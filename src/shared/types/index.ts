@@ -68,7 +68,7 @@ export interface TrialConfig {
   endDate: string // YYYY-MM-DD
 }
 
-export type IconKey = 'electricity' | 'water' | 'gas' | 'phone' | 'rent'
+export type IconKey = 'electricity' | 'water' | 'gas' | 'phone' | 'rent' | 'internet'
 
 export interface Subscription {
   id: string
