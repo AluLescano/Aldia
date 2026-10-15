@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react'
 
 // HOOKS
 import { formatDate } from '@/shared/lib/formatDate'
+import { useUIStore } from '@/shared/store/uiStore'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -39,6 +40,8 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
 
   const isDisabled = subscription.status == 'inactive'
 
+  const pushOverlay = useUIStore((state) => state.pushOverlay)
+
   const handleDelete = () => {
     onDelete(subscription)
     console.log('Delete Triggered for', subscription.name)
@@ -65,6 +68,9 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
       {/* 2. FOREGROUND LAYER (The Draggable Card) */}
       <motion.div
         drag="x"
+        onTap={() =>
+          pushOverlay('subscription-form', { subscriptionId: subscription.id })
+        }
         // This limits dragging exclusively to the left by 70px (width of the button approx)
         dragConstraints={{ left: -70, right: 0 }}
         // Elasticity makes it bounce back slightly when letting go or pulling too far

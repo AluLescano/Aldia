@@ -4,47 +4,56 @@ form {
   flex-direction: column;
   padding: 0 1rem;
 
-  .logoWrapper {
-    display: flex;
-    justify-content: center;
-    margin: 0.75rem 0 2.5rem;
-  }
-
-  .container {
+  .fieldSet {
     display: flex;
     flex: 1;
     flex-direction: column;
-    background-color: var(--bg-surface);
-    margin-bottom: 1rem;
-    border-radius: 1.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
 
-    .inputContainer {
+    .logoWrapper {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 1rem;
+      justify-content: center;
+      margin: 0.75rem 0 2.5rem;
     }
 
-    .buttonNotification {
-      background-color: transparent;
-      color: var(--text-on-brand);
-      border: none;
-      aspect-ratio: 1 / 1;
+    .container {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      background-color: var(--bg-surface);
+      margin-bottom: 1rem;
+      border-radius: 1.5rem;
 
-      svg {
-        transform: rotate(180deg);
+      .inputContainer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+      }
+
+      .buttonNotification {
+        background-color: transparent;
+        color: var(--text-on-brand);
+        border: none;
+        aspect-ratio: 1 / 1;
+
+        svg {
+          transform: rotate(180deg);
+        }
+      }
+
+      .collapse {
+        overflow: hidden;
       }
     }
 
-    .collapse {
-        overflow: hidden;
+    .buttonContainer {
+      position: sticky;
+      bottom: 1rem;
+      margin-top: auto;
     }
-  }
-
-  .buttonContainer {
-    position: sticky;
-    bottom: 1rem;
-    margin-top: auto;
-
   }
 }

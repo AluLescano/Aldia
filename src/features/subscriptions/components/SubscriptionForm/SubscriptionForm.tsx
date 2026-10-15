@@ -45,11 +45,13 @@ type SheetName = 'billingCycle' | 'firstBillDate' | 'endDate' | 'currency' | 'ca
 interface Props {
   initialValues: SubscriptionFormValues
   submitLabel: string
+  readOnly?: boolean
   onSubmit: (values: SubscriptionFormValues) => void
 }
 
-const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
+const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Props) => {
   const {
+    fieldSet,
     logoWrapper,
     container,
     inputContainer,
@@ -229,185 +231,189 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit}>
-      <div className={logoWrapper}>
-        <Avatar
-          src={values.iconUrl}
-          iconKey={values.iconKey}
-          name={values.name}
-          size="large"
-        />
-      </div>
-      <div className={container}>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Nombre
-          </Typography>
-          <InputText
-            size="medium"
-            width="fit"
-            value={values.name}
-            onChange={(event) => {
-              const { value } = event.currentTarget
-              setValues((current) => ({ ...current, name: value }))
-              setTouched((current) => ({ ...current, name: false }))
-            }}
-            onBlur={() => setTouched((current) => ({ ...current, name: true }))}
-            errorMessage={touched.name ? errors.name : undefined}
+      <fieldset disabled={readOnly} className={fieldSet}>
+        <div className={logoWrapper}>
+          <Avatar
+            src={values.iconUrl}
+            iconKey={values.iconKey}
+            name={values.name}
+            size="large"
           />
         </div>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Formato del Cobro
-          </Typography>
-          {/* Placeholder */}
-          <InputSelect
-            size="medium"
-            width="fit"
-            placeholder={'Formato del Cobro'}
-            value={
-              trialDays !== undefined
-                ? `Prueba ${trialDays} d · ${formatBillingCycle(values.billingCycle)}`
-                : formatBillingCycle(values.billingCycle)
-            }
-            onClick={() => setOpenSheet('billingCycle')}
-            errorMessage={touched.billingCycle ? errors.billingCycle : undefined}
-            style={{ minWidth: 0, padding: '0 1rem' }}
-          />
+        <div className={container}>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Nombre
+            </Typography>
+            <InputText
+              size="medium"
+              width="fit"
+              value={values.name}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setValues((current) => ({ ...current, name: value }))
+                setTouched((current) => ({ ...current, name: false }))
+              }}
+              onBlur={() => setTouched((current) => ({ ...current, name: true }))}
+              errorMessage={touched.name ? errors.name : undefined}
+            />
+          </div>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Formato del Cobro
+            </Typography>
+            {/* Placeholder */}
+            <InputSelect
+              size="medium"
+              width="fit"
+              placeholder={'Formato del Cobro'}
+              value={
+                trialDays !== undefined
+                  ? `Prueba ${trialDays} d · ${formatBillingCycle(values.billingCycle)}`
+                  : formatBillingCycle(values.billingCycle)
+              }
+              onClick={() => setOpenSheet('billingCycle')}
+              errorMessage={touched.billingCycle ? errors.billingCycle : undefined}
+              style={{ minWidth: 0, padding: '0 1rem' }}
+            />
+          </div>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Inicio del Cobro
+            </Typography>
+            <InputDate
+              size="medium"
+              width="fit"
+              value={values.firstBillDate}
+              onClick={() => setOpenSheet('firstBillDate')}
+              errorMessage={touched.firstBillDate ? errors.firstBillDate : undefined}
+              disabled={values.trial !== undefined}
+            />
+          </div>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Fin del Cobro
+            </Typography>
+            <Switch
+              checked={hasEndDate}
+              onChange={handleEndDateToggle}
+              label="Tiene fecha de fin"
+            />
+          </div>
+          <AnimatePresence initial={false}>
+            {hasEndDate && (
+              <motion.div
+                key="end-date"
+                className={collapse}
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeInOut' }}
+              >
+                <div className={inputContainer}>
+                  <Typography variant="body" size="medium">
+                    Fecha de fin del cobro
+                  </Typography>
+                  <InputDate
+                    size="medium"
+                    width="fit"
+                    value={values.endDate ?? ''}
+                    onClick={() => setOpenSheet('endDate')}
+                    errorMessage={touched.endDate ? errors.endDate : undefined}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Inicio del Cobro
-          </Typography>
-          <InputDate
-            size="medium"
-            width="fit"
-            value={values.firstBillDate}
-            onClick={() => setOpenSheet('firstBillDate')}
-            errorMessage={touched.firstBillDate ? errors.firstBillDate : undefined}
-            disabled={values.trial !== undefined}
-          />
+
+        <div className={container}>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Tipo de Moneda
+            </Typography>
+            <InputSelect
+              size="medium"
+              width="fit"
+              placeholder={'Moneda'}
+              value={values.currency}
+              onClick={() => setOpenSheet('currency')}
+              errorMessage={touched.currency ? errors.currency : undefined}
+              style={{ minWidth: 0, padding: '0 1rem' }}
+            />
+          </div>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Monto
+            </Typography>
+            <InputAmount
+              size="medium"
+              width="fit"
+              value={values.price}
+              onChange={(event) => {
+                const { value } = event.currentTarget
+                setValues((current) => ({ ...current, price: value }))
+                setTouched((current) => ({ ...current, price: false }))
+              }}
+              onBlur={() => setTouched((current) => ({ ...current, price: true }))}
+              errorMessage={touched.price ? errors.price : undefined}
+            />
+          </div>
         </div>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Fin del Cobro
-          </Typography>
-          <Switch
-            checked={hasEndDate}
-            onChange={handleEndDateToggle}
-            label="Tiene fecha de fin"
-          />
+        <div className={container}>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Notificaciones
+            </Typography>
+            <Button size="small" onClick={() => {}} className={buttonNotification}>
+              <IconArrow />
+            </Button>
+          </div>
         </div>
-        <AnimatePresence initial={false}>
-          {hasEndDate && (
-            <motion.div
-              key="end-date"
-              className={collapse}
-              initial={{ height: 0 }}
-              animate={{ height: 'auto' }}
-              exit={{ height: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeInOut' }}
+
+        <div className={container}>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Categoría
+            </Typography>
+            <InputSelect
+              size="medium"
+              width="fit"
+              placeholder={'Categoría'}
+              value={categoryName}
+              onClick={() => setOpenSheet('categoryId')}
+              errorMessage={touched.categoryId ? errors.categoryId : undefined}
+              style={{ minWidth: 0, padding: '0 1rem' }}
+            />
+          </div>
+          <div className={inputContainer}>
+            <Typography variant="body" size="medium">
+              Cobrado en
+            </Typography>
+            <InputSelect
+              size="medium"
+              width="fit"
+              placeholder={'Cobrado en'}
+              value={values.paymentMethodId ?? ''}
+              onClick={() => {}}
+              errorMessage={touched.paymentMethodId ? errors.paymentMethodId : undefined}
+              disabled
+            />
+          </div>
+        </div>
+        {!readOnly && (
+          <div className={buttonContainer}>
+            <Button
+              width="full"
+              size="large"
+              type="submit"
+              aria-disabled={Object.keys(errors).length > 0}
             >
-              <div className={inputContainer}>
-                <Typography variant="body" size="medium">
-                  Fecha de fin del cobro
-                </Typography>
-                <InputDate
-                  size="medium"
-                  width="fit"
-                  value={values.endDate ?? ''}
-                  onClick={() => setOpenSheet('endDate')}
-                  errorMessage={touched.endDate ? errors.endDate : undefined}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className={container}>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Tipo de Moneda
-          </Typography>
-          <InputSelect
-            size="medium"
-            width="fit"
-            placeholder={'Moneda'}
-            value={values.currency}
-            onClick={() => setOpenSheet('currency')}
-            errorMessage={touched.currency ? errors.currency : undefined}
-            style={{ minWidth: 0, padding: '0 1rem' }}
-          />
-        </div>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Monto
-          </Typography>
-          <InputAmount
-            size="medium"
-            width="fit"
-            value={values.price}
-            onChange={(event) => {
-              const { value } = event.currentTarget
-              setValues((current) => ({ ...current, price: value }))
-              setTouched((current) => ({ ...current, price: false }))
-            }}
-            onBlur={() => setTouched((current) => ({ ...current, price: true }))}
-            errorMessage={touched.price ? errors.price : undefined}
-          />
-        </div>
-      </div>
-      <div className={container}>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Notificaciones
-          </Typography>
-          <Button size="small" onClick={() => {}} className={buttonNotification}>
-            <IconArrow />
-          </Button>
-        </div>
-      </div>
-
-      <div className={container}>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Categoría
-          </Typography>
-          <InputSelect
-            size="medium"
-            width="fit"
-            placeholder={'Categoría'}
-            value={categoryName}
-            onClick={() => setOpenSheet('categoryId')}
-            errorMessage={touched.categoryId ? errors.categoryId : undefined}
-            style={{ minWidth: 0, padding: '0 1rem' }}
-          />
-        </div>
-        <div className={inputContainer}>
-          <Typography variant="body" size="medium">
-            Cobrado en
-          </Typography>
-          <InputSelect
-            size="medium"
-            width="fit"
-            placeholder={'Cobrado en'}
-            value={values.paymentMethodId ?? ''}
-            onClick={() => {}}
-            errorMessage={touched.paymentMethodId ? errors.paymentMethodId : undefined}
-            disabled
-          />
-        </div>
-      </div>
-      <div className={buttonContainer}>
-        <Button
-          width="full"
-          size="large"
-          type="submit"
-          aria-disabled={Object.keys(errors).length > 0}
-        >
-          {submitLabel}
-        </Button>
-      </div>
+              {submitLabel}
+            </Button>{' '}
+          </div>
+        )}
+      </fieldset>
       <BottomSheet
         isOpen={sheet !== null}
         title={sheet?.title}

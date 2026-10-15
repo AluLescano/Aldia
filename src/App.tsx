@@ -28,7 +28,6 @@ import { SubscriptionFormPage } from './pages/subscriptionForm/SubscriptionFormP
 // ASSETS
 import styles from './App.module.scss'
 
-
 function App() {
   const { appContainer, appWrapper, mainContent, overlayContainer } = styles
   const [activeTab, setActiveTab] = useState<TabType>('home')
@@ -68,7 +67,10 @@ function App() {
           <div className={overlayContainer}>
             {activeOverlay.type === 'preset-picker' && <PresetPicker />}
             {activeOverlay.type === 'subscription-form' && (
-              <SubscriptionFormPage preset={activeOverlay.data?.preset} />
+              <SubscriptionFormPage
+                preset={activeOverlay.data?.preset}
+                subscriptionId={activeOverlay.data?.subscriptionId}
+              />
             )}
           </div>
         )}

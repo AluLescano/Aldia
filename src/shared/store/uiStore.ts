@@ -7,6 +7,7 @@ interface OverlayContext {
   type: OverlayType
   data?: {
     preset?: SubscriptionTemplate
+    subscriptionId?: string
   }
 }
 
@@ -29,4 +30,3 @@ export const useUIStore = create<UIState>((set) => ({
     })),
   closeAllOverlays: () => set({ overlays: [] }),
 }))
-

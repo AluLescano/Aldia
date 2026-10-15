@@ -1,5 +1,5 @@
 // DEPENDENCIES
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
 // STORAGE
 import { useUIStore } from '@/shared/store/uiStore'
@@ -72,22 +72,14 @@ const MOCKED_SUBS: Subscription[] = [
 
 export const HomePage: React.FC = () => {
   const { container, header, toastContent, undoButton, fabWrapper, fabContainer, fabButton } = styles
-  const [lastDeleted, setLastDeleted] = useState<Subscription | null>(null)
 
   const subs = useSubscriptionStore((state) => state.subscriptions)
   const addSubscription = useSubscriptionStore((state) => state.addSubscription)
   const deleteSubscription = useSubscriptionStore((state) => state.deleteSubscription)
+  const lastDeleted = useSubscriptionStore((state) => state.lastDeleted)
+  const undoDelete = useSubscriptionStore((state) => state.undoDelete)
+  const clearLastDeleted = useSubscriptionStore((state) => state.clearLastDeleted)
   const pushOverlay = useUIStore((state) => state.pushOverlay)
-
-  const handleDelete = (sub: Subscription) => {
-    deleteSubscription(sub.id)
-    setLastDeleted(sub)
-  }
-
-  const handleUndo = () => {
-    addSubscription(lastDeleted!)
-    setLastDeleted(null)
-  }
 
   useEffect(() => {
     if (useSubscriptionStore.getState().subscriptions.length === 0) {
@@ -119,22 +111,20 @@ export const HomePage: React.FC = () => {
         />
       </header>
 
-      <SubscriptionList subscriptions={subs} onDelete={handleDelete} />
+      <SubscriptionList subscriptions={subs} onDelete={(sub) => deleteSubscription(sub.id)} />
       <AnimatePresence>
         {lastDeleted && (
           <Toast
             position="bottom"
             type="success"
-            onDismiss={() => {
-              setLastDeleted(null)
-            }}
+            onDismiss={clearLastDeleted}
             message={
               <div className={toastContent}>
                 <Typography variant="body" size="medium">
                   {`Se eliminó ${lastDeleted.name} exitosamente`}
                 </Typography>
                 <Button
-                  onClick={handleUndo}
+                  onClick={undoDelete}
                   className={undoButton}
                 >
                   <IconUndo />

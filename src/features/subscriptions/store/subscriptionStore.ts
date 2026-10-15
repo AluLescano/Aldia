@@ -4,8 +4,12 @@ import type { Subscription } from '@/shared/types'
 
 interface SubscriptionState {
   subscriptions: Subscription[]
+  // The last deleted subscription, kept so the Home screen can offer to undo it
+  lastDeleted: Subscription | null
   addSubscription: (sub: Subscription) => void
   deleteSubscription: (id: string) => void
+  undoDelete: () => void
+  clearLastDeleted: () => void
   updateSubscription: (id: string, updatedSub: Partial<Subscription>) => void
   // Moves every subscription of one category to another (used when a category is deleted)
   reassignCategory: (fromId: string, toId: string) => void
@@ -17,6 +21,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
     (set) => ({
       // Initial state
       subscriptions: [],
+      lastDeleted: null,
 
       // Actions
       addSubscription: (newSub) =>
@@ -29,7 +34,17 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         set((state) => ({
           // Filter out the subscription with the matching ID
           subscriptions: state.subscriptions.filter((sub) => sub.id !== id),
+          lastDeleted: state.subscriptions.find((sub) => sub.id === id) ?? null,
         })),
+
+      undoDelete: () =>
+        set((state) =>
+          state.lastDeleted
+            ? { subscriptions: [...state.subscriptions, state.lastDeleted], lastDeleted: null }
+            : state,
+        ),
+
+      clearLastDeleted: () => set({ lastDeleted: null }),
 
       updateSubscription: (id, updatedSub) =>
         set((state) => ({
@@ -48,6 +63,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
     }),
     {
       name: 'aldia_subscriptions_v1', // The key used in localStorage (defined in README)
+      partialize: (state) => ({ subscriptions: state.subscriptions }), // lastDeleted is not saved
     }
   )
 )
