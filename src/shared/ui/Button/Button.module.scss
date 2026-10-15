@@ -36,9 +36,10 @@
     opacity: 0.12;
   }
 
-  &:disabled {
+  &:disabled,
+  &[aria-disabled='true'] {
     cursor: not-allowed;
-    opacity: 0.1;
+    opacity: 0.5;
   }
 }
 

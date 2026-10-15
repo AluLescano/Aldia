@@ -1,9 +1,6 @@
 // HOOKS
-import { type ReactNode, type SubmitEvent, useState } from 'react'
+import { type ReactNode, type SubmitEvent, useRef, useState } from 'react'
 import { useCategoryEditor } from '@/features/categories/useCategoryEditor'
-
-// TYPES
-import type { BillingCycle } from '@/shared/types'
 
 // TYPES
 import {
@@ -13,7 +10,7 @@ import {
 
 // DATA
 import { addCycles, formatBillingCycle } from '../../utils/billingCycle'
-import { daysBetween } from '@/shared/lib/isoDate'
+import { daysBetween, todayISO } from '@/shared/lib/isoDate'
 import { DEFAULT_CURRENCIES } from '@/shared/lib/currencies'
 import { OTHERS_ID, useCategoryStore } from '@/features/categories/categoryStore'
 
@@ -70,6 +67,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
   const reduceMotion = useReducedMotion()
 
   const [openSheet, setOpenSheet] = useState<SheetName | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
 
   const categoryName = useCategoryStore(
     (state) => state.categories.find((c) => c.id === values.categoryId)?.name ?? '',
@@ -95,31 +93,32 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
     : undefined
 
   const handleBillingChange = (choice: BillingChoice) => {
+    setValues((current) => ({
+      ...current,
+      billingCycle:
+        choice.mode === 'one-time'
+          ? { type: 'one-time' }
+          : { type: 'every', interval: choice.interval, unit: choice.unit },
+    }))
+  }
+
+  const handleTrialChange = (days: number | undefined) => {
     setValues((current) => {
-      if (choice.mode === 'one-time') {
-        return { ...current, billingCycle: { type: 'one-time' }, trial: undefined }
-      }
-      if (choice.mode === 'every') {
-        const { interval, unit } = choice
+      if (days === undefined) {
+        // Trial off: the first charge goes back to when the trial started (today)
         return {
           ...current,
-          billingCycle: { type: 'every', interval, unit },
           trial: undefined,
+          firstBillDate: current.trial?.startDate ?? current.firstBillDate,
         }
       }
-      // Trial: the cycle stays as it is, it applies once the trial is over
-      const trialCycle: BillingCycle = {
-        type: 'every',
-        interval: choice.days,
-        unit: 'day',
-      }
-      return {
-        ...current,
-        trial: {
-          startDate: current.firstBillDate,
-          endDate: addCycles(current.firstBillDate, trialCycle, 1),
-        },
-      }
+      const startDate = todayISO()
+      const endDate = addCycles(
+        startDate,
+        { type: 'every', interval: days, unit: 'day' },
+        1,
+      )
+      return { ...current, trial: { startDate, endDate }, firstBillDate: endDate }
     })
   }
 
@@ -155,6 +154,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
           cycle={values.billingCycle}
           trialDays={trialDays}
           onChange={handleBillingChange}
+          onTrialChange={handleTrialChange}
         />
       ),
     },
@@ -210,15 +210,25 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
       name: true,
       billingCycle: true,
       firstBillDate: true,
+      endDate: true,
       currency: true,
       price: true,
       categoryId: true,
     })
-    if (Object.keys(errors).length === 0) onSubmit(values)
+    if (Object.keys(errors).length === 0) {
+      onSubmit(values)
+      return
+    }
+    // The errors render on the next frame, then the first invalid field exists in the DOM
+    requestAnimationFrame(() => {
+      const first = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      first?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      first?.focus({ preventScroll: true })
+    })
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={formRef} onSubmit={handleSubmit}>
       <div className={logoWrapper}>
         <Avatar src={values.iconUrl} name={values.name} size="large" />
       </div>
@@ -251,7 +261,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
             placeholder={'Formato del Cobro'}
             value={
               trialDays !== undefined
-                ? `Prueba ${trialDays} d`
+                ? `Prueba ${trialDays} d · ${formatBillingCycle(values.billingCycle)}`
                 : formatBillingCycle(values.billingCycle)
             }
             onClick={() => setOpenSheet('billingCycle')}
@@ -269,6 +279,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
             value={values.firstBillDate}
             onClick={() => setOpenSheet('firstBillDate')}
             errorMessage={touched.firstBillDate ? errors.firstBillDate : undefined}
+            disabled={values.trial !== undefined}
           />
         </div>
         <div className={inputContainer}>
@@ -378,11 +389,17 @@ const SubscriptionForm = ({ initialValues, submitLabel, onSubmit }: Props) => {
             value={values.paymentMethodId ?? ''}
             onClick={() => {}}
             errorMessage={touched.paymentMethodId ? errors.paymentMethodId : undefined}
+            disabled
           />
         </div>
       </div>
       <div className={buttonContainer}>
-        <Button width="full" size="large" type="submit">
+        <Button
+          width="full"
+          size="large"
+          type="submit"
+          aria-disabled={Object.keys(errors).length > 0}
+        >
           {submitLabel}
         </Button>
       </div>

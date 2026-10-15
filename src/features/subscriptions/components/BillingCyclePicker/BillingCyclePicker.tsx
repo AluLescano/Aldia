@@ -25,9 +25,7 @@ const {
 } = styles
 
 export type BillingChoice =
-  | { mode: 'one-time' }
-  | { mode: 'trial'; days: number }
-  | { mode: 'every'; interval: number; unit: BillingUnit }
+  { mode: 'one-time' } | { mode: 'every'; interval: number; unit: BillingUnit }
 
 const UNITS: { value: BillingUnit; label: string }[] = [
   { value: 'day', label: 'Día' },
@@ -80,13 +78,13 @@ interface BodyProps {
   cycle: BillingCycle
   trialDays?: number
   onChange: (choice: BillingChoice) => void
+  onTrialChange: (days: number | undefined) => void
 }
 
 // Lives inside the sheet, so its state starts fresh every time the sheet opens
-const BillingCyclePicker = ({ cycle, trialDays, onChange }: BodyProps) => {
-
-  const mode =
-    trialDays !== undefined ? 'trial' : cycle.type === 'one-time' ? 'one-time' : 'every'
+const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyProps) => {
+  const hasTrial = trialDays !== undefined
+  const mode = cycle.type === 'one-time' ? 'one-time' : 'every'
 
   // The text can be empty or invalid for a moment while typing, so it is kept apart
   const [trialText, setTrialText] = useState(String(trialDays ?? DEFAULT_TRIAL_DAYS))
@@ -97,9 +95,9 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange }: BodyProps) => {
     cycle.type === 'every' ? cycle.unit : 'month',
   )
 
-  const selectTrial = (text = trialText) => {
+  const changeTrial = (text = trialText) => {
     const days = parsePositive(text)
-    if (days !== null) onChange({ mode: 'trial', days })
+    if (days !== null) onTrialChange(days)
   }
 
   const selectEvery = (text = intervalText, nextUnit = unit) => {
@@ -109,27 +107,14 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange }: BodyProps) => {
 
   return (
     <div className={list}>
-      <div className={`${card} ${compact} ${mode === 'one-time' ? selected : ''}`}>
+      {/* Trial */}
+      <div className={`${card} ${compact} ${hasTrial ? selected : ''}`}>
         <button
           type="button"
           className={cardButton}
-          aria-pressed={mode === 'one-time'}
-          aria-label="Pago único"
-          onClick={() => onChange({ mode: 'one-time' })}
-        />
-        <div className={content}>
-          <Typography variant="body" size="medium">
-            Pago único
-          </Typography>
-        </div>
-      </div>
-      <div className={`${card} ${compact} ${mode === 'trial' ? selected : ''}`}>
-        <button
-          type="button"
-          className={cardButton}
-          aria-pressed={mode === 'trial'}
+          aria-pressed={hasTrial}
           aria-label="Período de prueba"
-          onClick={() => selectTrial()}
+          onClick={() => (hasTrial ? onTrialChange(undefined) : changeTrial())}
         />
         <div className={content}>
           <Typography variant="body" size="medium">
@@ -144,11 +129,11 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange }: BodyProps) => {
               aria-label="Días de prueba"
               value={trialText}
               errorMessage={parsePositive(trialText) === null ? 'Mínimo 1' : undefined}
-              onFocus={() => selectTrial()}
+              onFocus={() => changeTrial()}
               onChange={(event) => {
                 const text = event.currentTarget.value
                 setTrialText(text)
-                selectTrial(text)
+                changeTrial(text)
               }}
             />
             <Typography variant="body" size="medium">
@@ -157,7 +142,22 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange }: BodyProps) => {
           </div>
         </div>
       </div>
-
+      {/* One time payment */}
+      <div className={`${card} ${compact} ${mode === 'one-time' ? selected : ''}`}>
+        <button
+          type="button"
+          className={cardButton}
+          aria-pressed={mode === 'one-time'}
+          aria-label="Pago único"
+          onClick={() => onChange({ mode: 'one-time' })}
+        />
+        <div className={content}>
+          <Typography variant="body" size="medium">
+            Pago único
+          </Typography>
+        </div>
+      </div>
+      {/* Every x days/weeks/months/years */}
       <div className={`${card} ${mode === 'every' ? selected : ''}`}>
         <button
           type="button"
