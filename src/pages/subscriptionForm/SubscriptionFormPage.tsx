@@ -125,7 +125,10 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
                 <PauseToggleIcon isPaused={isPaused} />
               </IconButton>
               {!isEditing && (
-                <IconButton onClick={() => setIsEditing(true)} label="Editar subscripción">
+                <IconButton
+                  onClick={() => setIsEditing(true)}
+                  label="Editar subscripción"
+                >
                   <IconEdit />
                 </IconButton>
               )}

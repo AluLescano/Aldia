@@ -1,0 +1,44 @@
+# Runs on every pull request and on every push to main and dev.
+# A PR can only be merged when this passes (see the branch rules on GitHub).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+
+# Read-only: this workflow never writes to the repo
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run that is still going
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, format, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install (exact versions from package-lock.json)
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Test
+        run: npm test
+
+      - name: Type check and build
+        run: npm run build
