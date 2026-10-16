@@ -200,7 +200,7 @@ Data is saved under versioned keys:
 - `aldia_settings` (in use)
 - `aldia_categories_v1` (in use)
 - `aldia_cards_v1` (planned)
-- `aldia_rates` (planned): the last downloaded exchange rates and their date
+- `aldia_rates` (in use): the last downloaded exchange rates and the day they were downloaded
 
 **Durability:** these keys live in the WebView's `localStorage`, which Android can clear (low storage, WebView reset). Before testers rely on the app, the stores move to Capacitor Preferences through a custom `persist` storage, and JSON export ships as the backup.
 
@@ -250,11 +250,12 @@ Each of these comes from a real bug in this codebase.
 
 ---
 
-## 8. Exchange Rates (planned)
+## 8. Exchange Rates
 
-- Source: the free [exchange-api](https://github.com/fawazahmed0/exchange-api) (no key, daily JSON on a CDN, with a fallback URL).
-- On the first app start of the day, if the saved rates are not from today, download once and save them with their date (`aldia_rates`). If the download fails, keep using the last saved rates and show their date. With no rates at all, show totals per currency without converting.
-- Conversion is a pure function (`convert(amount, from, to, rates)`), so totals and statistics stay testable offline.
+- Source: the free [exchange-api](https://github.com/fawazahmed0/exchange-api) (no key, daily JSON on a CDN, with a fallback URL). Download and conversion live in `shared/lib/exchangeRates.ts`.
+- `useRatesStore` (`shared/store/ratesStore.ts`, persisted as `aldia_rates`) downloads once per local day: `App.tsx` calls `refreshIfStale()` on start and every time the app becomes visible again. Two calls at once share one download. If the download fails, the last saved rates stay in use.
+- Conversion is a pure function (`convert(amount, from, to, rates)`), so totals and statistics stay testable offline. The same currency never needs rates.
+- Home (`getMonthlyTotal` in `features/subscriptions/utils/monthlyTotal.ts`) adds only the active subscriptions, each turned into its monthly cost (`monthlyEquivalent`) and converted. It says so when rates are older than today ("Tasas del ...") or when some subscriptions could not be converted ("N sin sumar").
 - Known limit: the API gives official rates. A USD subscription paid with an Argentine card is charged at the official rate plus taxes, so the ARS total can be lower than the real charge.
 
 ---

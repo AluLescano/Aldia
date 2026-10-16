@@ -1,4 +1,4 @@
-import type { ChangeEvent, InputHTMLAttributes } from 'react'
+import type { ChangeEvent, CSSProperties, InputHTMLAttributes } from 'react'
 
 // HOOKS
 import { useFieldControl, type FieldControlProps } from '@/shared/hooks/useFieldControl'
@@ -71,6 +71,10 @@ const InputAmount = ({
         value={value}
         onChange={handleChange}
         className={container}
+        // A longer symbol ("U$S") needs more room on the left (see InputAmount.module.scss)
+        style={
+          { ...rest.style, '--symbol-chars': currencySymbol.length } as CSSProperties
+        }
       />
     </Field>
   )

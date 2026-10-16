@@ -1,7 +1,9 @@
 .container {
   display: flex;
   flex: 1;
-  padding: 0 0.75rem 0 1.75rem;
+  // Room for the currency symbol: 1.75rem fits one character ("$", "€"),
+  // each extra character ("U$S") adds about one more symbol width
+  padding: 0 0.75rem 0 calc(1.75rem + (var(--symbol-chars, 1) - 1) * 0.75em);
   align-self: stretch;
   background: none;
   border: none;

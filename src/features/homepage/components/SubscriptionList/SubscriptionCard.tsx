@@ -1,10 +1,19 @@
 // DEPENDENCIES
+import { useRef, type CSSProperties } from 'react'
 import { motion, useAnimation } from 'motion/react'
-import { cn } from '@/shared/lib/cn'
 
-// HOOKS
-import { formatDate } from '@/shared/lib/formatDate'
+// STORES
 import { useUIStore } from '@/shared/store/uiStore'
+import { useRatesStore } from '@/shared/store/ratesStore'
+import { useSettingsStore } from '@/features/settings/store'
+
+// UTILS
+import { cn } from '@/shared/lib/cn'
+import { formatDate } from '@/shared/lib/formatDate'
+import { todayISO } from '@/shared/lib/isoDate'
+import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
+import { convert } from '@/shared/lib/exchangeRates'
+import { nextBillDate } from '@/features/subscriptions/utils/billingCycle'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -12,7 +21,6 @@ import Button from '@/shared/ui/Button/Button'
 import Avatar from '@/shared/ui/Avatar/Avatar'
 
 // TYPES
-import type { CSSProperties } from 'react'
 import type { Subscription } from '@/shared/types'
 
 // ASSETS
@@ -20,108 +28,151 @@ import { IconDelete } from '@/assets/icons/IconDelete'
 
 import styles from './SubscriptionList.module.scss'
 
+const {
+  subscriptionContainer,
+  disabled,
+  cardWrapper,
+  deleteLayer,
+  deleteButton,
+  deleteIcon,
+  cardImg,
+  opacity50,
+  cardInfo,
+  cardPrice,
+  originalPrice,
+} = styles
+
+// How far the card slides left to uncover the delete button (about the button's width)
+const OPEN_X = -70
+
 interface Props {
   subscription: Subscription
-  onDelete: (arg0: Subscription) => void
+  /** Called from the delete button uncovered by swiping the card left. */
+  onDelete: (subscription: Subscription) => void
 }
 
+/**
+ * One subscription on Home. Tap to open its detail screen; swipe left to uncover
+ * the delete button. A tap on a swiped-open card closes it instead of opening it.
+ */
 const SubscriptionCard = ({ subscription, onDelete }: Props) => {
-  const {
-    subscriptionContainer,
-    disabled,
-    cardWrapper,
-    deleteLayer,
-    deleteButton,
-    deleteIcon,
-    cardImg,
-    opacity50,
-    cardInfo,
-    cardPrice,
-  } = styles
-
-  const isDisabled = subscription.status == 'inactive'
-
   const pushOverlay = useUIStore((state) => state.pushOverlay)
+  const selectedCurrency = useSettingsStore((state) => state.selectedCurrency)
+  const rates = useRatesStore((state) => state.rates)
+  const controls = useAnimation()
 
-  const handleDelete = () => {
-    onDelete(subscription)
-    console.log('Delete Triggered for', subscription.name)
+  // Memory between events, nothing to draw: refs, so changing them never re-renders.
+  // The finger moved since it touched the card (then lifting it is not a tap)
+  const wasDragged = useRef(false)
+  // The card is slid open, showing the delete button
+  const isOpen = useRef(false)
+
+  const slideTo = (open: boolean) => {
+    isOpen.current = open
+    controls.start({ x: open ? OPEN_X : 0 })
   }
 
-  const controls = useAnimation()
+  const handleTap = () => {
+    if (wasDragged.current) return
+    if (isOpen.current) {
+      slideTo(false)
+      return
+    }
+    pushOverlay('subscription-form', { subscriptionId: subscription.id })
+  }
+
+  const isPaused = subscription.status === 'inactive'
+
+  // Calculated, not read from the stored field, so it never shows a date that already passed
+  const nextCharge = nextBillDate(
+    subscription.firstBillDate,
+    subscription.billingCycle,
+    todayISO(),
+  )
+
+  // In another currency: show it converted to the one picked on Home, and keep the
+  // original (what the card is really charged) small underneath. No rate: original only.
+  const isForeign = subscription.currency !== selectedCurrency
+  const converted = isForeign
+    ? convert(subscription.price, subscription.currency, selectedCurrency, rates)
+    : null
+  const shownAmount = converted ?? subscription.price
+  const shownSymbol = getCurrencySymbol(
+    converted !== null ? selectedCurrency : subscription.currency,
+  )
 
   return (
     <div className={cardWrapper}>
-      {/* 1. BACKGROUND LAYER (The Delete Button) */}
+      {/* Background: the delete button, uncovered by the swipe */}
       <div className={deleteLayer}>
         <Button
           variant="primary"
           size="large"
           width="fit"
-          onClick={handleDelete}
+          onClick={() => onDelete(subscription)}
           className={deleteButton}
-          aria-label="Delete subscription"
+          aria-label={`Eliminar ${subscription.name}`}
         >
           <IconDelete className={deleteIcon} />
         </Button>
       </div>
 
-      {/* 2. FOREGROUND LAYER (The Draggable Card) */}
+      {/* Foreground: the card itself, draggable to the left only */}
       <motion.div
         drag="x"
-        onTap={() =>
-          pushOverlay('subscription-form', { subscriptionId: subscription.id })
-        }
-        // This limits dragging exclusively to the left by 70px (width of the button approx)
-        dragConstraints={{ left: -70, right: 0 }}
-        // Elasticity makes it bounce back slightly when letting go or pulling too far
-        dragElastic={0.1}
+        dragConstraints={{ left: OPEN_X, right: 0 }}
+        dragElastic={0.1} // a small bounce past the limits
         animate={controls}
-        onDragEnd={(_, info) => {
-          // If dragged past half the button width, or swiped fast, snap open. Else snap closed.
-          if (info.offset.x < -35 || info.velocity.x < -500) {
-            controls.start({ x: -70 })
-          } else {
-            controls.start({ x: 0 })
-          }
+        onTapStart={() => {
+          wasDragged.current = false // every touch starts as a possible tap
         }}
-        className={cn(subscriptionContainer, isDisabled && disabled)}
+        onDragStart={() => {
+          wasDragged.current = true
+        }}
+        onTap={handleTap}
+        onDragEnd={(_, info) => {
+          // Past half the button, or a fast swipe: snap open. Otherwise snap closed.
+          slideTo(info.offset.x < OPEN_X / 2 || info.velocity.x < -500)
+        }}
+        className={cn(subscriptionContainer, isPaused && disabled)}
       >
         <div style={{ '--image': `url("${subscription.iconUrl}")` } as CSSProperties}>
           {subscription.iconUrl ? (
             <img
               src={subscription.iconUrl}
-              className={cn(cardImg, isDisabled && opacity50)}
+              alt="" // decorative: the name is right next to it
+              className={cn(cardImg, isPaused && opacity50)}
             />
           ) : (
             <Avatar
               iconKey={subscription.iconKey}
               name={subscription.name}
-              className={cn(cardImg, isDisabled && opacity50)}
+              className={cn(cardImg, isPaused && opacity50)}
             />
           )}
           <div className={cardInfo}>
             <Typography
               variant="label"
               size="medium"
-              className={cn(isDisabled && opacity50)}
+              className={isPaused ? opacity50 : undefined}
             >
               {subscription.name}
             </Typography>
-            {!isDisabled && (
+            {!isPaused && (
               <Typography variant="label" size="small">
-                {formatDate(subscription.nextBillDate)}
+                {formatDate(nextCharge)}
               </Typography>
             )}
           </div>
-          <div className={cardPrice}>
-            <Typography
-              variant="currency"
-              size="medium"
-              className={cn(isDisabled && opacity50)}
-            >
-              {subscription.price}
+          <div className={cn(cardPrice, isPaused && opacity50)}>
+            <Typography variant="currency" size="medium" currencySymbol={shownSymbol}>
+              {shownAmount}
             </Typography>
+            {converted !== null && (
+              <Typography variant="label" size="small" className={originalPrice}>
+                {`${getCurrencySymbol(subscription.currency)} ${formatAmount(subscription.price)}`}
+              </Typography>
+            )}
           </div>
         </div>
       </motion.div>

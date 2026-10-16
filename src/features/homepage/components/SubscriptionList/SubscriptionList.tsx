@@ -1,18 +1,27 @@
-// HOOKS
+// DEPENDENCIES
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
-// TYPES
-import { type Subscription } from '@/shared/types'
-
-// STORE
+// STORES
 import { useCategoryStore } from '@/features/categories/categoryStore'
+
+// UTILS
+import {
+  filterKey,
+  filterSubscriptions,
+  listFilters,
+  sortSubscriptions,
+  type ListFilter,
+} from '@/features/subscriptions/utils/subscriptionList'
 
 // COMPONENTS
 import SubscriptionListSkeleton from './SubscriptionListSkeleton'
 import SubscriptionCard from './SubscriptionCard'
 import Typography from '@/shared/ui/Typography/Typography'
 import Pill from '@/shared/ui/Pill/Pill'
+
+// TYPES
+import type { Subscription } from '@/shared/types'
 
 // ASSETS
 import { IconAddEmpty } from '@/assets/icons/IconAddEmpty'
@@ -21,13 +30,11 @@ import styles from './SubscriptionList.module.scss'
 interface Props {
   subscriptions: Subscription[]
   isLoading?: boolean
-  onDelete: (arg0: Subscription) => void
+  /** Called from a card's swipe-to-delete button. */
+  onDelete: (subscription: Subscription) => void
 }
 
-const isDisabled = (status: string) => {
-  return status == 'inactive'
-}
-
+/** Filter tabs plus the list of subscription cards (or an empty state). */
 const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
   const {
     container,
@@ -42,37 +49,25 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
     cardMotionWrapper,
   } = styles
 
-  const hasSubscriptions = (subscriptions ?? []).length > 0
-  const [activeTab, setActiveTab] = useState('Todas')
+  const [chosenFilter, setChosenFilter] = useState<ListFilter>({ type: 'all' })
+  const categories = useCategoryStore((state) => state.categories)
 
-  const storedCategories = useCategoryStore((state) => state.categories)
+  const filters = listFilters(subscriptions)
 
-  // Tabs hold the category ID, but show its name (renaming a category changes the label)
-  const tabLabel = (tab: string) =>
-    storedCategories.find((category) => category.id === tab)?.name ?? tab
+  // A tab can disappear while selected (resume the last paused one, delete the last of a
+  // category). Derived, not stored: if the chosen tab is gone, the list shows "all".
+  const activeFilter = filters.some((f) => filterKey(f) === filterKey(chosenFilter))
+    ? chosenFilter
+    : filters[0]
 
-  // All Unique Filter tabs + 'All' tab
-  const categories = [
-    'Todas',
-    ...new Set(subscriptions.map((sub) => sub.categoryId)),
-    'Inactivas',
-  ]
-  const filteredSubscriptions =
-    activeTab === 'Todas'
-      ? subscriptions
-      : activeTab === 'Inactivas'
-        ? subscriptions.filter((sub) => 'inactive' == sub.status)
-        : subscriptions.filter((sub) => activeTab == sub.categoryId)
+  // Category tabs show the category's current name, so renaming one renames its tab
+  const filterLabel = (filter: ListFilter) => {
+    if (filter.type === 'all') return 'Todas'
+    if (filter.type === 'inactive') return 'Inactivas'
+    return categories.find((c) => c.id === filter.categoryId)?.name ?? filter.categoryId
+  }
 
-  const sortedSubscriptions = [...filteredSubscriptions].sort((a, b) => {
-    // 1. Sort by Status (Active first)
-    if (isDisabled(a.status) !== isDisabled(b.status)) {
-      return isDisabled(a.status) ? 1 : -1
-    }
-
-    // 2. Sort Alphabetically
-    return a.name.localeCompare(b.name)
-  })
+  const visible = sortSubscriptions(filterSubscriptions(subscriptions, activeFilter))
 
   if (isLoading) {
     return <SubscriptionListSkeleton />
@@ -80,31 +75,28 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
 
   return (
     <div className={wrapper}>
-      {/* Filter Tabs */}
       <div className={filterTabs}>
-        {categories.map((cat) => (
+        {filters.map((filter) => (
           <Pill
-            key={cat}
-            isActive={activeTab === cat}
-            onClick={() => setActiveTab(cat)}
+            key={filterKey(filter)}
+            isActive={filterKey(filter) === filterKey(activeFilter)}
+            onClick={() => setChosenFilter(filter)}
             className={filterPill}
           >
             <Typography variant="label" size="small">
-              {tabLabel(cat)}
+              {filterLabel(filter)}
             </Typography>
           </Pill>
         ))}
       </div>
 
-      {/* Subscription List Section */}
       <div className={container}>
         <div className={header}>
           <Typography variant="title">Tus subscripciones</Typography>
         </div>
 
-        {/* Scrollable List Area */}
         <div className={listArea}>
-          {!hasSubscriptions ? (
+          {subscriptions.length === 0 ? (
             <div className={emptyState}>
               <div className={emptyStateIcon}>
                 <IconAddEmpty />
@@ -120,7 +112,7 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
           ) : (
             <motion.div layout className={cardsContainer}>
               <AnimatePresence mode="popLayout" initial={false}>
-                {sortedSubscriptions.map((sub) => (
+                {visible.map((sub) => (
                   <motion.div
                     key={sub.id}
                     layout

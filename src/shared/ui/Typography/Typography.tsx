@@ -1,4 +1,5 @@
 import { cn } from '@/shared/lib/cn'
+import { formatAmount } from '@/shared/lib/currencies'
 
 import styles from './Typography.module.scss'
 
@@ -10,10 +11,11 @@ interface TypographyProps {
   className?: string
 }
 
-// Helper to auto-detect decimals in "250.50" or "250,50" or 250.5
+// Splits an amount for the currency style: numbers get thousands dots ("15.130" + "69"),
+// strings are split as they come ("250.50" or "250,50")
 const splitCurrency = (value: string | number) => {
   if (typeof value === 'number') {
-    const [integerPart, decimalPart] = value.toFixed(2).split('.')
+    const [integerPart, decimalPart] = formatAmount(value).split(',')
     return { integerPart, decimalPart }
   }
 

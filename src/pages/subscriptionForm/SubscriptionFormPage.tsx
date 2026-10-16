@@ -6,6 +6,7 @@ import { useUIStore } from '@/shared/store/uiStore'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 import { useSettingsStore } from '@/features/settings/store'
 import { useToastStore } from '@/shared/store/toastStore'
+import { useCategoryStore } from '@/features/categories/categoryStore'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -54,6 +55,7 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
   const updateSubscription = useSubscriptionStore((state) => state.updateSubscription)
   const showToast = useToastStore((state) => state.showToast)
   const selectedCurrency = useSettingsStore((state) => state.selectedCurrency)
+  const categories = useCategoryStore((state) => state.categories)
 
   // Read from the store on every render, so pausing or editing shows up here right away
   const existing = useSubscriptionStore((state) =>
@@ -66,7 +68,7 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
 
   const initialValues = existing
     ? subscriptionToFormValues(existing)
-    : newSubscriptionValues(preset, selectedCurrency)
+    : newSubscriptionValues(preset, selectedCurrency, categories)
 
   // In edit mode, back drops the changes and returns to view mode; otherwise it closes the screen.
   // The changes are dropped by the form's `key` below: a new key mounts a fresh form

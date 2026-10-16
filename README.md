@@ -80,7 +80,7 @@ npx cap open android               # open in Android Studio
 - [x] Preset picker and custom subscriptions
 - [x] Add, view, edit, pause and delete subscriptions
 - [x] Categories with create / rename / delete
-- [ ] Monthly total that respects billing cycle and currency (daily exchange rates, cached)
+- [x] Monthly total that respects billing cycle and currency (daily exchange rates, cached)
 - [ ] Initialize the Capacitor Android platform
 - [ ] Local notifications before each charge (Capacitor Local Notifications)
 - [ ] JSON export/import (the only backup until Drive sync)

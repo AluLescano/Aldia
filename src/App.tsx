@@ -1,5 +1,5 @@
 // DEPENDENCIES
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // COMPONENTS
 import { BottomNavBar } from '@/features/navigation/components/BottomNavBar'
@@ -12,6 +12,7 @@ import type { TabType } from '@/shared/types'
 // HOOKS
 import { useUIStore } from './shared/store/uiStore'
 import { useToastStore } from '@/shared/store/toastStore'
+import { useRatesStore } from '@/shared/store/ratesStore'
 
 // ANIMATIONS
 import { AnimatePresence } from 'motion/react'
@@ -36,6 +37,18 @@ function App() {
 
   const toast = useToastStore((state) => state.toast)
   const hideToast = useToastStore((state) => state.hideToast)
+
+  // Exchange rates: download once a day, on the first open and whenever the app comes back
+  // to the screen (a phone can keep it open across midnight). The store skips it if done today.
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === 'visible')
+        useRatesStore.getState().refreshIfStale()
+    }
+    refresh()
+    document.addEventListener('visibilitychange', refresh)
+    return () => document.removeEventListener('visibilitychange', refresh)
+  }, [])
 
   const renderActiveScreen = () => {
     switch (activeTab) {

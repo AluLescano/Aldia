@@ -10,6 +10,7 @@ import { useCategoryStore } from '@/features/categories/categoryStore'
 
 // UTILS
 import { formatBillingCycle } from '../../utils/billingCycle'
+import { getCurrencySymbol } from '@/shared/lib/currencies'
 
 // COMPONENTS
 import Avatar from '@/shared/ui/Avatar/Avatar'
@@ -177,6 +178,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               size="medium"
               width="fit"
               value={values.price}
+              // The symbol of the currency picked in this form; '$' if none is picked yet
+              currencySymbol={values.currency ? getCurrencySymbol(values.currency) : '$'}
               onChange={(event) => setField('price', event.currentTarget.value)}
               onBlur={() => touch('price')}
               errorMessage={errorFor('price')}
