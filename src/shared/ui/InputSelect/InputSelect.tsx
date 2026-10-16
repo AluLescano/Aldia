@@ -1,72 +1,67 @@
 import type { ButtonHTMLAttributes } from 'react'
 
 // HOOKS
-import { useFieldIds } from '@/shared/hooks/useFieldIds'
+import { useFieldControl, type FieldControlProps } from '@/shared/hooks/useFieldControl'
 
-// ANIMATIONS
-import { useShake } from '@/shared/hooks/useShake'
-
-//COMPONENTS
+// COMPONENTS
 import Field from '../Field/Field'
 
 // ASSETS
 import styles from './InputSelect.module.scss'
 
-interface Props extends Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  'size' | 'width' | 'value' | 'onChange'
-> {
-  id?: string
-  label?: string
-  placeholder: string
+interface Props
+  extends
+    FieldControlProps,
+    Omit<
+      ButtonHTMLAttributes<HTMLButtonElement>,
+      keyof FieldControlProps | 'value' | 'onChange'
+    > {
+  /** The text to show for the chosen option (a label like "Mensual", not an id). */
   value: string
+  /** Shown while `value` is empty. */
+  placeholder: string
+  /** Opens the picker, usually a bottom sheet. This component never changes `value` itself. */
   onClick: () => void
-  size?: 'large' | 'medium'
-  width?: 'full' | 'fit'
-  subText?: string
-  errorMessage?: string
 }
 
+/**
+ * Select-looking button: shows the current choice and opens a picker on tap.
+ * The parent owns the sheet and updates `value` when something is picked.
+ */
 const InputSelect = ({
   id,
   label,
   placeholder,
   value,
   onClick,
-  size = 'large',
-  width = 'full',
+  size,
+  width,
   subText,
   errorMessage,
   ...rest
 }: Props) => {
   const { container } = styles
 
-  const filled = Boolean(value)
-  const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
-
-  const boxRef = useShake<HTMLDivElement>(Boolean(errorMessage))
+  const { fieldProps, controlProps } = useFieldControl({
+    id,
+    label,
+    size,
+    width,
+    subText,
+    errorMessage,
+    disabled: rest.disabled,
+    filled: value !== '',
+  })
 
   return (
-    <Field
-      id={fieldId}
-      label={label}
-      size={size}
-      width={width}
-      filled={filled}
-      subText={subText}
-      errorMessage={errorMessage}
-      ref={boxRef}
-      disabled={rest.disabled}
-      styles={rest.style}
-    >
+    <Field {...fieldProps}>
       <button
-        id={fieldId}
+        {...rest}
+        {...controlProps}
         type="button"
         onClick={onClick}
         className={container}
         aria-haspopup="dialog"
-        aria-invalid={!!errorMessage || undefined}
-        aria-describedby={describedBy}
       >
         {value || placeholder}
       </button>

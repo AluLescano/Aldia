@@ -1,12 +1,9 @@
 import type { ChangeEvent, InputHTMLAttributes } from 'react'
 
 // HOOKS
-import { useFieldIds } from '@/shared/hooks/useFieldIds'
+import { useFieldControl, type FieldControlProps } from '@/shared/hooks/useFieldControl'
 
-// ANIMATIONS
-import { useShake } from '@/shared/hooks/useShake'
-
-//COMPONENTS
+// COMPONENTS
 import Field from '../Field/Field'
 
 // ASSETS
@@ -15,28 +12,32 @@ import styles from './InputAmount.module.scss'
 // Digits with at most one "," or "." separator and two decimals
 const AMOUNT_TYPING_PATTERN = /^\d*[.,]?\d{0,2}$/
 
-interface Props extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'size' | 'width' | 'value' | 'onChange'
-> {
-  id?: string
-  label?: string
+interface Props
+  extends
+    FieldControlProps,
+    Omit<
+      InputHTMLAttributes<HTMLInputElement>,
+      keyof FieldControlProps | 'value' | 'onChange'
+    > {
+  /** The amount as typed, e.g. `"1299,5"`. Turn it into a number with `parsePrice`. */
   value: string
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void
+  /** Shown at the left of the box. Defaults to `$`. */
   currencySymbol?: string
-  size?: 'large' | 'medium'
-  width?: 'full' | 'fit'
-  subText?: string
-  errorMessage?: string
+  /** Only called when the new text still looks like an amount (2 decimals at most). */
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
 }
 
+/**
+ * Money field: decimal keyboard, currency symbol on the left. Keys that would break
+ * the amount (letters, a second separator, a third decimal) are ignored silently.
+ */
 const InputAmount = ({
   id,
   label,
   value,
   onChange,
-  size = 'large',
-  width = 'full',
+  size,
+  width,
   subText,
   currencySymbol = '$',
   errorMessage,
@@ -44,39 +45,32 @@ const InputAmount = ({
 }: Props) => {
   const { container } = styles
 
-  const filled = Boolean(value)
-  const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
-
-  const boxRef = useShake<HTMLDivElement>(Boolean(errorMessage))
+  const { fieldProps, controlProps } = useFieldControl({
+    id,
+    label,
+    size,
+    width,
+    subText,
+    errorMessage,
+    disabled: rest.disabled,
+    filled: value !== '',
+  })
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (AMOUNT_TYPING_PATTERN.test(event.target.value)) onChange(event)
   }
 
   return (
-    <Field
-      id={fieldId}
-      label={label}
-      size={size}
-      width={width}
-      filled={filled}
-      startAdornment={currencySymbol}
-      subText={subText}
-      errorMessage={errorMessage}
-      ref={boxRef}
-      disabled={rest.disabled}
-    >
+    <Field {...fieldProps} startAdornment={currencySymbol}>
       <input
         {...rest}
-        id={fieldId}
+        {...controlProps}
         type="text"
         inputMode="decimal"
         placeholder="0.00"
         value={value}
         onChange={handleChange}
         className={container}
-        aria-invalid={!!errorMessage || undefined}
-        aria-describedby={describedBy}
       />
     </Field>
   )

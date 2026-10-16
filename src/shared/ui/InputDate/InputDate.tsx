@@ -1,13 +1,12 @@
 import type { ButtonHTMLAttributes } from 'react'
 
 // HOOKS
-import { useFieldIds } from '@/shared/hooks/useFieldIds'
+import { useFieldControl, type FieldControlProps } from '@/shared/hooks/useFieldControl'
+
+// UTILS
 import { formatDate } from '@/shared/lib/formatDate'
 
-// ANIMATIONS
-import { useShake } from '@/shared/hooks/useShake'
-
-//COMPONENTS
+// COMPONENTS
 import Field from '../Field/Field'
 
 // ASSETS
@@ -15,60 +14,53 @@ import { IconCalendar } from '@/assets/icons/IconCalendar'
 
 import styles from './InputDate.module.scss'
 
-interface Props extends Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  'size' | 'width' | 'value' | 'onChange'
-> {
-  id?: string
-  label?: string
+interface Props
+  extends
+    FieldControlProps,
+    Omit<
+      ButtonHTMLAttributes<HTMLButtonElement>,
+      keyof FieldControlProps | 'value' | 'onChange'
+    > {
+  /** The date as `YYYY-MM-DD`. Shown as "15 Oct 26". Empty shows nothing. */
   value: string
+  /** Opens the date picker sheet. This component never changes `value` itself. */
   onClick: () => void
-  size?: 'large' | 'medium'
-  width?: 'full' | 'fit'
-  subText?: string
-  errorMessage?: string
 }
 
+/** Date-looking button with a calendar icon: shows the date and opens a picker on tap. */
 const InputDate = ({
   id,
   label,
   value,
   onClick,
-  size = 'large',
-  width = 'full',
+  size,
+  width,
   subText,
   errorMessage,
   ...rest
 }: Props) => {
   const { container, calendarIcon } = styles
 
-  const filled = Boolean(value)
-  const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
-
-  const boxRef = useShake<HTMLDivElement>(Boolean(errorMessage))
+  const { fieldProps, controlProps } = useFieldControl({
+    id,
+    label,
+    size,
+    width,
+    subText,
+    errorMessage,
+    disabled: rest.disabled,
+    filled: value !== '',
+  })
 
   return (
-    <Field
-      id={fieldId}
-      size={size}
-      width={width}
-      label={label}
-      filled={filled}
-      startAdornment={<IconCalendar className={calendarIcon} />}
-      subText={subText}
-      errorMessage={errorMessage}
-      ref={boxRef}
-      disabled={rest.disabled}
-    >
+    <Field {...fieldProps} startAdornment={<IconCalendar className={calendarIcon} />}>
       <button
-        id={fieldId}
+        {...rest}
+        {...controlProps}
         type="button"
         onClick={onClick}
         className={container}
-        disabled={rest.disabled}
         aria-haspopup="dialog"
-        aria-invalid={!!errorMessage || undefined}
-        aria-describedby={describedBy}
       >
         {formatDate(value)}
       </button>

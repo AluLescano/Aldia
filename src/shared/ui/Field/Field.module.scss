@@ -53,6 +53,18 @@ $label-transition: 150ms ease;
   }
 }
 
+.widthAuto {
+  width: fit-content;
+  min-width: 0;
+  padding: 0 1rem;
+
+  input {
+    width: auto;
+    field-sizing: content;
+    padding: 0 1rem;
+  }
+}
+
 .adornmentContainer {
   position: absolute;
   top: 50%;

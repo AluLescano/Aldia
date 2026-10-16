@@ -263,7 +263,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             {/* Placeholder */}
             <InputSelect
               size="medium"
-              width="fit"
+              width="auto"
               placeholder={'Formato del Cobro'}
               value={
                 trialDays !== undefined
@@ -272,7 +272,6 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               }
               onClick={() => setOpenSheet('billingCycle')}
               errorMessage={touched.billingCycle ? errors.billingCycle : undefined}
-              style={{ minWidth: 0, padding: '0 1rem' }}
             />
           </div>
           <div className={inputContainer}>
@@ -332,12 +331,11 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             </Typography>
             <InputSelect
               size="medium"
-              width="fit"
+              width="auto"
               placeholder={'Moneda'}
               value={values.currency}
               onClick={() => setOpenSheet('currency')}
               errorMessage={touched.currency ? errors.currency : undefined}
-              style={{ minWidth: 0, padding: '0 1rem' }}
             />
           </div>
           <div className={inputContainer}>
@@ -376,12 +374,11 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             </Typography>
             <InputSelect
               size="medium"
-              width="fit"
+              width="auto"
               placeholder={'Categoría'}
               value={categoryName}
               onClick={() => setOpenSheet('categoryId')}
               errorMessage={touched.categoryId ? errors.categoryId : undefined}
-              style={{ minWidth: 0, padding: '0 1rem' }}
             />
           </div>
           <div className={inputContainer}>

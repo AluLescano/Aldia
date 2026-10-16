@@ -1,15 +1,17 @@
 // DEPENDENCIES
 import type { CSSProperties, ReactNode, Ref } from 'react'
+import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
 import Typography from '../Typography/Typography'
 
 // ASSETS
 import styles from './Field.module.scss'
-import { cn } from '@/shared/lib/cn'
 
-type Size = 'large' | 'medium'
-type Width = 'full' | 'fit'
+/** Figma "Default" (`large`) or "Small" (`medium`). */
+export type FieldSize = 'large' | 'medium'
+/** How wide the box is. See `FieldControlProps.width`. */
+export type FieldWidth = 'full' | 'fit' | 'auto'
 
 const {
   base,
@@ -17,6 +19,7 @@ const {
   sizeMedium,
   widthFull,
   widthFit,
+  widthAuto,
   floated,
   errorState,
   labelContainer,
@@ -27,31 +30,47 @@ const {
 } = styles
 
 interface Props {
+  /** Id of the control inside, so the label can point at it with `htmlFor`. */
   id: string
-  size?: Size
-  width?: Width
+  size?: FieldSize
+  width?: FieldWidth
+  /** Floating label, shown only on `size="large"`. */
   label?: string
+  /** The control has a value: the floating label stays up on the border. */
   filled?: boolean
+  /** Hint under the box. An error replaces it. */
   subText?: string
+  /** Error under the box. Also turns the border and the label red. */
   errorMessage?: string
+  /** Goes on the box (not the wrapper), so the shake moves only the box. */
   ref?: Ref<HTMLDivElement>
+  /** Something on the left inside the box, like the currency symbol or the calendar icon. */
   startAdornment?: ReactNode
+  /** The real control: an `<input>` or a `<button>`. */
   children: ReactNode
+  /** Dims the box and blocks clicks. The control itself still needs `disabled`. */
   disabled?: boolean
   className?: string
-  styles?: CSSProperties
+  /** Id for the hint/error element. The control points at it with `aria-describedby`. */
+  descriptionId?: string
+  style?: CSSProperties
 }
 
-const sizeClasses: Record<Size, string> = {
+const widthClasses: Record<FieldWidth, string> = {
+  full: widthFull,
+  fit: widthFit,
+  auto: widthAuto,
+}
+
+const sizeClasses: Record<FieldSize, string> = {
   large: sizeLarge,
   medium: sizeMedium,
 }
 
-const widthClasses: Record<Width, string> = {
-  full: widthFull,
-  fit: widthFit,
-}
-
+/**
+ * The box every input shares: border, size, floating label, hint or error underneath.
+ * It holds no logic: use it through an `Input*` component, which wires it with `useFieldControl`.
+ */
 const Field = ({
   id,
   size = 'large',
@@ -64,8 +83,9 @@ const Field = ({
   startAdornment,
   children,
   disabled,
+  descriptionId,
   className,
-  styles,
+  style,
 }: Props) => {
   // Only the large size floats its label; medium rows get theirs from FormRow
   const showLabel = Boolean(label) && size === 'large'
@@ -88,7 +108,7 @@ const Field = ({
         ref={ref}
         aria-disabled={disabled || undefined}
         className={classes}
-        style={styles}
+        style={style}
       >
         {showLabel && (
           <label htmlFor={id} className={labelContainer}>
@@ -99,7 +119,7 @@ const Field = ({
         {children}
       </div>
       {message && (
-        <div id={`${id}-description`} className={description}>
+        <div id={descriptionId} className={description}>
           <Typography
             variant="label"
             size="small"

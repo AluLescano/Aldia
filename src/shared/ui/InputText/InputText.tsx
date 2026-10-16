@@ -1,70 +1,61 @@
 import type { ChangeEvent, InputHTMLAttributes } from 'react'
 
 // HOOKS
-import { useFieldIds } from '@/shared/hooks/useFieldIds'
+import { useFieldControl, type FieldControlProps } from '@/shared/hooks/useFieldControl'
 
-// ANIMATIONS
-import { useShake } from '@/shared/hooks/useShake'
-
-//COMPONENTS
+// COMPONENTS
 import Field from '../Field/Field'
 
 // ASSETS
 import styles from './InputText.module.scss'
 
-interface Props extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'size' | 'width' | 'value' | 'onChange'
-> {
-  id?: string
-  label?: string
+interface Props
+  extends
+    FieldControlProps,
+    Omit<
+      InputHTMLAttributes<HTMLInputElement>,
+      keyof FieldControlProps | 'value' | 'onChange'
+    > {
+  /** The text shown. The parent owns it (controlled input). */
   value: string
+  /** Called on every key. Read the new text from `event.currentTarget.value`. */
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
-  size?: 'large' | 'medium'
-  width?: 'full' | 'fit'
-  subText?: string
-  errorMessage?: string
 }
 
+/** Single-line text field on the shared `Field` box. Controlled: the parent owns `value`. */
 const InputText = ({
   id,
   label,
-  value,
-  onChange,
-  size = 'large',
-  width = 'full',
+  size,
+  width,
   subText,
   errorMessage,
+  value,
+  onChange,
   ...rest
 }: Props) => {
   const { container } = styles
 
-  const filled = Boolean(value)
-  const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
-
-  const boxRef = useShake<HTMLDivElement>(Boolean(errorMessage))
+  const { fieldProps, controlProps } = useFieldControl({
+    id,
+    label,
+    size,
+    width,
+    subText,
+    errorMessage,
+    disabled: rest.disabled,
+    filled: value !== '',
+  })
 
   return (
-    <Field
-      id={fieldId}
-      label={label}
-      size={size}
-      width={width}
-      filled={filled}
-      subText={subText}
-      errorMessage={errorMessage}
-      ref={boxRef}
-      disabled={rest.disabled}
-    >
+    <Field {...fieldProps}>
       <input
         {...rest}
-        id={fieldId}
+        {...controlProps}
         type="text"
         value={value}
         onChange={onChange}
         className={container}
-        aria-invalid={!!errorMessage || undefined}
-        aria-describedby={describedBy}
       />
     </Field>
   )

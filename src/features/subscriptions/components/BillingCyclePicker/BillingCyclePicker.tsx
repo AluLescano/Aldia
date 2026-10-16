@@ -124,8 +124,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
           <div>
             <InputNumber
               size="medium"
-              width="fit"
-              style={{ minWidth: 0, padding: '0 1rem' }}
+              width="auto"
               maxLength={3}
               aria-label="Días de prueba"
               value={trialText}
@@ -174,9 +173,8 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
           <div>
             <InputNumber
               size="medium"
-              width="fit"
+              width="auto"
               maxLength={3}
-              style={{ minWidth: 0, padding: '0 1rem' }}
               aria-label="Cantidad"
               value={intervalText}
               errorMessage={parsePositive(intervalText) === null ? 'Mínimo 1' : undefined}
