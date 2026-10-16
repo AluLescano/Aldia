@@ -7,10 +7,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "commit": "cz",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize-logos": "node scripts/compress-images.mjs"
   },
   "config": {
     "commitizen": {
@@ -19,14 +22,17 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.5.1",
-    "@tailwindcss/vite": "^4.3.3",
+    "colorthief": "^3.5.0",
+    "flag-icons": "^7.5.0",
+    "motion": "^14.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tailwindcss": "^4.3.3"
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.1",
     "@eslint/js": "^10.0.1",
+    "@types/colorthief": "^2.6.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -39,8 +45,10 @@
     "globals": "^17.11.0",
     "prettier": "^3.9.6",
     "sass": "^1.104.0",
+    "sharp": "^0.35.5",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.67.0",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^5.0.5"
   }
 }

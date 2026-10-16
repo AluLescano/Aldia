@@ -1,0 +1,80 @@
+.list {
+  position: relative; // AnimatePresence popLayout places an exiting row relative to the list
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0.625rem;
+  list-style: none;
+
+  .row {
+    display: flex;
+    align-items: center;
+    min-height: 3.5rem;
+    border-radius: 1.25rem;
+    background-color: var(--bg-surface-elevated);
+  }
+
+  .selected {
+    background-color: var(--brand-subtle); // no !important needed
+  }
+
+  .nameButton {
+    flex: 1;
+    align-self: stretch; // the name area fills the whole row height
+    padding: 0 1rem;
+    border: none;
+    border-radius: inherit;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    // Paragraphs have a default margin since the Tailwind reset is gone
+    p {
+      margin: 0;
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.25rem; // space between edit and delete, so a thumb doesn't hit the wrong one
+    padding-right: 0.5rem;
+  }
+
+  // The row while its name is being typed: the text field is the row
+  .editRow {
+    padding: 0.25rem 0;
+  }
+
+  // The row while asking "are you sure?": tinted with the error color
+  .confirmRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--error-border);
+    border-radius: 1.25rem;
+    background-color: var(--bg-surface-elevated);
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .iconButton {
+    display: grid;
+    place-items: center;
+    width: 3rem; // 48px touch target, 24px icon
+    height: 3rem;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+
+    &:active {
+      background-color: var(--overlay-hover);
+    }
+  }
+}

@@ -1,0 +1,106 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  gap: 0.5rem;
+  padding-top: 1rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 6rem; // 96px, like Figma
+  border: 2px solid transparent; // reserved, so the selected border never shifts the layout
+  border-radius: 0.75rem;
+  background-color: var(--bg-surface-elevated);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.compact {
+  min-height: 3.5rem;
+}
+
+.selected {
+  border-color: var(--focus-ring);
+  background-color: var(--brand-subtle);
+}
+
+// Covers the whole card behind the content, so a tap anywhere selects it
+.cardButton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+// Sits above the button, but lets taps on empty space fall through to it
+.content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.25rem 1rem;
+  pointer-events: none;
+
+  > div {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 0 auto;
+  }
+
+  input,
+  button {
+    pointer-events: auto;
+  }
+
+  // Browsers give paragraphs a 1em margin by default, which makes the cards taller
+  p {
+    margin: 0;
+  }
+}
+
+.centered {
+  justify-content: center;
+}
+
+.chip {
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0 1rem;
+}
+
+.wheel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem !important;
+  width: 5.5rem;
+}
+
+.wheelItem {
+  display: block;
+  width: 100%;
+  height: 1.25rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dimmed {
+  opacity: 0.7;
+}

@@ -1,6 +1,9 @@
 // ==============================================================================
 // Aldia Design System — Primitives
 // ==============================================================================
+// Hues: phthalo 159-168, champagne 78-86, paper 86-88, charcoal 154-164,
+// amber 62, brick 28. Never reference these directly from components: use the
+// semantic tokens in _themes.scss.
 
 // --- Phthalo Green (Brand) ---
 $phthalo-50: #eef8f2;
@@ -13,33 +16,47 @@ $phthalo-600: #0a3d2c; // core brand anchor — light-mode brand, dark-mode ink
 $phthalo-700: #082a1f; // deepest — light-mode text ink
 
 // --- Champagne (Accent) ---
-$champagne-50: #fbf3e2;
-$champagne-100: #f5e5c4;
+$champagne-50: #fcf3e2;
+$champagne-100: #f6e5c4;
+$champagne-200: #efd6a5;
 $champagne-300: #e6c583;
-$champagne-500: #cf9f4f;
-$champagne-700: #93702e; // accessible bronze on light surfaces
+$champagne-400: #d9b367;
+$champagne-500: #caa24d;
+$champagne-600: #ac883a;
+$champagne-700: #91712d;
+$champagne-800: #6f5721; // accessible bronze text on light surfaces
 
-// --- Paper (Light-mode warm neutrals) ---
-$paper-0: #fffdf9; // reserved for elevated surfaces (modals/sheets)
-$paper-50: #faf7f0; // base card surface
-$paper-100: #f2ede1; // app canvas
-$paper-300: #cfc6b4; // dividers, strong borders
+// --- Paper (Light-mode warm neutrals, low chroma so cards read clean) ---
+$paper-0: #fffefc; // elevated surfaces (modals/sheets)
+$paper-50: #fbfaf5; // base card surface
+$paper-100: #f0ede5; // app canvas
+$paper-200: #e4dfd5; // pressed/selected washes
+$paper-300: #cdc7b9; // dividers, strong borders
+$paper-500: #8c8577; // input borders (3:1 on every light surface)
 
 // --- Charcoal (Dark-mode neutrals, subtle green undertone) ---
 $charcoal-900: #0a0f0c; // app canvas
 $charcoal-800: #131916; // base card surface
 $charcoal-700: #1d2620; // elevated surface
 $charcoal-500: #3a453d; // strong border/divider
+$charcoal-300: #707e75; // input borders (3:1 on every dark surface)
 
-// --- Success (distinct from brand green — status meaning stays unambiguous) ---
-$success-100: #dcf3e5;
-$success-500: #2e9e63;
-$success-700: #1d6b42;
+// --- Text neutrals (solid, so contrast does not depend on what is underneath) ---
+$ink-600: #46574f; // light-mode secondary text
+$ink-500: #586760; // light-mode muted text (4.5:1 on the canvas)
+$bone-300: #b9b8b0; // dark-mode secondary text
+$bone-400: #94928a; // dark-mode muted text (4.5:1 on elevated surfaces)
 
-// --- Warning ---
-$warning-100: #fbedd2;
-$warning-400: #e5ae49;
-$warning-700: #94650f;
+// --- Warning (orange-amber: far enough from champagne to mean "careful") ---
+$amber-100: #ffe6d1;
+$amber-400: #f4993c;
+$amber-700: #995600;
+
+// --- Error (warm brick, sits with the paper tones instead of clashing) ---
+$brick-100: #ffe4e0;
+$brick-300: #ed8c80;
+$brick-500: #cb473d;
+$brick-700: #9e2d26;
 
 // --- Base ---
 $color-white: #ffffff;

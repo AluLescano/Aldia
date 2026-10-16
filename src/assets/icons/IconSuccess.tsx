@@ -1,0 +1,8 @@
+import Icon, { type IconProps } from './Icon'
+
+export const IconSuccess = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <path d="M22 4 12 14.01l-3-3" />
+  </Icon>
+)

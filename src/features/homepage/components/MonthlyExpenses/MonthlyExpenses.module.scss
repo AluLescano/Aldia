@@ -1,0 +1,108 @@
+.skeleton {
+  background-color: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  gap: 1rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  .skeletonElement {
+    background-color: var(--bg-surface-elevated);
+  }
+
+  .skeletonHeader {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .skeletonTitle {
+    width: 12.5rem;
+    padding: 0.6875rem;
+    border-radius: 0.5rem;
+  }
+
+  .skeletonPill {
+    width: 3.75rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+  }
+
+  .skeletonAmount {
+    width: 5rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .skeletonSubtitle {
+    width: 12.5rem;
+    padding: 0.6875rem;
+    border-radius: 0.5rem;
+  }
+}
+
+.container {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-featured);
+  border-radius: 1.5rem;
+  background-color: var(--bg-surface);
+  box-shadow: var(--shadow-glow-brand);
+  width: 100%;
+  padding: 1.5rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-hero);
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .currencyPill {
+    background-color: var(--brand-subtle);
+    border-color: var(--border-featured);
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .flagWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .flag {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    border-radius: 9999px;
+    display: inline-block;
+  }
+
+  .amounts {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .currencyRate {
+    color: var(--text-accent);
+    margin: 0;
+  }
+}

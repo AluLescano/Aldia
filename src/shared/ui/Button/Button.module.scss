@@ -1,0 +1,102 @@
+@use '@/styles/variables' as *;
+
+@mixin button-base($background-color, $color) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform 150ms ease-out,
+    opacity 150ms ease-out,
+    background-color 150ms ease-out;
+
+  background-color: $background-color;
+  color: $color;
+
+  /* Pressed Anim */
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: $phthalo-200;
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  &:active:not(:disabled)::after {
+    opacity: 0.12;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.ButtonPrimary {
+  @include button-base(var(--brand-primary), var(--text-on-brand));
+
+  &:hover {
+    background-color: var(--brand-primary-hover);
+  }
+}
+
+.ButtonSecondary {
+  @include button-base(var(--bg-surface-elevated), var(--text-on-brand));
+  border: none;
+
+  &:hover {
+    background-color: var(--border-subtle);
+  }
+}
+
+.ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.3;
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple-expand 500ms ease-out forwards;
+  pointer-events: none; // clicks pass through it, don't block the button
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: translate(-50%, -50%) scale(8);
+    opacity: 0;
+  }
+}
+
+.sizeLarge {
+  min-height: 3rem;
+  padding: 0.75rem 1.5rem;
+}
+.sizeMedium {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+}
+.sizeSmall {
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+}
+.widthFull {
+  width: 100%;
+}
+.widthFit {
+  width: fit-content;
+}
+.base {
+  border-radius: 0.75rem;
+}

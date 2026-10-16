@@ -1,0 +1,128 @@
+$label-scale: 0.78;
+$label-transition: 150ms ease;
+
+.base {
+  --field-radius: 5rem;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-input);
+  border-radius: var(--field-radius);
+
+  &:focus-within {
+    border-color: var(--focus-ring);
+  }
+
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.sizeLarge {
+  min-height: 3.5rem;
+
+  // The label sits where the symbol goes, so the symbol waits for focus or content
+  .adornmentContainer {
+    opacity: 0;
+  }
+
+  &:focus-within .adornmentContainer,
+  &.floated .adornmentContainer {
+    opacity: 1;
+  }
+}
+
+.sizeMedium {
+  min-height: 2.625rem;
+}
+
+.widthFull {
+  width: 100%;
+}
+
+.widthFit {
+  width: fit-content;
+  min-width: 9rem;
+
+  input {
+    width: auto;
+    field-sizing: content;
+  }
+}
+
+.widthAuto {
+  width: fit-content;
+  min-width: 0;
+  padding: 0 1rem;
+
+  input {
+    width: auto;
+    field-sizing: content;
+    padding: 0 1rem;
+  }
+}
+
+.adornmentContainer {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0.75rem;
+  display: flex;
+  align-items: center;
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+}
+
+.labelContainer {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  max-width: calc(100% - 2rem);
+  padding: 0 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  transform: translateY(-50%);
+  transform-origin: left center;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      top $label-transition,
+      transform $label-transition;
+  }
+}
+
+// Floated: the label sits centered on the top border, whatever the height
+.base:focus-within .labelContainer,
+.base.floated .labelContainer {
+  top: 0;
+  background-color: var(--field-surface, var(--bg-surface));
+  transform: translateY(-50%) scale($label-scale);
+}
+
+.description {
+  width: 0;
+  min-width: 100%;
+
+  .info {
+    color: var(--text-accent);
+  }
+
+  .error {
+    color: var(--error-text);
+  }
+}
+
+.base.errorState {
+  border-color: var(--error-border);
+
+  .labelContainer {
+    color: var(--error-text);
+  }
+}
