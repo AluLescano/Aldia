@@ -2,16 +2,20 @@
 import styles from './SubscriptionList.module.scss'
 
 const SubscriptionListSkeleton = () => {
-  const { skeletonList, skeletonFilters, skeletonFilter, skeletonCards, skeletonTitle, skeletonCard } = styles
+  const {
+    skeletonList,
+    skeletonFilters,
+    skeletonFilter,
+    skeletonCards,
+    skeletonTitle,
+    skeletonCard,
+  } = styles
   return (
     <div className={skeletonList}>
       <div className={skeletonFilters}>
         {/* Filter section */}
         {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index}
-            className={skeletonFilter}
-          />
+          <div key={index} className={skeletonFilter} />
         ))}
       </div>
       {/* Card section */}

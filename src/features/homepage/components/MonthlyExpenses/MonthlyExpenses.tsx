@@ -25,7 +25,7 @@ const MonthlyExpenses = ({
   title = 'Gastos Mensuales',
   monthlyAmount = '0,00',
   subscriptionAmount = 0,
-  isLoading
+  isLoading,
 }: Props) => {
   const { container, currencyPill, header, flagWrapper, flag, amounts } = styles
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -38,7 +38,7 @@ const MonthlyExpenses = ({
   const subAmount = `${String(subscriptionAmount)} subscripciones activas`
 
   if (isLoading) {
-    return <MonthlyExpensesSkeleton/>
+    return <MonthlyExpensesSkeleton />
   }
 
   return (
@@ -48,9 +48,7 @@ const MonthlyExpenses = ({
           <Typography variant="overline">{title}</Typography>
           <Pill onClick={() => setIsSheetOpen(true)} className={currencyPill}>
             <span className={flagWrapper}>
-              <span
-                className={`fi fi-${currentCountryCode} fi ${flag}`}
-              />
+              <span className={`fi fi-${currentCountryCode} fi ${flag}`} />
               <Typography variant="label" size="small">
                 {selectedCurrency}
               </Typography>

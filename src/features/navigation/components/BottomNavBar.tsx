@@ -160,9 +160,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
             >
               <div className={iconWrapper}>
                 {item.icon(isActive)}
-                {isActive && (
-                  <span className={activeIndicator} />
-                )}
+                {isActive && <span className={activeIndicator} />}
               </div>
               <span className={labelStyle}>{item.label}</span>
             </button>

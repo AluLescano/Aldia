@@ -27,6 +27,8 @@
     background-color: var(--brand-primary);
     color: var(--text-on-brand);
     border-color: transparent;
-    box-shadow: 0 0 0 3px var(--brand-subtle), var(--shadow-glow-brand);
+    box-shadow:
+      0 0 0 3px var(--brand-subtle),
+      var(--shadow-glow-brand);
   }
 }

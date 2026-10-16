@@ -2,15 +2,23 @@ import React from 'react'
 import styles from './CalendarPage.module.scss'
 
 export const CalendarPage: React.FC = () => {
-  const { container, header, title, subtitle, card, iconContainer, icon, cardTitle, cardText } = styles
+  const {
+    container,
+    header,
+    title,
+    subtitle,
+    card,
+    iconContainer,
+    icon,
+    cardTitle,
+    cardText,
+  } = styles
 
   return (
     <div className={container}>
       <div className={header}>
         <h1 className={title}>Calendar</h1>
-        <p className={subtitle}>
-          View charges scheduled for each day of the month
-        </p>
+        <p className={subtitle}>View charges scheduled for each day of the month</p>
       </div>
 
       <div className={card}>

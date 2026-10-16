@@ -112,7 +112,12 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
       return
     }
 
-    addSubscription({ ...data, id: createId(), status, createdAt: new Date().toISOString() })
+    addSubscription({
+      ...data,
+      id: createId(),
+      status,
+      createdAt: new Date().toISOString(),
+    })
     showToast('¡Se ha agregado la subscripción!', 'success')
     closeAllOverlays()
   }

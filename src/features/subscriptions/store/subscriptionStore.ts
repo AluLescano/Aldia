@@ -40,7 +40,10 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       undoDelete: () =>
         set((state) =>
           state.lastDeleted
-            ? { subscriptions: [...state.subscriptions, state.lastDeleted], lastDeleted: null }
+            ? {
+                subscriptions: [...state.subscriptions, state.lastDeleted],
+                lastDeleted: null,
+              }
             : state,
         ),
 
@@ -64,6 +67,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
     {
       name: 'aldia_subscriptions_v1', // The key used in localStorage (defined in README)
       partialize: (state) => ({ subscriptions: state.subscriptions }), // lastDeleted is not saved
-    }
-  )
+    },
+  ),
 )

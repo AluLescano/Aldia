@@ -26,7 +26,6 @@ interface Props {
 
 const isDisabled = (status: string) => {
   return status == 'inactive'
-
 }
 
 const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
@@ -62,9 +61,7 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
     activeTab === 'Todas'
       ? subscriptions
       : activeTab === 'Inactivas'
-        ? subscriptions.filter(
-            (sub) => 'inactive' == sub.status
-          )
+        ? subscriptions.filter((sub) => 'inactive' == sub.status)
         : subscriptions.filter((sub) => activeTab == sub.categoryId)
 
   const sortedSubscriptions = [...filteredSubscriptions].sort((a, b) => {
@@ -72,7 +69,7 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
     if (isDisabled(a.status) !== isDisabled(b.status)) {
       return isDisabled(a.status) ? 1 : -1
     }
-    
+
     // 2. Sort Alphabetically
     return a.name.localeCompare(b.name)
   })
@@ -86,14 +83,19 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
       {/* Filter Tabs */}
       <div className={filterTabs}>
         {categories.map((cat) => (
-          <Pill key={cat} isActive={activeTab === cat} onClick={() => setActiveTab(cat)} className={filterPill}>
+          <Pill
+            key={cat}
+            isActive={activeTab === cat}
+            onClick={() => setActiveTab(cat)}
+            className={filterPill}
+          >
             <Typography variant="label" size="small">
               {tabLabel(cat)}
             </Typography>
           </Pill>
         ))}
       </div>
-      
+
       {/* Subscription List Section */}
       <div className={container}>
         <div className={header}>
@@ -124,7 +126,12 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
                     layout
                     initial={{ opacity: 0, scale: 0.9, filter: 'blur(4px)' }}
                     animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, scale: 0.9, filter: 'blur(4px)', transition: { duration: 0.2 } }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.9,
+                      filter: 'blur(4px)',
+                      transition: { duration: 0.2 },
+                    }}
                     className={cardMotionWrapper}
                   >
                     <SubscriptionCard subscription={sub} onDelete={onDelete} />

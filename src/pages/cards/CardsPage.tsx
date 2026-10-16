@@ -25,17 +25,10 @@ export const CardsPage: React.FC = () => {
     <div className={container}>
       <div className={header}>
         <div>
-          <h1 className={title}>
-            Payment Methods
-          </h1>
-          <p className={subtitle}>
-            Manage mock credit cards and bank accounts
-          </p>
+          <h1 className={title}>Payment Methods</h1>
+          <p className={subtitle}>Manage mock credit cards and bank accounts</p>
         </div>
-        <button
-          type="button"
-          className={headerButton}
-        >
+        <button type="button" className={headerButton}>
           <svg
             className={icon}
             fill="none"
@@ -58,16 +51,12 @@ export const CardsPage: React.FC = () => {
         <div className={cardGlow} />
 
         <div className={cardHeader}>
-          <span className={cardLabel}>
-            Mock Credit Card
-          </span>
+          <span className={cardLabel}>Mock Credit Card</span>
           <span className={cardBrand}>VISA</span>
         </div>
 
         <div>
-          <p className={cardNumber}>
-            •••• •••• •••• 4242
-          </p>
+          <p className={cardNumber}>•••• •••• •••• 4242</p>
         </div>
 
         <div className={cardFooter}>

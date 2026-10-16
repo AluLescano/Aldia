@@ -26,7 +26,13 @@ const CategoryFooter = ({ editor }: Props) => {
         >
           Guardar
         </Button>
-        <Button type="button" variant="secondary" size="large" width="full" onClick={editor.cancel}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="large"
+          width="full"
+          onClick={editor.cancel}
+        >
           Cancelar
         </Button>
       </>
@@ -45,7 +51,13 @@ const CategoryFooter = ({ editor }: Props) => {
         >
           Eliminar
         </Button>
-        <Button type="button" variant="secondary" size="large" width="full" onClick={editor.cancel}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="large"
+          width="full"
+          onClick={editor.cancel}
+        >
           Cancelar
         </Button>
       </>
@@ -53,7 +65,13 @@ const CategoryFooter = ({ editor }: Props) => {
   }
 
   return (
-    <Button type="button" variant="primary" size="large" width="full" onClick={editor.startAdding}>
+    <Button
+      type="button"
+      variant="primary"
+      size="large"
+      width="full"
+      onClick={editor.startAdding}
+    >
       Agregar otra categoría
     </Button>
   )

@@ -1,4 +1,4 @@
-import type {ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes } from 'react'
 
 // HOOKS
 import { useFieldIds } from '@/shared/hooks/useFieldIds'
@@ -11,7 +11,6 @@ import Field from '../Field/Field'
 
 // ASSETS
 import styles from './InputSelect.module.scss'
-
 
 interface Props extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -34,8 +33,8 @@ const InputSelect = ({
   placeholder,
   value,
   onClick,
-  size = "large",
-  width = "full",
+  size = 'large',
+  width = 'full',
   subText,
   errorMessage,
   ...rest
@@ -43,8 +42,7 @@ const InputSelect = ({
   const { container } = styles
 
   const filled = Boolean(value)
-    const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
-
+  const { fieldId, describedBy } = useFieldIds({ id, errorMessage, subText })
 
   const boxRef = useShake<HTMLDivElement>(Boolean(errorMessage))
 

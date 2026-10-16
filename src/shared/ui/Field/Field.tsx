@@ -85,7 +85,12 @@ const Field = ({
 
   return (
     <div>
-      <div ref={ref} aria-disabled={disabled || undefined} className={classes} style={styles}>
+      <div
+        ref={ref}
+        aria-disabled={disabled || undefined}
+        className={classes}
+        style={styles}
+      >
         {showLabel && (
           <label htmlFor={id} className={labelContainer}>
             {label}

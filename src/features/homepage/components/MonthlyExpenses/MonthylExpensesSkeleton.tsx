@@ -2,7 +2,15 @@
 import styles from './MonthlyExpenses.module.scss'
 
 const MonthlyExpensesSkeleton = () => {
-  const { skeleton, skeletonElement, skeletonHeader, skeletonTitle, skeletonPill, skeletonAmount, skeletonSubtitle } = styles
+  const {
+    skeleton,
+    skeletonElement,
+    skeletonHeader,
+    skeletonTitle,
+    skeletonPill,
+    skeletonAmount,
+    skeletonSubtitle,
+  } = styles
   return (
     <div className={skeleton}>
       <div className={skeletonHeader}>

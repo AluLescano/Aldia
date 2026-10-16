@@ -24,7 +24,6 @@ import { IconUndo } from '@/assets/icons/IconUndo'
 
 import styles from './HomePage.module.scss'
 
-
 const MOCKED_SUBS: Subscription[] = [
   {
     id: 'claude-pro',
@@ -71,7 +70,15 @@ const MOCKED_SUBS: Subscription[] = [
 ]
 
 export const HomePage: React.FC = () => {
-  const { container, header, toastContent, undoButton, fabWrapper, fabContainer, fabButton } = styles
+  const {
+    container,
+    header,
+    toastContent,
+    undoButton,
+    fabWrapper,
+    fabContainer,
+    fabButton,
+  } = styles
 
   const subs = useSubscriptionStore((state) => state.subscriptions)
   const addSubscription = useSubscriptionStore((state) => state.addSubscription)
@@ -111,7 +118,10 @@ export const HomePage: React.FC = () => {
         />
       </header>
 
-      <SubscriptionList subscriptions={subs} onDelete={(sub) => deleteSubscription(sub.id)} />
+      <SubscriptionList
+        subscriptions={subs}
+        onDelete={(sub) => deleteSubscription(sub.id)}
+      />
       <AnimatePresence>
         {lastDeleted && (
           <Toast
@@ -123,10 +133,7 @@ export const HomePage: React.FC = () => {
                 <Typography variant="body" size="medium">
                   {`Se eliminó ${lastDeleted.name} exitosamente`}
                 </Typography>
-                <Button
-                  onClick={undoDelete}
-                  className={undoButton}
-                >
+                <Button onClick={undoDelete} className={undoButton}>
                   <IconUndo />
                 </Button>
               </div>

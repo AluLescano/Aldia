@@ -19,7 +19,9 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: background-color 150ms ease, border-color 150ms ease;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
   }
 }
 
@@ -34,7 +36,10 @@
   transform: translateY(-50%);
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: left 150ms ease, width 150ms ease, height 150ms ease;
+    transition:
+      left 150ms ease,
+      width 150ms ease,
+      height 150ms ease;
   }
 }
 

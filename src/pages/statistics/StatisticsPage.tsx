@@ -2,15 +2,14 @@ import React from 'react'
 import styles from './StatisticsPage.module.scss'
 
 export const StatisticsPage: React.FC = () => {
-  const { container, title, subtitle, card, iconContainer, icon, cardTitle, cardText } = styles
+  const { container, title, subtitle, card, iconContainer, icon, cardTitle, cardText } =
+    styles
 
   return (
     <div className={container}>
       <div>
         <h1 className={title}>Analytics</h1>
-        <p className={subtitle}>
-          Cost distribution and category breakdown
-        </p>
+        <p className={subtitle}>Cost distribution and category breakdown</p>
       </div>
 
       <div className={card}>

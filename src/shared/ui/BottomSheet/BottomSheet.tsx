@@ -9,7 +9,8 @@ import BackdropFilter from '../BackdropFilter/BackdropFilter'
 //ASSETS
 import styles from './BottomSheet.module.scss'
 
-const { container, collapsed, expanded, dragArea, dragHandle, content, footerContainer } = styles
+const { container, collapsed, expanded, dragArea, dragHandle, content, footerContainer } =
+  styles
 
 interface PanelProps {
   onClose: () => void
@@ -69,7 +70,11 @@ const Panel = ({ onClose, title, children, footer, className }: PanelProps) => {
         exit={{ y: '100%' }}
         transition={{ duration: reduceMotion ? 0 : 0.3, ease: [0.32, 0.72, 0, 1] }}
       >
-        <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className={dragArea}>
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className={dragArea}
+        >
           <div className={dragHandle} />
           {title && (
             <Typography variant="title" size="large">

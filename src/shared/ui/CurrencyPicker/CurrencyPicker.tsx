@@ -45,29 +45,19 @@ const CurrencyPicker = ({
             >
               {/* Left: Flag + Code + Name */}
               <div className={leftSection}>
-                <span
-                  className={`fi fi-${currency.countryCode} fis ${flag}`}
-                />
+                <span className={`fi fi-${currency.countryCode} fis ${flag}`} />
                 <div className={currencyInfo}>
                   <Typography variant="label" size="medium">
                     {currency.code}
                   </Typography>
-                  <Typography
-                    variant="label"
-                    size="small"
-                    className={mutedText}
-                  >
+                  <Typography variant="label" size="small" className={mutedText}>
                     {currency.name}
                   </Typography>
                 </div>
               </div>
               {/* Right: Symbol */}
               <div className={rightSection}>
-                <Typography
-                  variant="body"
-                  size="medium"
-                  className={mutedText}
-                >
+                <Typography variant="body" size="medium" className={mutedText}>
                   {currency.symbol}
                 </Typography>
               </div>

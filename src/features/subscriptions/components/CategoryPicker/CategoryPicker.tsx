@@ -18,7 +18,8 @@ import { IconEdit } from '@/assets/icons/IconEdit'
 
 import styles from './CategoryPicker.module.scss'
 
-const { list, row, selected, nameButton, actions, iconButton, editRow, confirmRow } = styles
+const { list, row, selected, nameButton, actions, iconButton, editRow, confirmRow } =
+  styles
 
 // Same entrance and exit as the subscription cards on Home
 const rowMotion = {
@@ -34,7 +35,8 @@ interface NameInputProps {
 // The text field that takes the place of a row. Saving and cancelling live in the sheet footer.
 const NameInput = ({ editor }: NameInputProps) => {
   // An empty draft is invalid too, but shouting about it before the first key is rude
-  const errorMessage = editor.draft.trim() !== '' ? (editor.error ?? undefined) : undefined
+  const errorMessage =
+    editor.draft.trim() !== '' ? (editor.error ?? undefined) : undefined
 
   return (
     <InputText
@@ -80,15 +82,22 @@ const CategoryPicker = ({ value, onSelect, editor }: Props) => {
         {categories.map((category) => {
           // What this row is doing right now. The <li> stays the same element in every
           // state (same key), so switching between them never counts as "leaving".
-          const state = mode.type !== 'view' && mode.id === category.id ? mode.type : 'view'
+          const state =
+            mode.type !== 'view' && mode.id === category.id ? mode.type : 'view'
           const isSelected = category.id === value
 
           const className =
-            state === 'editing' ? editRow : state === 'deleting' ? confirmRow : `${row} ${isSelected ? selected : ''}`
+            state === 'editing'
+              ? editRow
+              : state === 'deleting'
+                ? confirmRow
+                : `${row} ${isSelected ? selected : ''}`
 
           const affected =
             state === 'deleting'
-              ? subscriptions.filter((subscription) => subscription.categoryId === category.id).length
+              ? subscriptions.filter(
+                  (subscription) => subscription.categoryId === category.id,
+                ).length
               : 0
 
           return (

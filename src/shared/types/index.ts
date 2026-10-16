@@ -58,8 +58,7 @@ export interface SubscriptionReminder {
 // ==========================================
 export type BillingUnit = 'day' | 'week' | 'month' | 'year'
 export type BillingCycle =
-  | { type: 'one-time' }
-  | { type: 'every'; interval: number; unit: BillingUnit }
+  { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
 
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
