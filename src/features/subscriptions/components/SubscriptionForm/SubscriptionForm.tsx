@@ -14,7 +14,7 @@ import { OTHERS_ID, useCategoryStore } from '@/features/categories/categoryStore
 
 // COMPONENTS
 import Avatar from '@/shared/ui/Avatar/Avatar'
-import Typography from '@/shared/ui/Typography/Typography'
+import FormRow from './FormRow'
 import InputText from '@/shared/ui/InputText/InputText'
 import InputAmount from '@/shared/ui/InputAmount/InputAmount'
 import InputSelect from '@/shared/ui/InputSelect/InputSelect'
@@ -52,7 +52,6 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
     fieldSet,
     logoWrapper,
     container,
-    inputContainer,
     collapse,
     buttonContainer,
     buttonNotification,
@@ -239,10 +238,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
           />
         </div>
         <div className={container}>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Nombre
-            </Typography>
+          <FormRow label="Nombre">
             <InputText
               size="medium"
               width="fit"
@@ -255,12 +251,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               onBlur={() => setTouched((current) => ({ ...current, name: true }))}
               errorMessage={touched.name ? errors.name : undefined}
             />
-          </div>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Formato del Cobro
-            </Typography>
-            {/* Placeholder */}
+          </FormRow>
+          <FormRow label="Formato del Cobro">
             <InputSelect
               size="medium"
               width="auto"
@@ -273,11 +265,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               onClick={() => setOpenSheet('billingCycle')}
               errorMessage={touched.billingCycle ? errors.billingCycle : undefined}
             />
-          </div>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Inicio del Cobro
-            </Typography>
+          </FormRow>
+          <FormRow label="Inicio del Cobro">
             <InputDate
               size="medium"
               width="fit"
@@ -286,17 +275,14 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               errorMessage={touched.firstBillDate ? errors.firstBillDate : undefined}
               disabled={values.trial !== undefined}
             />
-          </div>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Fin del Cobro
-            </Typography>
+          </FormRow>
+          <FormRow label="Fin del Cobro">
             <Switch
               checked={hasEndDate}
               onChange={handleEndDateToggle}
               label="Tiene fecha de fin"
             />
-          </div>
+          </FormRow>
           <AnimatePresence initial={false}>
             {hasEndDate && (
               <motion.div
@@ -307,10 +293,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
                 exit={{ height: 0 }}
                 transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeInOut' }}
               >
-                <div className={inputContainer}>
-                  <Typography variant="body" size="medium">
-                    Fecha de fin del cobro
-                  </Typography>
+                <FormRow label="Fecha de fin del cobro">
                   <InputDate
                     size="medium"
                     width="fit"
@@ -318,17 +301,14 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
                     onClick={() => setOpenSheet('endDate')}
                     errorMessage={touched.endDate ? errors.endDate : undefined}
                   />
-                </div>
+                </FormRow>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         <div className={container}>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Tipo de Moneda
-            </Typography>
+          <FormRow label="Tipo de Moneda">
             <InputSelect
               size="medium"
               width="auto"
@@ -337,11 +317,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               onClick={() => setOpenSheet('currency')}
               errorMessage={touched.currency ? errors.currency : undefined}
             />
-          </div>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Monto
-            </Typography>
+          </FormRow>
+          <FormRow label="Monto">
             <InputAmount
               size="medium"
               width="fit"
@@ -354,24 +331,18 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               onBlur={() => setTouched((current) => ({ ...current, price: true }))}
               errorMessage={touched.price ? errors.price : undefined}
             />
-          </div>
+          </FormRow>
         </div>
         <div className={container}>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Notificaciones
-            </Typography>
+          <FormRow label="Notificaciones">
             <Button size="small" onClick={() => {}} className={buttonNotification}>
               <IconArrow />
             </Button>
-          </div>
+          </FormRow>
         </div>
 
         <div className={container}>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Categoría
-            </Typography>
+          <FormRow label="Categoría">
             <InputSelect
               size="medium"
               width="auto"
@@ -380,11 +351,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               onClick={() => setOpenSheet('categoryId')}
               errorMessage={touched.categoryId ? errors.categoryId : undefined}
             />
-          </div>
-          <div className={inputContainer}>
-            <Typography variant="body" size="medium">
-              Cobrado en
-            </Typography>
+          </FormRow>
+          <FormRow label="Cobrado en">
             <InputSelect
               size="medium"
               width="fit"
@@ -394,7 +362,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               errorMessage={touched.paymentMethodId ? errors.paymentMethodId : undefined}
               disabled
             />
-          </div>
+          </FormRow>
         </div>
         {!readOnly && (
           <div className={buttonContainer}>
