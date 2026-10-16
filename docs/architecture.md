@@ -7,9 +7,10 @@
 ### Guiding Principles
 
 1. **Zero Spaghetti Code (Strict Separation of Concerns):**
-   - **UI components** (`components/`): Present data and handle user events. They _never_ calculate exchange rates, parse dates, or directly touch storage.
-   - **Stores** (`store/` or `store.ts`): Zustand stores hold state and the actions that change it.
-   - **Utilities** (`shared/lib/`): Pure TypeScript functions with no React dependency (easily testable and portable).
+   - **UI components** (`components/`): Present data and handle user events. They _never_ calculate totals or exchange rates, parse dates, or directly touch storage.
+   - **Hooks** (`hooks/`): Component logic that several components share or that would bury the JSX (form state, editors, field wiring).
+   - **Stores** (`store/`): Zustand stores hold state and the actions that change it.
+   - **Utilities**: Pure TypeScript functions with no React dependency (easily testable and portable). In `features/<feature>/utils/` when one feature uses them, in `shared/lib/` when several do.
 2. **Local-First & Privacy-Focused:**
    - All user data remains on the device.
    - Backups are plain, versioned JSON files that can be exported or synced directly with Google Drive without an intermediary backend server.
@@ -23,6 +24,11 @@
 ## 2. Directory Structure (Feature-Driven Architecture)
 
 The codebase is organized by business features rather than generic file types. This ensures that as the app grows, files that change together stay together.
+
+Two rules decide where a file goes:
+
+- **`shared/` never imports from `features/`.** Shared code can't know about a feature, only the other way around.
+- **Something moves to `shared/` when two or more features use it.** Until then it stays in its feature. (Domain types used everywhere, like `Subscription`, live in `shared/types`.)
 
 ```text
 src/
@@ -62,7 +68,7 @@ src/
 │
 ├── shared/                   # Generic code that has NO domain knowledge
 │   ├── ui/                   # Button, Field, Input*, Switch, BottomSheet, DatePicker, CurrencyPicker, Avatar, Toast, Typography...
-│   ├── hooks/                # useFieldIds, useShake
+│   ├── hooks/                # useFieldControl (field ids, aria links, shake), useShake
 │   ├── lib/                  # isoDate, calendar, currencies, formatDate, id, icons, normalizeText, storage
 │   ├── store/                # uiStore.ts (overlay stack), toastStore.ts (app toast)
 │   └── types/                # index.ts (all domain types)
@@ -71,6 +77,8 @@ src/
 ```
 
 Each component lives in its own folder with a matching `*.module.scss` file (SCSS Modules). Styling is SCSS only.
+
+Known leftovers to tidy later: the three stores use three file layouts (`subscriptions/store/subscriptionStore.ts`, `categories/categoryStore.ts`, `settings/store.ts`); the target is `features/<feature>/store/<name>Store.ts`. `features/homepage` is named after a page; its list and card components belong in `features/subscriptions`.
 
 ---
 
@@ -173,7 +181,7 @@ User preferences currently live in `useSettingsStore` (`selectedCurrency`, `favo
 State lives in **Zustand** stores:
 
 - `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription` (keeps `lastDeleted` for the undo toast), `undoDelete`, `updateSubscription`, `reassignCategory`. Uses the `persist` middleware, so it saves itself to `localStorage` under `aldia_subscriptions_v1`.
-- `useSettingsStore` (`features/settings/store.ts`): selected and favorite currencies. Loads from and saves to `localStorage` by hand through `shared/lib/storage.ts`, under `aldia_settings`.
+- `useSettingsStore` (`features/settings/store.ts`): selected and favorite currencies. Loads from and saves to `localStorage` by hand through `shared/lib/storage.ts`, under `aldia_settings` (to move onto `persist` like the others).
 - `useCategoryStore` (`features/categories/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Persisted under `aldia_categories_v1`.
 - `useToastStore` (`shared/store/toastStore.ts`): the one app-wide toast, rendered by `App.tsx`.
 - `useUIStore` (`shared/store/uiStore.ts`): a stack of overlays (`preset-picker`, `subscription-form`) with `pushOverlay`, `popOverlay` and `closeAllOverlays`. `App.tsx` renders the top of the stack.
@@ -190,8 +198,11 @@ Data is saved under versioned keys:
 
 - `aldia_subscriptions_v1` (in use)
 - `aldia_settings` (in use)
-- `aldia_cards_v1` (planned)
 - `aldia_categories_v1` (in use)
+- `aldia_cards_v1` (planned)
+- `aldia_rates` (planned): the last downloaded exchange rates and their date
+
+**Durability:** these keys live in the WebView's `localStorage`, which Android can clear (low storage, WebView reset). Before testers rely on the app, the stores move to Capacitor Preferences through a custom `persist` storage, and JSON export ships as the backup.
 
 ### Backup JSON Format (planned)
 
@@ -216,9 +227,38 @@ Data is saved under versioned keys:
 
 When you want to build a new screen or component:
 
-1. **Define Types First:** Add shared interfaces to `src/shared/types/index.ts`.
+1. **Define Types First:** Domain entities used across features go in `src/shared/types/index.ts`; types only one feature needs (like the form values) go in `src/features/<feature>/types.ts`.
 2. **Create Pure Utilities:** Put math, formatters, and data transformation in `src/shared/lib/` (or `src/features/<feature>/utils/` when they belong to one feature).
 3. **Build UI Primitives in `shared/ui/`:** If you need a reusable badge, switch, or button, create it in `src/shared/ui/`.
 4. **Add State When Needed:** Create a Zustand store in `src/features/<feature>/store/`.
 5. **Create Domain Components:** Build feature components in `src/features/<feature>/components/`, each with its own `*.module.scss`.
 6. **Assemble in `pages/`:** The page file only imports and arranges the feature components.
+
+---
+
+## 7. Rules Learned the Hard Way
+
+Each of these comes from a real bug in this codebase.
+
+- **Never store what you can calculate.** A stored `nextBillDate` goes stale as soon as the date passes. Store the inputs (`firstBillDate`, `billingCycle`) and calculate the next charge when showing it. The same goes for converted prices: store the price in its own currency, convert on screen.
+- **Dates are `YYYY-MM-DD` strings in local time.** Use `shared/lib/isoDate.ts` (`parseISODate`, `toISODate`, `todayISO`); never `toISOString()`, which works in UTC and can move a date to the day before in Argentina.
+- **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update.
+- **One way out with the Android back button.** Back closes the top-most layer first (bottom sheet, then overlay), and only leaves the app from a main tab (Capacitor App plugin `backButton` listener, once Android is set up).
+- **A control inside `Field` is a plain `<input>` or `<button>`.** `Field` owns the look; the `Button` component is for actions and brings its own styles and ripple.
+- **Class names go through `cn()`**, never through template strings with `? x : ''`.
+- **Exported helpers, hooks and component props get JSDoc** (`/** ... */`), so hovering explains them.
+
+---
+
+## 8. Exchange Rates (planned)
+
+- Source: the free [exchange-api](https://github.com/fawazahmed0/exchange-api) (no key, daily JSON on a CDN, with a fallback URL).
+- On the first app start of the day, if the saved rates are not from today, download once and save them with their date (`aldia_rates`). If the download fails, keep using the last saved rates and show their date. With no rates at all, show totals per currency without converting.
+- Conversion is a pure function (`convert(amount, from, to, rates)`), so totals and statistics stay testable offline.
+- Known limit: the API gives official rates. A USD subscription paid with an Argentine card is charged at the official rate plus taxes, so the ARS total can be lower than the real charge.
+
+---
+
+## 9. Testing (planned)
+
+Vitest for the pure functions first: billing cycles and next charge dates, validation, monthly totals, currency conversion, the calendar grid. They hold most of the logic and need no browser.

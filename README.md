@@ -1,142 +1,47 @@
 # Aldia
 
-> A subscription & recurring expense tracker built for Android (with future desktop support).
-> Track what you pay, where it goes, and when it's due — all offline, all private.
+> A subscription & recurring expense tracker for Android (desktop later).
+> Track what you pay, where it goes, and when it's due. Offline, private, no account.
 
-Aldia is inspired by [Tilla](https://play.google.com/store/apps/details?id=com.pavelrekun.tilly) (Android) and [SubscriptionDay](https://apps.apple.com/app/id1638498952) (iOS), with the goal of creating a polished, independent alternative for Android users that stores everything locally and syncs optionally via Google Drive.
+Aldia answers three questions at a glance: **how much do I spend per month**, **where does the money go** (by category), and **when is the next charge**. It is inspired by [Tilla](https://play.google.com/store/apps/details?id=com.pavelrekun.tilly) (Android) and [SubscriptionDay](https://apps.apple.com/app/id1638498952) (iOS), with everything stored on the phone.
+
+It is a portfolio and learning project first: for now it is shared with family and friends. Product details live in [`PRODUCT.md`](PRODUCT.md), the code structure in [`docs/architecture.md`](docs/architecture.md).
+
+---
+
+## What works today
+
+- **Home:** monthly total, subscription list filtered by category, swipe to delete with undo.
+- **Add a subscription:** 51 presets (streaming, AI, gaming, utility bills searchable by company, e.g. "Edenor") or a custom one.
+- **The form:** name, price, currency, billing cycle (one-time, or every N days / weeks / months / years), free trial, start and end dates, category.
+- **Categories:** 12 defaults plus your own (create, rename, delete; deleted ones fall back to "Otros").
+- **Detail screen:** view, edit, pause/resume and delete a subscription.
+
+Not built yet: Calendar, Statistics, Cards and Settings screens (placeholders), reminders, JSON export/import, the Android build.
 
 ---
 
 ## Tech Stack
 
-| Layer            | Technology                                                           |
-| ---------------- | -------------------------------------------------------------------- |
-| **UI Framework** | React 19 + TypeScript 6                                              |
-| **Build Tool**   | Vite 8                                                               |
-| **Mobile Shell** | Capacitor 8 (installed; the Android platform is not set up yet)      |
-| **State**        | Zustand 5 (lightweight stores, `persist` middleware for subscriptions) |
-| **Styling**      | SCSS Modules (design tokens in CSS Custom Props)                     |
-| **Animation**    | motion 14                                                            |
-| **Icons/Assets** | flag-icons (currency flags), custom SVGs, `.webp` brand logos        |
-| **Code Quality** | ESLint 10 · Prettier 3 · Commitizen (Conventional Commits)          |
+| Layer            | Technology                                                        |
+| ---------------- | ----------------------------------------------------------------- |
+| **UI Framework** | React 19 + TypeScript 6                                           |
+| **Build Tool**   | Vite 8                                                            |
+| **Mobile Shell** | Capacitor 8 (installed; the Android platform is not set up yet)   |
+| **State**        | Zustand 5 (`persist` middleware for subscriptions and categories) |
+| **Styling**      | SCSS Modules + design tokens in CSS custom properties             |
+| **Animation**    | motion 14                                                         |
+| **Icons/Assets** | Custom SVG icon set, flag-icons, `.webp` brand logos              |
+| **Code Quality** | ESLint 10 · Prettier 3 · Conventional Commits (Commitizen)        |
 
-### Why this stack?
+### Decisions and why
 
-- **React + Capacitor** lets us write a single web codebase and ship it as a native Android app using Capacitor's native bridge. Unlike React Native, the same codebase can later target **desktop via Electron or Tauri** with zero rewrite.
-- **Zustand** over Redux because this is a single-user, offline app — Zustand's minimal API (`create` + slices) eliminates boilerplate while providing fine-grained reactivity.
-- **SCSS Modules** — every component owns its styles, scoped by default, with design tokens shared through CSS custom properties. This keeps JSX free of long utility-class strings and makes theme-aware keyframes and pseudo-elements straightforward.
-
----
-
-## Features (v1 Scope)
-
-### Core Screens
-
-| Screen         | Description                                                                                                    | Status         |
-| -------------- | -------------------------------------------------------------------------------------------------------------- | -------------- |
-| **Home**       | Filterable subscription card list + monthly cost summary with currency switcher                                 | 🟡 In Progress |
-| **Calendar**   | Monthly grid showing charge days for each subscription + card expiry dates                                      | 🔴 Placeholder |
-| **Statistics** | Category breakdown — pie/donut chart showing % of monthly cost per category                                    | 🔴 Placeholder |
-| **Cards**      | Mock credit cards & bank accounts — visual display of where each sub is charged, with expiry date tracking     | 🔴 Placeholder |
-| **Settings**   | Currency preferences (5 favorites + active), theme toggle, Google Drive backup, JSON export/import             | 🔴 Placeholder |
-
-### Feature Details
-
-- **Subscription Management**
-  - Add from 17+ preset services (Netflix, Spotify, ChatGPT Plus, Claude Pro, etc.) — user only fills day, price, category, payment method
-  - Create fully custom subscriptions with name, icon, brand color
-  - Track billing cycle: one-time, weekly, monthly, bimonthly, semiannual, yearly (all unlocked in v1; `PRODUCT.md` plans to gate one-time, bimonthly, semiannual and trials behind a paid unlock later)
-  - Support for trials with start/end dates
-  - Pause, cancel, or reactivate subscriptions without deleting
-
-- **Multi-Currency**
-  - 5 favorite currencies configurable from settings (default: USD, EUR, ARS, CLP, GBP)
-  - Quick-switch active currency from home screen pill
-  - All totals recalculated in the selected display currency
-
-- **Payment Methods**
-  - Add mock credit cards (Visa, Mastercard, Amex, Discover) or bank accounts
-  - Visual card component with gradient, last 4 digits, and expiry
-  - Expiry dates appear in Calendar view as visual reminders
-
-- **Calendar View**
-  - Monthly grid with dots/markers on charge days
-  - Tap a day to see which subscriptions are due
-  - Card expiry dates shown as special markers
-
-- **Statistics**
-  - Category-based expense breakdown (% of total monthly cost)
-  - Visual chart (pie/donut or bar)
-
-- **Data & Privacy**
-  - 100% local storage (localStorage with versioned keys)
-  - JSON export/import for manual backups
-  - Google Drive sync to `appDataFolder` (planned v1.1)
-
----
-
-## Architecture
-
-This project follows a **Feature-Driven Architecture**. Full details in [`docs/architecture.md`](docs/architecture.md).
-
-```
-src/
-├── App.tsx                     # Tab switch, bottom nav and overlay renderer
-├── assets/icons/               # Icon* components (SVG)
-├── features/                   # Domain modules (each owns its components and stores)
-│   ├── homepage/               # Monthly expenses widget, subscription list and cards
-│   ├── subscriptions/          # Preset card + subscription store (add form is next)
-│   ├── settings/               # Currency picker + settings store
-│   ├── navigation/             # Bottom tab bar
-│   └── (planned)               # cards/, calendar/, statistics/
-├── pages/                      # Screen-level orchestrators (home, calendar, cards, statistics, settings, presetPicker)
-├── shared/
-│   ├── ui/                     # Primitives: Button, BottomSheet, BackdropFilter, Pill, Toast, Typography
-│   ├── lib/                    # Utilities: storage, currencies, presets
-│   ├── store/                  # uiStore (overlay stack)
-│   └── types/                  # Domain interfaces & type definitions
-└── styles/                     # Design tokens (_variables.scss) + themes (_themes.scss)
-```
-
-### Key Principles
-
-1. **Separation of Concerns** — UI components never touch storage or do calculations directly. Logic lives in hooks/utils, data in stores.
-2. **Local-First** — All data on device. No backend server. Optional Google Drive sync uploads a versioned JSON blob.
-3. **Mobile-Native Feel** — 48px touch targets, safe area insets, bottom sheets for contextual actions, gesture-driven interactions.
-
----
-
-## Design System
-
-### Color Palette
-
-| Token Family  | Purpose                        | Example                       |
-| ------------- | ------------------------------ | ----------------------------- |
-| **Phthalo**   | Brand greens (primary actions)  | `$phthalo-600: #0a3d2c`      |
-| **Champagne** | Gold accents (premium feel)     | `$champagne-200: #e8d5a8`    |
-| **Paper**     | Light mode warm neutrals        | `$paper-0: #fffdf9`          |
-| **Charcoal**  | Dark mode neutrals              | `$charcoal-900: #0a0f0c`     |
-
-### Theme Support
-
-- **Light mode** (`:root`) and **Dark mode** (`[data-theme='dark']`)
-- All component styles reference semantic CSS variables (`--bg-surface`, `--text-primary`, `--brand-primary`, etc.) — never raw color values
-
-### Typography
-
-- Font: **Red Hat Text** (300–700 weights)
-- Specialized `currency` variant splits integer/decimal for financial display emphasis
-
-### Shared UI Components (Built)
-
-| Component        | Description                                               |
-| ---------------- | --------------------------------------------------------- |
-| `Button`         | Primary/Secondary variants with ripple effect animation   |
-| `BottomSheet`    | Portal-rendered modal with touch drag gestures            |
-| `BackdropFilter` | Blur overlay for modals                                   |
-| `Pill`           | Clickable rounded chip for filters and selections         |
-| `Typography`     | Semantic text with `title`, `body`, `overline`, `currency` variants |
-| `Toast`          | Animated notification with hover pause (used for delete undo)       |
+- **React + Capacitor** instead of React Native: one web codebase ships as an Android app today and can become a desktop app (Electron or Tauri) later without a rewrite.
+- **Zustand** instead of Redux: a single-user offline app needs small stores, not actions and reducers. `persist` saves them to storage for free.
+- **SCSS Modules** instead of Tailwind (Tailwind was removed): every component owns its styles, JSX stays readable, and themed pseudo-elements and keyframes are easy.
+- **Billing cycle as data**, `{ type: 'every', interval, unit }`, instead of a fixed list of names: "every 2 months" or "every 15 days" need no new code.
+- **Dates as `YYYY-MM-DD` strings in local time**, never `toISOString()`: no time zone can move a charge to the day before.
+- **Shared field wiring** (`useFieldControl`): every input gets the same ids, accessibility links and error shake from one place.
 
 ---
 
@@ -144,101 +49,65 @@ src/
 
 ### Prerequisites
 
-- Node.js 20+
-- npm 10+
-- Android Studio (for Capacitor builds)
+- Node.js 20+ and npm 10+
+- Android Studio, for the Android build (not needed for the web dev server)
 
 ### Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-
-# Lint
-npm run lint
-
-# Format
-npm run format
-
-# Build for production
-npm run build
-
-# Commit (conventional commits via Commitizen)
-npm run commit
+npm install        # install dependencies
+npm run dev        # dev server (add --host to open it on a phone in the same network)
+npm run lint       # ESLint
+npm run format     # Prettier
+npm run build      # type check + production build
 ```
 
-### Mobile (Android)
+### Android (not set up yet)
 
 ```bash
-# Initialize Capacitor (first time)
-npx cap init
-
-# Add Android platform
-npx cap add android
-
-# Sync web build to native project
-npm run build && npx cap sync
-
-# Open in Android Studio
-npx cap open android
+npx cap init                       # first time only
+npx cap add android                # first time only
+npm run build && npx cap sync      # copy the web build into the native project
+npx cap open android               # open in Android Studio
 ```
-
----
-
-## Local Storage Schema
-
-Data is stored under versioned keys to support future migrations:
-
-| Key                        | Contents                            |
-| -------------------------- | ----------------------------------- |
-| `aldia_settings`           | Selected currency and favorites (theme and reminders planned) |
-| `aldia_subscriptions_v1`   | All subscription records            |
-| `aldia_cards_v1`           | (planned) Payment methods           |
-| `aldia_categories_v1`      | (planned) Custom + default categories |
 
 ---
 
 ## Roadmap
 
-### v1.0 — MVP (Current)
-- [ ] Subscription CRUD (add from presets + custom creation)
-- [x] Subscription list with active/inactive states
-- [x] Monthly cost calculation
-- [x] Preset picker overlay
-- [x] Swipe-to-delete with undo toast
+### v1.0 — MVP: the first build for testers
+
+- [x] Preset picker and custom subscriptions
+- [x] Add, view, edit, pause and delete subscriptions
+- [x] Categories with create / rename / delete
+- [ ] Monthly total that respects billing cycle and currency (daily exchange rates, cached)
 - [ ] Initialize the Capacitor Android platform
-- [ ] Multi-currency support
-- [ ] Calendar view with charge day markers
-- [ ] Statistics screen with category % breakdown
-- [ ] Payment method cards with expiry tracking
-- [ ] Settings: currency favorites, theme toggle
-- [ ] JSON export/import
+- [ ] Local notifications before each charge (Capacitor Local Notifications)
+- [ ] JSON export/import (the only backup until Drive sync)
 
-### v1.1 — Sync & Polish
-- [ ] Google Drive backup sync (OAuth2 + appDataFolder)
-- [ ] Subscription reminders / notifications (via Capacitor Local Notifications)
-- [ ] Onboarding flow for first-time users
-- [ ] Subscription detail view / edit screen
+### v1.x — The other screens
 
-### v2.0 — Desktop & Differentiation
-- [ ] Desktop build (Electron or Tauri)
-- [ ] Unique features to distinguish from SubscriptionDay
-- [ ] Potential Google Play Store release
+- [ ] Calendar with charge days
+- [ ] Statistics by category
+- [ ] Cards: payment methods with expiry dates
+- [ ] Settings: favorite currencies, theme, export/import
+
+### Later
+
+- Google Drive backup, income and expenses, couple mode, desktop build. See `PRODUCT.md`.
 
 ---
 
-## Project Structure Conventions
+## Conventions
 
-- **Commits**: Conventional Commits via Commitizen (`npm run commit`)
-- **Branches**: `main` (stable) → feature branches (`feat/subscription-form`, `fix/currency-picker`)
-- **File naming**: PascalCase for components (`Button.tsx`), camelCase for utils (`storage.ts`), kebab-case for style files when needed
-- **Imports**: Use `@/` path alias (maps to `src/`)
+- **Branches:** `feature/*` (or `fix/*`, `chore/*`) → pull request into `dev` → `main` for stable releases.
+- **Commits:** Conventional Commits (`feat(scope): ...`, `fix`, `refactor`, `style`, `docs`, `chore`); `npm run commit` opens Commitizen.
+- **Files:** PascalCase folder + file per component (`Button/Button.tsx` + `Button.module.scss`), camelCase for hooks and utils (`useShake.ts`, `isoDate.ts`).
+- **Imports:** `@/` maps to `src/`.
+- **Docs in code:** exported helpers, hooks and component props carry JSDoc (`/** ... */`), so hovering explains them.
 
 ---
 
 ## License
 
-Private project — not open source. Distributed among family & friends.
+Private project, not open source.

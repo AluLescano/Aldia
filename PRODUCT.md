@@ -2,96 +2,95 @@
 
 ## Platform
 
-android
+Android (portrait). Desktop (Electron or Tauri) later, so the web codebase must stay portable.
 
 ## Users
 
-Primary: The developer (personal use) and a close circle of family & friends who want to track recurring subscription costs and know when charges are coming. All Android users with varying tech literacy.
+Primary: the developer and a close circle of family & friends who want to track recurring costs and know when charges are coming. Android users with varying tech literacy.
 
-Future: Public Android users discovered via Google Play, once the app has differentiated enough from SubscriptionDay to avoid takedown risk.
+Future: public Android users through Google Play, once the app has its own distinguishing features (see "Before a store release").
 
 ## Product Purpose
 
-Aldia is an offline-first subscription and recurring expense tracker for Android. It answers three questions at a glance: **how much am I spending per month**, **where is the money going** (by category), and **when is the next charge** (by calendar day).
+Aldia is an offline-first subscription and recurring expense tracker. It answers three questions at a glance: **how much am I spending per month**, **where is the money going** (by category), and **when is the next charge** (by calendar day).
 
-Success means a user opens the app once a month, sees their total, checks upcoming charges, and feels in control of their recurring expenses — without needing an account, an internet connection, or a server.
+Success means a user opens the app once a month, sees their total, checks upcoming charges, and feels in control of their recurring expenses, without an account or a server.
 
 ## Positioning
 
-Unlike SubscriptionDay (iOS-only, cloud-dependent) and Tilla (limited customization), Aldia is:
+Unlike SubscriptionDay (iOS only, cloud-dependent) and Tilla (limited customization), Aldia is:
 
-- **Local-first and private** — all data on device, optional Google Drive JSON backup, no account required.
-- **Preset-rich** — 17+ popular services pre-loaded so users only fill price, date, and category.
-- **Multi-currency aware** — 5 favorite currencies with quick-switch on the home screen; critical for users who pay in USD, EUR, and local currency.
-- **Category-driven statistics** — visual percentage breakdown of where the money goes.
-- **Payment method tracking** — mock credit cards and bank accounts with expiry date reminders on the calendar.
-
-The app must develop distinguishing features beyond SubscriptionDay before Google Play release to avoid being flagged as a clone.
+- **Local-first and private:** all data on the device, no account. The only network request is a daily download of public exchange rates; no user data is sent.
+- **Preset-rich:** 51 presets, including utility bills searchable by company name ("Edenor", "Metrogas"), so users mostly fill the price and the date.
+- **Multi-currency aware:** each subscription keeps its own currency; the home total converts to the currency the user picks.
+- **Category-driven statistics:** where the money goes, as percentages.
+- **Payment method tracking:** cards and bank accounts (visual only) with expiry reminders on the calendar.
 
 ## Operating Context
 
-Users interact with the app on Android phones (portrait only). Typical flow:
+Typical flow:
 
-1. Open app → see monthly total and subscription list on Home screen.
-2. Tap `+` → pick from preset services or create custom → fill form fields → save.
-3. Switch to Calendar → see which days have charges this month → tap a day for details.
-4. Check Statistics → see donut chart of category percentages → see annual forecast.
-5. Manage payment methods in Cards screen → see which card is being charged where.
-6. Settings → switch currency, change theme, export/import JSON backup.
+1. Open the app → see the monthly total and the subscription list on Home.
+2. Tap `+` → pick a preset or create a custom one → fill the form → save.
+3. Tap a subscription → see its details → edit, pause or delete it.
+4. Calendar → which days have charges this month → tap a day for details.
+5. Statistics → category percentages, annual forecast.
+6. Cards → which card or account pays what.
+7. Settings → currencies, theme, export/import.
 
-The app language is **Spanish** (UI copy: "Agregar Subscripción", "Formato del cobro", "Categorías", etc.) but will develop at least English format later on, selectable from settings and checked from the user system.
+The app language is **Spanish** (UI copy: "Agregar Suscripción", "Formato del cobro", "Categoría"...). English comes later, picked from the system language or from Settings.
 
 ## Capabilities and Constraints
 
-### Confirmed Capabilities (v1)
-- Subscription CRUD: add from presets (17+), create custom, edit, pause, cancel, delete.
-- Billing cycles (free tier): weekly, monthly, yearly.
-- Billing cycles (paid unlock, gated later): one-time, bimonthly, semiannual, trial periods.
-- Multi-currency: 5 favorites configurable in settings, quick-switch pill on home screen.
-- Calendar: monthly grid with charge day markers, tap-to-see-details bottom sheet, card expiry markers.
-- Statistics: category percentage donut chart, annual cost forecast, subscription count.
-- Payment methods: mock credit cards (Visa, Mastercard, Amex, Discover) with expiry tracking and bank accounts.
-- Categories: 1–2 default templates, user can edit/add custom categories.
-- Notifications: configurable reminders (N days before charge, at specific time).
-- Data: JSON export/import, Google Drive appDataFolder backup (v1.1).
-- Theme: dark mode default, system preference detection, manual toggle.
+### v1 capabilities
+
+- Subscriptions: add from presets or custom, view, edit, pause/resume, delete with undo.
+- Billing cycles: one-time, or every N days / weeks / months / years. Free trials with their own length.
+- Categories: 12 defaults; the user can create, rename and delete (deleted ones fall back to "Otros").
+- Multi-currency: price stored in its own currency, converted for the total with daily exchange rates (cached; the last saved rates are used offline).
+- Notifications: reminders N days before a charge or a trial end, at a chosen time (local notifications, no server).
+- Data: JSON export/import.
+- Theme: dark by default, light mode, system detection, manual toggle.
+- Later in v1.x: Calendar, Statistics, Cards, Settings screens. Google Drive backup after that.
 
 ### Constraints
-- Android only (iOS will be published if app is profitable later on).
-- 100% local storage (localStorage via Capacitor, no backend server).
-- Freemium model planned but **no paywall in v1** — all features unlocked; gate added later.
-- No real payment processing — cards/accounts are visual mock representations only.
-- No user accounts or authentication (except optional Google OAuth for Drive backup).
-- Spanish-language UI (no i18n framework yet; localization is a future concern).
-- Desktop version (Electron or Tauri) planned for v2 — the web codebase must remain portable.
 
-### Undecided
-- Freemium pricing model (one-time purchase vs subscription).
-- Google Play listing timeline.
-- Distinguishing features for store release.
+- Android only for now (iOS only if the app ever pays for it).
+- No backend, no user accounts (except optional Google sign-in for Drive backup, later).
+- No real payment processing: cards and accounts are visual only.
+- Spanish UI, no i18n framework yet.
+- **Storage durability:** today the data lives in the WebView's `localStorage`, which the phone can clear. Before testers depend on it, move the stores to Capacitor Preferences (Zustand `persist` accepts a custom storage) and ship JSON export.
+
+### Monetization (undecided)
+
+No paywall in v1: everything is unlocked. If a freemium tier comes later, the rule is **recording your real bills is always free** (every billing cycle, trials, categories), because a total that can't include a bimonthly bill is a wrong total. Candidates for a paid tier: more than one reminder per subscription, Drive sync, extra themes, statistics history, couple mode. Pricing model (one-time vs subscription) is open.
+
+### Before a store release
+
+- **Brand logos:** the presets ship real company logos. That is fine for a private build, but on Google Play trademarks are what get apps removed. Keep the names, replace the logos with generic or user-picked icons.
+- **Distinguishing features:** still to decide. Ideas in the long-term plan: income and expenses book, couple mode with split subscriptions, "which card is cheapest" for a purchase.
 
 ## Brand Commitments
 
 - **Name:** Aldia
-- **Palette:** Phthalo greens (brand primary), Champagne golds (accents), Paper (light mode), Charcoal (dark mode).
-- **Font:** Red Hat Text (300–700 weights).
-- **Visual identity:** Premium, sleek, clean, mobile-native feel — not a cheap wrapper. Touch-first with native-feeling gestures (drag bottom sheets, ripple buttons).
-- **Tone:** Friendly, clear, Spanish-language UI copy.
+- **Palette:** Phthalo greens (brand), Champagne golds (accents), Paper (light mode), Charcoal (dark mode). A full palette revision is planned.
+- **Font:** Red Hat Text, Light 300 and Regular 400 (as in Figma).
+- **Visual identity:** premium, sleek, clean, mobile-native. Touch-first gestures (drag bottom sheets, swipe cards, ripple buttons).
+- **Tone:** friendly, clear, Spanish UI copy.
 
 ## Evidence on Hand
 
-- Figma design file with screens for: Home (empty + populated), Add Subscription (preset picker, form, selectors), Calendar (grid + day details sheet), Statistics (donut chart), and all bottom sheet sub-flows (datepicker, billing format, notifications, categories, payment methods).
-- Working partial codebase: React 19 + Vite 8 + Capacitor 8 + Zustand 5 + SCSS Modules.
-- 17 preset subscription services defined in code.
-- 8 default categories defined in code.
-- 5 default currencies defined in code (USD, EUR, ARS, CLP, GBP).
-- Shared UI primitives built: Button (ripple), BottomSheet (touch drag), Typography (currency formatting), Pill, BackdropFilter.
-- No real user testimonials, case studies, or external content to display.
+- Figma file "Financial Tracker" with screens for Home, Add Subscription (preset picker, form, every bottom sheet), Calendar and Statistics.
+- Working codebase: React 19 + Vite 8 + Zustand 5 + SCSS Modules, Capacitor 8 installed (Android platform not set up yet).
+- 51 presets, 12 default categories, 5 default currencies (USD, EUR, ARS, CLP, GBP).
+- Shared UI: Button, Field with Input Text / Amount / Number / Select / Date, Switch, BottomSheet, DatePicker, CurrencyPicker, Avatar, Pill, Toast, Typography.
+- No real user testimonials or external content yet.
 
 ## Product Principles
 
-1. **Privacy by default** — data never leaves the device unless the user explicitly exports or syncs.
-2. **Glanceable value** — the home screen answers "how much am I spending?" in under 2 seconds.
-3. **Low friction entry** — presets eliminate most typing; a subscription can be added in under 30 seconds.
-4. **Honest simplicity** — show what matters, hide what doesn't. No dashboard overload.
-5. **Portable foundation** — the codebase must remain a clean web app that works on Android today and desktop tomorrow.
+1. **Privacy by default:** data never leaves the device unless the user exports or syncs it.
+2. **Glanceable value:** Home answers "how much am I spending?" in under 2 seconds.
+3. **Low friction entry:** presets remove most typing; adding a subscription takes under 30 seconds.
+4. **Honest simplicity:** show what matters, hide what doesn't. No dashboard overload.
+5. **Honest numbers:** totals never pretend; when rates are old or missing, the app says so.
+6. **Portable foundation:** a clean web app that works on Android today and desktop tomorrow.
