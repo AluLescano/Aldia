@@ -1,21 +1,8 @@
-interface Props {
-  className?: string
-}
+import Icon, { type IconProps } from './Icon'
 
-export const IconAddEmpty = ({ className = 'w-6 h-6' }: Props) => {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.75}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  )
-}
+export const IconAddEmpty = (props: IconProps) => (
+  <Icon {...props}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 8v8M8 12h8" />
+  </Icon>
+)

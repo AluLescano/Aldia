@@ -1,43 +1,40 @@
-@import 'tailwindcss';
-
-@theme {
-  --font-sans:
-    'Red Hat Text', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    sans-serif;
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
-@layer base {
-  :root {
-    --sat: env(safe-area-inset-top, 0px);
-    --sab: env(safe-area-inset-bottom, 0px);
-    --sal: env(safe-area-inset-left, 0px);
-    --sar: env(safe-area-inset-right, 0px);
-  }
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
 
-  * {
-    -webkit-tap-highlight-color: transparent;
-    box-sizing: border-box;
-  }
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family:
+    'Red Hat Text',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior-y: none;
+}
 
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: var(--bg-app);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    user-select: none;
-    -webkit-user-select: none;
-    overscroll-behavior-y: none;
-  }
-
-  /* Allow normal selection in form controls */
-  input,
-  textarea {
-    user-select: auto;
-    -webkit-user-select: auto;
-  }
+/* Allow normal selection in form controls */
+input,
+textarea {
+  user-select: auto;
+  -webkit-user-select: auto;
 }
 
 /* Custom utility classes for mobile layout */
@@ -58,6 +55,10 @@
 }
 
 @keyframes shrink {
-  from { width: 100%; }
-  to { width: 0%; }
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }

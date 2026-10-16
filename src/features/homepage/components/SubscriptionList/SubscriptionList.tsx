@@ -1,14 +1,27 @@
-// HOOKS
+// DEPENDENCIES
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 
-// TYPES
-import { type Subscription } from '@/shared/types'
+// STORES
+import { useCategoryStore } from '@/features/categories/store/categoryStore'
+
+// UTILS
+import {
+  filterKey,
+  filterSubscriptions,
+  listFilters,
+  sortSubscriptions,
+  type ListFilter,
+} from '@/features/subscriptions/utils/subscriptionList'
 
 // COMPONENTS
 import SubscriptionListSkeleton from './SubscriptionListSkeleton'
 import SubscriptionCard from './SubscriptionCard'
 import Typography from '@/shared/ui/Typography/Typography'
 import Pill from '@/shared/ui/Pill/Pill'
+
+// TYPES
+import type { Subscription } from '@/shared/types'
 
 // ASSETS
 import { IconAddEmpty } from '@/assets/icons/IconAddEmpty'
@@ -17,87 +30,109 @@ import styles from './SubscriptionList.module.scss'
 interface Props {
   subscriptions: Subscription[]
   isLoading?: boolean
-  onDelete: (arg0: Subscription) => void
+  /** Called from a card's swipe-to-delete button. */
+  onDelete: (subscription: Subscription) => void
 }
 
-const isDisabled = (status: string) => {
-  return status == 'inactive'
-
-}
-
+/** Filter tabs plus the list of subscription cards (or an empty state). */
 const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
-  const { container } = styles
-  const hasSubscriptions = (subscriptions ?? []).length > 0
-  const [activeTab, setActiveTab] = useState('Todas')
+  const {
+    container,
+    wrapper,
+    filterTabs,
+    filterPill,
+    header,
+    listArea,
+    emptyState,
+    emptyStateIcon,
+    cardsContainer,
+    cardMotionWrapper,
+  } = styles
 
-  // All Unique Filter tabs + 'All' tab
-  const categories = [
-    'Todas',
-    ...new Set(subscriptions.map((sub) => sub.categoryId)),
-    'Inactivas',
-  ]
-  const filteredSubscriptions =
-    activeTab === 'Todas'
-      ? subscriptions
-      : activeTab === 'Inactivas'
-        ? subscriptions.filter(
-            (sub) => 'inactive' == sub.status
-          )
-        : subscriptions.filter((sub) => activeTab == sub.categoryId)
+  const [chosenFilter, setChosenFilter] = useState<ListFilter>({ type: 'all' })
+  const categories = useCategoryStore((state) => state.categories)
 
-  const sortedSubscriptions = [...filteredSubscriptions].sort((a, b) => {
-    // 1. Sort by Status (Active first)
-    if (isDisabled(a.status) !== isDisabled(b.status)) {
-      return isDisabled(a.status) ? 1 : -1
-    }
-    
-    // 2. Sort Alphabetically
-    return a.name.localeCompare(b.name)
-  })
+  const filters = listFilters(subscriptions)
+
+  // A tab can disappear while selected (resume the last paused one, delete the last of a
+  // category). Derived, not stored: if the chosen tab is gone, the list shows "all".
+  const activeFilter = filters.some((f) => filterKey(f) === filterKey(chosenFilter))
+    ? chosenFilter
+    : filters[0]
+
+  // Category tabs show the category's current name, so renaming one renames its tab
+  const filterLabel = (filter: ListFilter) => {
+    if (filter.type === 'all') return 'Todas'
+    if (filter.type === 'inactive') return 'Inactivas'
+    return categories.find((c) => c.id === filter.categoryId)?.name ?? filter.categoryId
+  }
+
+  const visible = sortSubscriptions(filterSubscriptions(subscriptions, activeFilter))
 
   if (isLoading) {
     return <SubscriptionListSkeleton />
   }
 
   return (
-    <div className={`flex flex-col gap-4`}>
-      {/* Filter Tabs */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar">
-        {categories.map((cat) => (
-          <Pill key={cat} isActive={activeTab === cat} onClick={() => setActiveTab(cat)} className="shrink-0">
+    <div className={wrapper}>
+      <div className={filterTabs}>
+        {filters.map((filter) => (
+          <Pill
+            key={filterKey(filter)}
+            isActive={filterKey(filter) === filterKey(activeFilter)}
+            onClick={() => setChosenFilter(filter)}
+            className={filterPill}
+          >
             <Typography variant="label" size="small">
-              {cat}
+              {filterLabel(filter)}
             </Typography>
           </Pill>
         ))}
       </div>
-      {/* Subscription List Section */}
-      <div className={`flex flex-col ${container} gap-3 rounded-2xl`}>
-        <div className="flex items-center justify-between px-1">
+
+      <div className={container}>
+        <div className={header}>
           <Typography variant="title">Tus subscripciones</Typography>
         </div>
 
-        {/* Empty State placeholder */}
-        {!hasSubscriptions ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed p-8 text-center">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 border">
-              <IconAddEmpty />
+        <div className={listArea}>
+          {subscriptions.length === 0 ? (
+            <div className={emptyState}>
+              <div className={emptyStateIcon}>
+                <IconAddEmpty />
+              </div>
+              <Typography variant="body" size="medium">
+                Sin subscripciones aún
+              </Typography>
+              <Typography variant="body">
+                Agrega tus gastos mensuales para mantenerte al tanto de tus días de pago y
+                tu gasto total.
+              </Typography>
             </div>
-            <Typography variant="body" size="medium">
-              Sin subscripciones aún
-            </Typography>
-            <Typography variant="body">
-              Agrega tus gastos mensuales para mantenerte al tanto de tus días de pago y
-              tu gasto total.
-            </Typography>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-3 align-middle">
-            {sortedSubscriptions.map((sub) => (
-              <SubscriptionCard key={sub.id} subscription={sub} onDelete={onDelete} />
-            ))}
-          </div>
-        )}
+          ) : (
+            <motion.div layout className={cardsContainer}>
+              <AnimatePresence mode="popLayout" initial={false}>
+                {visible.map((sub) => (
+                  <motion.div
+                    key={sub.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9, filter: 'blur(4px)' }}
+                    animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.9,
+                      filter: 'blur(4px)',
+                      transition: { duration: 0.2 },
+                    }}
+                    className={cardMotionWrapper}
+                  >
+                    <SubscriptionCard subscription={sub} onDelete={onDelete} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )

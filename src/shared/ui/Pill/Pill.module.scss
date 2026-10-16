@@ -8,6 +8,8 @@
   gap: 0.5rem;
   cursor: pointer;
   user-select: none;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
   transition:
     background-color 150ms ease-out,
     color 150ms ease-out;
@@ -25,6 +27,8 @@
     background-color: var(--brand-primary);
     color: var(--text-on-brand);
     border-color: transparent;
-    box-shadow: 0 0 0 3px var(--brand-subtle), var(--shadow-glow-brand);
+    box-shadow:
+      0 0 0 3px var(--brand-subtle),
+      var(--shadow-glow-brand);
   }
 }

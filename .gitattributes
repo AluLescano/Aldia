@@ -1,2 +1,10 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Text files are stored with LF and checked out with LF on every OS
+# (no more "LF will be replaced by CRLF" warnings, Prettier always agrees)
+* text=auto eol=lf
+
+# Binary files: never touch their bytes
+*.webp binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

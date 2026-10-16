@@ -6,6 +6,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--border-subtle);
   gap: 0.5rem;
   cursor: pointer;
   user-select: none;
@@ -35,9 +36,10 @@
     opacity: 0.12;
   }
 
-  &:disabled {
+  &:disabled,
+  &[aria-disabled='true'] {
     cursor: not-allowed;
-    opacity: 0.1;
+    opacity: 0.5;
   }
 }
 
@@ -50,11 +52,11 @@
 }
 
 .ButtonSecondary {
-  @include button-base(var(--brand-subtle), var(--brand-primary));
-  border: 1px solid var(--border-strong);
+  @include button-base(var(--bg-surface-elevated), var(--text-on-brand));
+  border: none;
 
   &:hover {
-    background-color: var(--bg-surface-subtle);
+    background-color: var(--border-subtle);
   }
 }
 
@@ -75,4 +77,26 @@
     transform: translate(-50%, -50%) scale(8);
     opacity: 0;
   }
+}
+
+.sizeLarge {
+  min-height: 3rem;
+  padding: 0.75rem 1.5rem;
+}
+.sizeMedium {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+}
+.sizeSmall {
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+}
+.widthFull {
+  width: 100%;
+}
+.widthFit {
+  width: fit-content;
+}
+.base {
+  border-radius: 0.75rem;
 }

@@ -1,0 +1,73 @@
+.calendar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0;
+  padding-top: 1rem;
+
+  .header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+
+    .navGroup {
+      display: flex;
+      background-color: var(--bg-surface-elevated);
+      border-radius: 1rem;
+
+      .select {
+        width: fit-content;
+        border: none;
+        background-color: var(--bg-surface-elevated);
+        text-align: center;
+        appearance: none;
+        border-radius: 1rem;
+        outline: none;
+      }
+
+      .nextArrow {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .weekdays {
+    display: flex;
+    width: 100%;
+    margin-top: 0.5rem;
+    gap: 1rem;
+
+    .weekday {
+      display: flex;
+      width: 3rem;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 1 / 1;
+    }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    justify-content: center;
+    align-items: center;
+    gap: 0 0.5rem;
+
+    .day {
+      display: flex;
+      background-color: transparent;
+      width: 2.75rem;
+      border-radius: 50%;
+      aspect-ratio: 1 / 1;
+      background-color: none;
+    }
+
+    .muted {
+      color: var(--text-muted);
+    }
+
+    .selected {
+      background-color: var(--brand-primary);
+    }
+  }
+}

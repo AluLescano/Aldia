@@ -1,34 +1,46 @@
+// DEPENDENCIES
 import { useState } from 'react'
 
-// HOOKS
-import { useSettingsStore } from '@/features/settings/store'
+// STORES
+import { useSettingsStore } from '@/features/settings/store/settingsStore'
+
+// UTILS
+import { DEFAULT_CURRENCIES, getCurrencySymbol } from '@/shared/lib/currencies'
 
 // COMPONENTS
-import MonthlyExpensesSkeleton from './MonthylExpensesSkeleton'
-import CurrencyPicker from '@/features/settings/components/CurrencyPicker'
+import MonthlyExpensesSkeleton from './MonthlyExpensesSkeleton'
+import CurrencyPicker from '@/shared/ui/CurrencyPicker/CurrencyPicker'
 import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
 import Typography from '@/shared/ui/Typography/Typography'
 import Pill from '@/shared/ui/Pill/Pill'
 
 // ASSETS
-import { DEFAULT_CURRENCIES } from '@/shared/lib/currencies'
-
 import styles from './MonthlyExpenses.module.scss'
 
 interface Props {
   title?: string
-  monthlyAmount?: string
+  /** Monthly cost, already converted to the selected currency. */
+  monthlyAmount?: number
+  /** How many subscriptions are active, for the line under the amount. */
   subscriptionAmount?: number
+  /** Optional small line under the count, e.g. when rates are old or missing. */
+  note?: string
   isLoading?: boolean
 }
 
+/**
+ * The Home header: monthly total in the selected currency, the active count, and the
+ * currency pill that opens a sheet to switch currency (saved in the settings store).
+ */
 const MonthlyExpenses = ({
   title = 'Gastos Mensuales',
-  monthlyAmount = '0,00',
+  monthlyAmount = 0,
   subscriptionAmount = 0,
-  isLoading
+  note,
+  isLoading,
 }: Props) => {
-  const { container, currencyPill } = styles
+  const { container, currencyPill, header, flagWrapper, flag, amounts, currencyRate } =
+    styles
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { selectedCurrency, setSelectedCurrency } = useSettingsStore()
 
@@ -39,19 +51,17 @@ const MonthlyExpenses = ({
   const subAmount = `${String(subscriptionAmount)} subscripciones activas`
 
   if (isLoading) {
-    return <MonthlyExpensesSkeleton/>
+    return <MonthlyExpensesSkeleton />
   }
 
   return (
     <>
-      <div className={`${container} p-6`}>
-        <div className="flex items-center justify-between">
+      <div className={container}>
+        <div className={header}>
           <Typography variant="overline">{title}</Typography>
           <Pill onClick={() => setIsSheetOpen(true)} className={currencyPill}>
-            <span className="flex items-center gap-1.5">
-              <span
-                className={`fi fi-${currentCountryCode} fi text-xs rounded-full inline-block`}
-              />
+            <span className={flagWrapper}>
+              <span className={`fi fi-${currentCountryCode} fi ${flag}`} />
               <Typography variant="label" size="small">
                 {selectedCurrency}
               </Typography>
@@ -59,13 +69,22 @@ const MonthlyExpenses = ({
           </Pill>
         </div>
 
-        <div className="mt-2 flex flex-col gap-2">
-          <Typography variant="currency" size="large">
+        <div className={amounts}>
+          <Typography
+            variant="currency"
+            size="large"
+            currencySymbol={getCurrencySymbol(selectedCurrency)}
+          >
             {monthlyAmount}
           </Typography>
           <Typography variant="body" size="medium">
             {subAmount}
           </Typography>
+          {note && (
+            <Typography variant="body" size="small" className={currencyRate}>
+              {note}
+            </Typography>
+          )}
         </div>
       </div>
 

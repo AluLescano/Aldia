@@ -1,0 +1,241 @@
+// DEPENDENCIES
+import { type SubmitEvent, useRef, useState } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+
+// HOOKS
+import { useSubscriptionForm } from '../../hooks/useSubscriptionForm'
+
+// STORES
+import { useCategoryStore } from '@/features/categories/store/categoryStore'
+
+// UTILS
+import { formatBillingCycle } from '../../utils/billingCycle'
+import { getCurrencySymbol } from '@/shared/lib/currencies'
+
+// COMPONENTS
+import Avatar from '@/shared/ui/Avatar/Avatar'
+import InputText from '@/shared/ui/InputText/InputText'
+import InputAmount from '@/shared/ui/InputAmount/InputAmount'
+import InputSelect from '@/shared/ui/InputSelect/InputSelect'
+import InputDate from '@/shared/ui/InputDate/InputDate'
+import Switch from '@/shared/ui/Switch/Switch'
+import Button from '@/shared/ui/Button/Button'
+import FormRow from './FormRow'
+import SubscriptionFormSheets, { type SheetName } from './SubscriptionFormSheets'
+
+// TYPES
+import type { SubscriptionFormValues } from '../../types'
+
+// ASSETS
+import { IconArrow } from '@/assets/icons/IconArrow'
+
+import styles from './SubscriptionForm.module.scss'
+
+interface Props {
+  /** Starting values. Read once: to reset the form, give it a new `key`. */
+  initialValues: SubscriptionFormValues
+  /** Text of the submit button, e.g. "Guardar". */
+  submitLabel: string
+  /** View mode: every control is disabled and the submit button is hidden. */
+  readOnly?: boolean
+  /** Called with the values only when the whole form is valid. */
+  onSubmit: (values: SubscriptionFormValues) => void
+}
+
+/**
+ * The subscription form used to create, view and edit a subscription.
+ * Its state and rules live in `useSubscriptionForm`; its pickers in `SubscriptionFormSheets`.
+ */
+const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Props) => {
+  const {
+    fieldSet,
+    logoWrapper,
+    container,
+    collapse,
+    buttonContainer,
+    buttonNotification,
+  } = styles
+
+  const form = useSubscriptionForm(initialValues)
+  const { values, isValid, hasEndDate, trialDays, setField, touch, touchAll, errorFor } =
+    form
+
+  const [openSheet, setOpenSheet] = useState<SheetName | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  const reduceMotion = useReducedMotion()
+
+  const categoryName = useCategoryStore(
+    (state) => state.categories.find((c) => c.id === values.categoryId)?.name ?? '',
+  )
+
+  const billingLabel =
+    trialDays !== undefined
+      ? `Prueba ${trialDays} d · ${formatBillingCycle(values.billingCycle)}`
+      : formatBillingCycle(values.billingCycle)
+
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    touchAll()
+    if (isValid) {
+      onSubmit(values)
+      return
+    }
+    // The errors render on the next frame, then the first invalid field exists in the DOM
+    requestAnimationFrame(() => {
+      const first = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      first?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      first?.focus({ preventScroll: true })
+    })
+  }
+
+  return (
+    <form ref={formRef} onSubmit={handleSubmit}>
+      <fieldset disabled={readOnly} className={fieldSet}>
+        <div className={logoWrapper}>
+          <Avatar
+            src={values.iconUrl}
+            iconKey={values.iconKey}
+            name={values.name}
+            size="large"
+          />
+        </div>
+
+        <div className={container}>
+          <FormRow label="Nombre">
+            <InputText
+              size="medium"
+              width="fit"
+              value={values.name}
+              onChange={(event) => setField('name', event.currentTarget.value)}
+              onBlur={() => touch('name')}
+              errorMessage={errorFor('name')}
+            />
+          </FormRow>
+          <FormRow label="Formato del Cobro">
+            <InputSelect
+              size="medium"
+              width="auto"
+              placeholder="Formato del Cobro"
+              value={billingLabel}
+              onClick={() => setOpenSheet('billingCycle')}
+              errorMessage={errorFor('billingCycle')}
+            />
+          </FormRow>
+          <FormRow label="Inicio del Cobro">
+            <InputDate
+              size="medium"
+              width="fit"
+              value={values.firstBillDate}
+              onClick={() => setOpenSheet('firstBillDate')}
+              errorMessage={errorFor('firstBillDate')}
+              disabled={values.trial !== undefined} // the trial end decides the first charge
+            />
+          </FormRow>
+          <FormRow label="Fin del Cobro">
+            <Switch
+              checked={hasEndDate}
+              onChange={form.toggleEndDate}
+              label="Tiene fecha de fin"
+            />
+          </FormRow>
+          <AnimatePresence initial={false}>
+            {hasEndDate && (
+              <motion.div
+                key="end-date"
+                className={collapse}
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeInOut' }}
+              >
+                <FormRow label="Fecha de fin del cobro">
+                  <InputDate
+                    size="medium"
+                    width="fit"
+                    value={values.endDate ?? ''}
+                    onClick={() => setOpenSheet('endDate')}
+                    errorMessage={errorFor('endDate')}
+                  />
+                </FormRow>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className={container}>
+          <FormRow label="Tipo de Moneda">
+            <InputSelect
+              size="medium"
+              width="auto"
+              placeholder="Moneda"
+              value={values.currency}
+              onClick={() => setOpenSheet('currency')}
+              errorMessage={errorFor('currency')}
+            />
+          </FormRow>
+          <FormRow label="Monto">
+            <InputAmount
+              size="medium"
+              width="fit"
+              value={values.price}
+              // The symbol of the currency picked in this form; '$' if none is picked yet
+              currencySymbol={values.currency ? getCurrencySymbol(values.currency) : '$'}
+              onChange={(event) => setField('price', event.currentTarget.value)}
+              onBlur={() => touch('price')}
+              errorMessage={errorFor('price')}
+            />
+          </FormRow>
+        </div>
+
+        <div className={container}>
+          {/* Reminders sheet comes with the notifications work */}
+          <FormRow label="Notificaciones">
+            <Button size="small" className={buttonNotification}>
+              <IconArrow />
+            </Button>
+          </FormRow>
+        </div>
+
+        <div className={container}>
+          <FormRow label="Categoría">
+            <InputSelect
+              size="medium"
+              width="auto"
+              placeholder="Categoría"
+              value={categoryName}
+              onClick={() => setOpenSheet('categoryId')}
+              errorMessage={errorFor('categoryId')}
+            />
+          </FormRow>
+          {/* Payment methods come with the Cards screen */}
+          <FormRow label="Cobrado en">
+            <InputSelect
+              size="medium"
+              width="fit"
+              placeholder="Cobrado en"
+              value={values.paymentMethodId ?? ''}
+              onClick={() => {}}
+              disabled
+            />
+          </FormRow>
+        </div>
+
+        {!readOnly && (
+          <div className={buttonContainer}>
+            <Button width="full" size="large" type="submit" aria-disabled={!isValid}>
+              {submitLabel}
+            </Button>
+          </div>
+        )}
+      </fieldset>
+
+      <SubscriptionFormSheets
+        form={form}
+        openSheet={openSheet}
+        onClose={() => setOpenSheet(null)}
+      />
+    </form>
+  )
+}
+
+export default SubscriptionForm

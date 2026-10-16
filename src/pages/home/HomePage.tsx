@@ -1,132 +1,104 @@
 // DEPENDENCIES
-import React, { useState } from 'react'
+import { AnimatePresence } from 'motion/react'
+
+// STORES
+import { useUIStore } from '@/shared/store/uiStore'
+import { useRatesStore } from '@/shared/store/ratesStore'
+import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
+import { useSettingsStore } from '@/features/settings/store/settingsStore'
+
+// UTILS
+import { getMonthlyTotal } from '@/features/subscriptions/utils/monthlyTotal'
+import { formatDate } from '@/shared/lib/formatDate'
+import { todayISO } from '@/shared/lib/isoDate'
 
 // COMPONENTS
+import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
+import Toast from '@/shared/ui/Toast/Toast'
 import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses/MonthlyExpenses'
 import SubscriptionList from '@/features/homepage/components/SubscriptionList/SubscriptionList'
-
-// TYPES
-import type { Subscription } from '@/shared/types'
 
 // ASSETS
 import { IconAdd } from '@/assets/icons/IconAdd'
 import { IconUndo } from '@/assets/icons/IconUndo'
-import { AnimatePresence } from 'motion/react'
-import Toast from '@/shared/ui/Toast/Toast'
-import Typography from '@/shared/ui/Typography/Typography'
 
-const MOCKED_SUBS: Subscription[] = [
-  {
-    id: 'claude-pro',
-    name: 'Claude Pro',
-    price: 20.0,
-    currency: 'USD',
-    billingCycle: 'monthly',
-    firstBillDate: '2026-10-02',
-    nextBillDate: '2026-11-01',
-    categoryId: 'AI & Tools',
-    reminders: [],
-    brandColor: '#D97706',
-    iconUrl: '/logos/logo_claude.webp',
-    status: 'inactive',
-    createdAt: '2026-10-02',
-  },
-  {
-    id: 'midjourney',
-    name: 'Midjourney',
-    price: 10.0,
-    currency: 'USD',
-    billingCycle: 'monthly',
-    firstBillDate: '2026-10-05',
-    nextBillDate: '2026-11-05',
-    categoryId: 'AI & Tools',
-    reminders: [],
-    brandColor: '#8f06d9c8',
-    iconUrl: '/logos/logo_midjourney.webp',
-    status: 'active',
-    createdAt: '2026-10-02',
-  },
-  {
-    id: 'spotify',
-    name: 'Spotify',
-    price: 3.98,
-    currency: 'USD',
-    billingCycle: 'monthly',
-    firstBillDate: '2026-09-28',
-    nextBillDate: '2026-10-28',
-    categoryId: 'Entertaiment',
-    reminders: [],
-    brandColor: '#22d906',
-    iconUrl: '/logos/logo_spotify.webp',
-    status: 'active',
-    createdAt: '2026-09-28',
-  },
-]
+import styles from './HomePage.module.scss'
 
-export const HomePage: React.FC = () => {
-  const [pendingDelete, setPendingDelete] = useState<Subscription | null>(null)
-  const [subs, setSubs] = useState(MOCKED_SUBS)
+/** The main tab: monthly total, the subscription list, the undo toast and the add button. */
+export const HomePage = () => {
+  const {
+    container,
+    header,
+    toastContent,
+    undoButton,
+    fabWrapper,
+    fabContainer,
+    fabButton,
+  } = styles
 
-  const NonDeletedSubList = subs.filter((sub) => sub.id !== pendingDelete?.id)
-  const ActiveSubsAmount = NonDeletedSubList.filter(
-    (sub) => sub.status == 'active',
-  ).length
-  const MonthlyCost = () => {
-    let sum = 0
-    NonDeletedSubList.forEach((sub) => {
-      if (sub.status == 'active') {
-        sum += sub.price
-      }
-    })
-    return sum.toString()
-  }
+  const subs = useSubscriptionStore((state) => state.subscriptions)
+  const deleteSubscription = useSubscriptionStore((state) => state.deleteSubscription)
+  const lastDeleted = useSubscriptionStore((state) => state.lastDeleted)
+  const undoDelete = useSubscriptionStore((state) => state.undoDelete)
+  const clearLastDeleted = useSubscriptionStore((state) => state.clearLastDeleted)
+  const pushOverlay = useUIStore((state) => state.pushOverlay)
+  const selectedCurrency = useSettingsStore((state) => state.selectedCurrency)
+  const rates = useRatesStore((state) => state.rates)
+
+  const activeCount = subs.filter((sub) => sub.status === 'active').length
+  const { total, converted, unconverted } = getMonthlyTotal(subs, selectedCurrency, rates)
+
+  // Honest numbers: say when part of the total is missing or uses old rates
+  const totalNote =
+    unconverted > 0
+      ? `${unconverted} sin sumar: faltan tasas de cambio`
+      : converted > 0 && rates && rates.date < todayISO()
+        ? `Tasas del ${formatDate(rates.date)}`
+        : undefined
+
   return (
-    <div className="flex flex-col gap-6">
-      <MonthlyExpenses
-        title="Gastos Mensuales"
-        monthlyAmount={MonthlyCost()}
-        subscriptionAmount={ActiveSubsAmount}
-      />
+    <div className={container}>
+      <header className={header}>
+        <MonthlyExpenses
+          title="Gastos Mensuales"
+          monthlyAmount={total}
+          subscriptionAmount={activeCount}
+          note={totalNote}
+        />
+      </header>
 
       <SubscriptionList
-        subscriptions={NonDeletedSubList}
-        onDelete={(sub) => setPendingDelete(sub)}
+        subscriptions={subs}
+        onDelete={(sub) => deleteSubscription(sub.id)}
       />
       <AnimatePresence>
-        {pendingDelete && (
+        {lastDeleted && (
           <Toast
             position="bottom"
             type="success"
-            onDismiss={() => {
-              console.log(`Permanently deleting ${pendingDelete.id}...`)
-              setSubs(subs.filter(sub => sub.id !== pendingDelete.id))
-              setPendingDelete(null) // <--- CRITICAL FIX! Hide the toast
-            }}
+            onDismiss={clearLastDeleted}
             message={
-              <div className="flex w-full items-center justify-between mr-3">
-                <Typography variant='body' size='small' >
-                  {`Se eliminó ${pendingDelete.name} exitosamente`}
+              <div className={toastContent}>
+                <Typography variant="body" size="medium">
+                  {`Se eliminó ${lastDeleted.name} exitosamente`}
                 </Typography>
-                <button
-                  onClick={() => setPendingDelete(null)} // Cancel the delete
-                  className="flex items-center gap-1 hover:text-[#7BAA39] transition-colors"
-                >
-                  <IconUndo classname="w-5 h-5" />
-                </button>
+                <Button onClick={undoDelete} className={undoButton} aria-label="Deshacer">
+                  <IconUndo />
+                </Button>
               </div>
             }
           />
         )}
       </AnimatePresence>
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md pointer-events-none z-30 px-5 flex justify-end">
-        <div className="pointer-events-auto">
+      <div className={fabWrapper}>
+        <div className={fabContainer}>
           <Button
             variant="primary"
             size="large"
             aria-label="Agregar Subscripción"
-            onClick={() => console.log('Add subscription clicked')}
-            className="!rounded-full !py-6"
+            onClick={() => pushOverlay('preset-picker')}
+            className={fabButton}
           >
             <IconAdd />
           </Button>

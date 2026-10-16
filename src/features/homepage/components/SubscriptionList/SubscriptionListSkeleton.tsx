@@ -1,24 +1,29 @@
 // ASSETS
 import styles from './SubscriptionList.module.scss'
 
+/** Grey placeholder shapes of the filter tabs and cards, shown while the list loads (`isLoading`). */
 const SubscriptionListSkeleton = () => {
-  const { skeleton, skeletonElement } = styles
+  const {
+    skeletonList,
+    skeletonFilters,
+    skeletonFilter,
+    skeletonCards,
+    skeletonTitle,
+    skeletonCard,
+  } = styles
   return (
-    <div className="flex flex-col w-full gap-3">
-      <div className={`flex gap-2 mb-3`}>
+    <div className={skeletonList}>
+      <div className={skeletonFilters}>
         {/* Filter section */}
         {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index}
-            className={`w-full p-3 rounded-2xl ${skeleton} animate-pulse`}
-          />
+          <div key={index} className={skeletonFilter} />
         ))}
       </div>
       {/* Card section */}
-      <div className={`flex flex-col w-full gap-3 pt-3 pb-7 px-2 rounded-xl ${skeleton} animate-pulse`}>
-        <div className={`w-40 p-2.75 rounded-lg ${skeletonElement}`} />
+      <div className={skeletonCards}>
+        <div className={skeletonTitle} />
         {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className={`h-15 rounded-2xl ${skeletonElement} `} />
+          <div key={index} className={skeletonCard} />
         ))}
       </div>
     </div>

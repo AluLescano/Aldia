@@ -2,6 +2,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
 
+// UTILS
+import { cn } from '@/shared/lib/cn'
+
+// COMPONENTS
+import Button from '../Button/Button'
+
 // ASSETS
 import { IconAlert } from '@/assets/icons/IconAlert'
 import { IconInfo } from '@/assets/icons/IconInfo'
@@ -11,14 +17,24 @@ import { IconClose } from '@/assets/icons/IconClose'
 import styles from './Toast.module.scss'
 
 interface Props {
+  /** Usually a `Typography`; can hold a button too (the undo toast). */
   message: ReactNode
+  /** Sets the icon and the progress bar color. Defaults to `info`. */
   type?: 'success' | 'alert' | 'info'
+  /** `top` slides in from the side, `bottom` rises from below. */
   position?: 'top' | 'bottom'
+  /** Milliseconds before it closes by itself. Defaults to 5000. */
   duration?: number
+  /** Called by the close button and when the time runs out. */
   onDismiss: () => void
   className?: string
 }
 
+/**
+ * A short message that closes by itself, with a bar showing the time left. Touching
+ * it (or hovering on desktop) pauses the countdown. Render it inside `AnimatePresence`
+ * so it can animate out.
+ */
 const Toast = ({
   message,
   type = 'info',
@@ -27,11 +43,22 @@ const Toast = ({
   onDismiss,
   className = '',
 }: Props) => {
-  const { container } = styles
+  const {
+    container,
+    iconAlert,
+    iconSuccess,
+    iconInfo,
+    positionTop,
+    positionBottom,
+    contentWrapper,
+    closeWrapper,
+    closeButton,
+    progressBar,
+  } = styles
   const icon = {
-    alert: <IconAlert classname="w-5 h-5" />,
-    success: <IconSuccess classname="w-5 h-5" />,
-    info: <IconInfo classname="w-5 h-5" />,
+    alert: <IconAlert className={iconAlert} />,
+    success: <IconSuccess className={iconSuccess} />,
+    info: <IconInfo className={iconInfo} />,
   }[type]
 
   const progressBarColor = {
@@ -41,15 +68,17 @@ const Toast = ({
   }[type]
 
   const positionData = {
-    top: { 
-      initial: { y: -20, opacity: 0 }, 
-      exit: { y: -20, opacity: 0 }, 
-      className: 'fixed top-6 right-4'
+    top: {
+      initial: { x: '120%', opacity: 0 },
+      animate: { x: 0, opacity: 1 },
+      exit: { x: '120%', opacity: 0 },
+      className: positionTop,
     },
-    bottom: { 
-      initial: { y: 10, opacity: 0 }, 
-      exit: { y: 10, opacity: 0 }, 
-      className: 'fixed bottom-36 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(448px-2rem)]' 
+    bottom: {
+      initial: { y: 20, opacity: 0 },
+      animate: { y: 0, opacity: 1 },
+      exit: { y: 20, opacity: 0 },
+      className: positionBottom,
     },
   }[position]
 
@@ -92,39 +121,33 @@ const Toast = ({
   return (
     <motion.div
       initial={positionData.initial}
-      animate={{ x: 0, y: 60, opacity: 1 }}
+      animate={positionData.animate}
       exit={positionData.exit}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
-      className={`z-50 flex items-center justify-between py-3.5 px-4 ${container} rounded-xl shadow-2xl overflow-hidden ${positionData.className} ${className}`}
+      className={cn(container, positionData.className, className)}
     >
-      <div className="flex w-full items-center gap-3">
+      <div className={contentWrapper}>
         {icon}
-        <>
-          {message}
-        </>
+        <>{message}</>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button 
-          onClick={onDismiss} 
-          className="p-1 text-zinc-400 hover:text-white transition-colors"
-          aria-label="Close"
-        >
-          <IconClose classname="w-5 h-5" />
-        </button>
+      <div className={closeWrapper}>
+        <Button onClick={onDismiss} className={closeButton} aria-label="Close">
+          <IconClose />
+        </Button>
       </div>
 
       {/* Status Timer bar at the absolute bottom edge */}
       <div
-        className="absolute bottom-0 left-0 h-1 w-full"
-        style={{ 
-          backgroundColor: progressBarColor, 
+        className={progressBar}
+        style={{
+          backgroundColor: progressBarColor,
           animation: `shrink ${duration}ms linear forwards`,
-          animationPlayState: isPaused ? 'paused' : 'running'
+          animationPlayState: isPaused ? 'paused' : 'running',
         }}
       />
     </motion.div>

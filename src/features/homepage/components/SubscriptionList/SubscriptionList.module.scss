@@ -1,38 +1,210 @@
-.skeleton {
-    background-color: var(--bg-surface);
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0.75rem;
 
-    .skeletonElement {
+  .skeletonFilters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+
+    .skeletonFilter {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      background-color: var(--bg-surface);
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  }
+
+  .skeletonCards {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+    padding: 0.75rem 0.5rem 1.75rem;
+    border-radius: 0.75rem;
+    background-color: var(--bg-surface);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    .skeletonTitle {
+      width: 10rem;
+      padding: 0.6875rem;
+      border-radius: 0.5rem;
       background-color: var(--bg-surface-elevated);
     }
+
+    .skeletonCard {
+      height: 3.75rem;
+      border-radius: 1rem;
+      background-color: var(--bg-surface-elevated);
+    }
+  }
+}
+
+.wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 1rem;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.filterPill {
+  flex-shrink: 0;
 }
 
 .container {
-    background-color: var(--bg-surface);
-    padding: 0.75rem 0.5rem 1.75rem;
-    box-shadow: 0 10px 15px 1px var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  background-color: var(--bg-surface);
+  padding: 0.75rem 0.5rem 1.75rem;
+  box-shadow: 0 10px 15px 1px var(--shadow-md);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  flex-shrink: 0;
+}
+
+.listArea {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  width: 100%;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 1px dashed var(--border-subtle);
+  padding: 2rem;
+  text-align: center;
+  height: 100%;
+}
+
+.emptyStateIcon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border-subtle);
+}
+
+.cardsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  vertical-align: middle;
+  width: 100%;
+}
+
+.cardMotionWrapper {
+  width: 100%;
+}
+
+.cardWrapper {
+  position: relative;
+  width: 100%;
+  height: max-content;
+  border-radius: 1rem;
+  touch-action: pan-y;
+  background-color: #ef4444;
+
+  .deleteLayer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    z-index: 0;
+
+    .deleteButton {
+      display: flex;
+      width: 3rem;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      padding: 0;
+
+      .deleteIcon {
+        width: 1.5rem;
+        aspect-ratio: 1 / 1;
+        color: var(--text-on-error);
+        z-index: 10;
+      }
+    }
+  }
 }
 
 .subscriptionContainer {
   position: relative;
+  display: flex;
+  width: 100%;
+  height: max-content;
+  align-items: center;
+  border-radius: 1rem;
+  padding: 0.75rem;
   overflow: hidden;
   background-color: var(--bg-surface-elevated);
-  box-shadow: 0px 10px 15px 1px var(--shadow-md);
   transition:
     box-shadow 200ms ease-out,
     background-color 200ms ease-out;
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--accent-color, transparent) 30%, transparent) 0%,
-      transparent 55%
-    );
-    pointer-events: none;
-    border-radius: inherit;
-    z-index: 0;
+  z-index: 10;
+
+  & > div:first-child {
+    position: relative;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-evenly;
+    isolation: isolate;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -2rem auto -2rem -2rem;
+      width: 25%;
+      background: var(--image) center / cover;
+      filter: blur(50px) saturate(2);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: -1;
+    }
   }
 
   > * {
@@ -46,6 +218,48 @@
   }
 
   &.disabled {
-    filter: #{"grayscale(80%)"};
+    filter: grayscale(80%);
   }
+}
+
+.cardImg {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+
+  // A long name ends in "…" instead of pushing the price out of the card
+  & > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Grows with the amount (no fixed width: "$ 15.130,69" did not fit in 5rem) and right-aligns,
+// so prices still line up in a column
+.cardPrice {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-left: 0.5rem;
+  white-space: nowrap;
+}
+
+// What the card is really charged, under the converted amount
+.originalPrice {
+  color: var(--text-muted);
+}
+
+.opacity50 {
+  opacity: 0.5;
 }

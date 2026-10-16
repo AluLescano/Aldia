@@ -1,27 +1,22 @@
-import { useRef, useState, type ButtonHTMLAttributes } from 'react'
+// DEPENDENCIES
+import { useRef, useState, type ButtonHTMLAttributes, type MouseEvent } from 'react'
+
+// UTILS
+import { cn } from '@/shared/lib/cn'
 
 // ASSETS
 import styles from './Button.module.scss'
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+/** Everything a native `<button>` accepts, plus the look of the design system. */
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** `primary`: filled brand color, for the main action. `secondary`: quieter. Defaults to `primary`. */
   variant?: 'primary' | 'secondary'
+  /** Height and padding. Defaults to `large`. */
   size?: 'large' | 'medium' | 'small'
+  /** `full` stretches to the container, `fit` hugs the content. Defaults to `fit`. */
   width?: 'full' | 'fit'
   className?: string
 }
-
-const { ButtonPrimary, ButtonSecondary } = styles
-
-const BUTTON_SIZE_CLASSES = {
-  large: 'min-h-[3rem] py-3 px-6',
-  medium: 'min-h-[2.5rem] py-2 px-4',
-  small: 'min-h-[2rem] py-1 px-3',
-} as const
-
-const BUTTON_VARIANTS = {
-  primary: ButtonPrimary,
-  secondary: ButtonSecondary,
-} as const
 
 interface Ripple {
   id: number
@@ -29,6 +24,29 @@ interface Ripple {
   y: number
 }
 
+const {
+  ButtonPrimary,
+  ButtonSecondary,
+  sizeLarge,
+  sizeMedium,
+  sizeSmall,
+  widthFull,
+  widthFit,
+  base,
+  ripple,
+} = styles
+
+// Built once when the file loads, not on every render
+const sizeClasses = { large: sizeLarge, medium: sizeMedium, small: sizeSmall }
+const widthClasses = { full: widthFull, fit: widthFit }
+const variantClasses = { primary: ButtonPrimary, secondary: ButtonSecondary }
+
+/**
+ * The app's button for actions ("Guardar", "Agregar"...), with a ripple on every tap.
+ * Defaults to `type="button"`, so it never submits a form by accident; pass
+ * `type="submit"` for that. For icon-only buttons use `IconButton`; for the inside
+ * of a form field use a plain `<button>` (the field owns that look).
+ */
 const Button = ({
   variant = 'primary',
   size = 'large',
@@ -42,7 +60,8 @@ const Button = ({
   const [ripples, setRipples] = useState<Ripple[]>([])
   const rippleIdRef = useRef(0)
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  // Each tap adds a ripple where the finger landed; it removes itself when its animation ends
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect()
     const newRipple: Ripple = {
       id: rippleIdRef.current++,
@@ -54,7 +73,7 @@ const Button = ({
   }
 
   const removeRipple = (id: number) => {
-    setRipples((prev) => prev.filter((ripple) => ripple.id !== id))
+    setRipples((prev) => prev.filter((r) => r.id !== id))
   }
 
   return (
@@ -62,15 +81,21 @@ const Button = ({
       {...rest}
       type={type}
       onClick={handleClick}
-      className={`${BUTTON_SIZE_CLASSES[size]} ${BUTTON_VARIANTS[variant]} ${width === 'full' ? 'w-full' : 'w-fit'} rounded-xl ${className}`}
+      className={cn(
+        sizeClasses[size],
+        variantClasses[variant],
+        widthClasses[width],
+        base,
+        className,
+      )}
     >
       {children}
-      {ripples.map((ripple) => (
+      {ripples.map((r) => (
         <span
-          key={ripple.id}
-          className={styles.ripple}
-          style={{ left: ripple.x, top: ripple.y }}
-          onAnimationEnd={() => removeRipple(ripple.id)}
+          key={r.id}
+          className={ripple}
+          style={{ left: r.x, top: r.y }}
+          onAnimationEnd={() => removeRipple(r.id)}
         />
       ))}
     </button>

@@ -1,35 +1,49 @@
 // ==========================================
-// APP RELATED
+// APP
 // ==========================================
 
+/** The bottom navigation tabs. */
 export type TabType = 'home' | 'calendar' | 'statistics' | 'cards' | 'settings'
 
 // ==========================================
-// CURRENCIES AND ADJUSTMENTS
+// CURRENCIES
 // ==========================================
+
+/** The currencies offered by default. */
 export type DefaultCurrencyCode = 'USD' | 'EUR' | 'ARS' | 'CLP' | 'GBP'
+/**
+ * Any ISO currency code. `(string & {})` keeps autocomplete for the defaults while
+ * still accepting other codes ("BRL", "MXN"...).
+ */
 export type CurrencyCode = DefaultCurrencyCode | (string & {})
 
 export interface Currency {
   code: CurrencyCode
   name: string
+  /** Shown before amounts: "U$S", "€", "$". */
   symbol: string
-  countryCode: string // flag-icons (ej: 'us', 'eu', 'ar')
+  /** flag-icons code for the little flag, e.g. 'us', 'eu', 'ar'. */
+  countryCode: string
 }
 
 // ==========================================
 // CATEGORIES
 // ==========================================
+
 export interface Category {
+  /** Slug for defaults ('entertainment'), `custom-<id>` for the user's own. */
   id: string
   name: string
-  color: string // Hex for Statistics page
+  /** Hex color, for the Statistics charts. */
+  color: string
+  /** Created by the user (defaults have no flag). */
   isCustom?: boolean
 }
 
 // ==========================================
-// PAYMENT METHODS / CARDS
+// PAYMENT METHODS / CARDS (Cards screen, not built yet)
 // ==========================================
+
 export type PaymentMethodType = 'credit' | 'bank_account'
 export type CardBrand = 'visa' | 'mastercard' | 'amex' | 'discover' | 'generic'
 
@@ -37,51 +51,72 @@ export interface PaymentMethod {
   id: string
   name: string
   type: PaymentMethodType
-  brand?: CardBrand // Optional for Bank Accounts
-  last4Digits?: string // Optional to differentiate between cards
-  expiryDate?: string // MM/YY - Cards Only
+  /** Only for cards. */
+  brand?: CardBrand
+  /** To tell two cards of the same bank apart. */
+  last4Digits?: string
+  /** `MM/YY`, cards only. */
+  expiryDate?: string
 }
 
 // ==========================================
-// NOTIFICATIONS / REMINDERS
+// NOTIFICATIONS / REMINDERS (not built yet)
 // ==========================================
+
 export interface SubscriptionReminder {
   id: string
-  daysBefore: number // 0 = same day, 1 = 1 day before
-  time: string // HH:MM AM/PM
-  target: 'billing' | 'trial_end' // Notify billing or trial ending
+  /** 0 = the same day, 1 = the day before... */
+  daysBefore: number
+  /** Time of day to notify, `HH:MM`. */
+  time: string
+  /** Remind about the charge, or about the end of the free trial. */
+  target: 'billing' | 'trial_end'
   isEnabled: boolean
 }
 
 // ==========================================
-// SUBSCRIPTIONS / PAYMENT METHODS
+// SUBSCRIPTIONS
 // ==========================================
-export type BillingCycle =
-  | 'one-time'
-  | 'weekly'
-  | 'monthly'
-  | 'bimonthly'
-  | 'semiannual'
-  | 'yearly'
 
+export type BillingUnit = 'day' | 'week' | 'month' | 'year'
+
+/**
+ * How often a subscription charges: once, or every N days / weeks / months / years.
+ * Check `type` first: only `'every'` has `interval` and `unit`.
+ */
+export type BillingCycle =
+  { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
+
+/** `trial`: in its free trial · `active`: paying · `inactive`: paused by the user. */
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
 export interface TrialConfig {
-  startDate: string // YYYY-MM-DD
-  endDate: string // YYYY-MM-DD
+  /** `YYYY-MM-DD` */
+  startDate: string
+  /** `YYYY-MM-DD`. The first charge is on this day. */
+  endDate: string
 }
+
+/** Built-in icons for bills without a logo (see `shared/lib/icons.tsx`). */
+export type IconKey = 'electricity' | 'water' | 'gas' | 'phone' | 'rent' | 'internet'
 
 export interface Subscription {
   id: string
   name: string
+  /** Per cycle, in `currency`. */
   price: number
   currency: CurrencyCode
   billingCycle: BillingCycle
 
-  // Fechas de cobro y vigencia
-  firstBillDate: string // YYYY-MM-DD
-  nextBillDate: string // YYYY-MM-DD
-  endDate?: string // YYYY-MM-DD
+  /** `YYYY-MM-DD`. Every charge is counted from this one. */
+  firstBillDate: string
+  /**
+   * `YYYY-MM-DD`, saved when the subscription is saved, so it goes stale.
+   * For display, calculate it: `nextBillDate(firstBillDate, billingCycle, todayISO())`.
+   */
+  nextBillDate: string
+  /** `YYYY-MM-DD`. No charges after this day. */
+  endDate?: string
 
   trial?: TrialConfig
 
@@ -90,21 +125,27 @@ export interface Subscription {
 
   reminders: SubscriptionReminder[]
 
-  // Branding
+  /** A logo path like '/logos/logo_netflix.webp'. */
   iconUrl?: string
-  brandColor?: string
+  /** A built-in icon, for bills without a logo. */
+  iconKey?: IconKey
 
   status: SubscriptionStatus
+  /** ISO date and time of creation. */
   createdAt: string
 }
 
 // ==========================================
-// SUBSCRIPTION TEMPLATES / PRESETS
+// PRESETS (the ready-made subscriptions of the picker)
 // ==========================================
-export interface SubscriptionTemplate {
+
+export interface Preset {
   id: string
   name: string
-  defaultCategoryId?: string
-  iconUrl: string
-  brandColor?: string
+  /** Company names the search also matches (e.g. 'edenor' finds "Electricidad"). */
+  keywords?: string[]
+  defaultCategoryId: string
+  /** A logo path like '/logos/logo_netflix.webp'. */
+  iconUrl?: string
+  iconKey?: IconKey
 }

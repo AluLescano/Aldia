@@ -1,18 +1,22 @@
 @use './variables' as *;
 
+// Success has no color of its own: saving is the app's happy path, so it uses the brand green.
+
 :root {
   // ==========================================
   // LIGHT MODE (Default)
   // ==========================================
 
-  /* 1. Surfaces, Shadows, Buttons, Dividers */
+  /* 1. Surfaces, Shadows, Dividers */
   --bg-app: #{$paper-100};
   --bg-surface: #{$paper-50};
   --bg-surface-elevated: #{$paper-0};
   --bg-surface-subtle: #{$phthalo-100};
   --border-subtle: #{rgba($color-black, 0.06)};
   --border-strong: #{$paper-300};
+  --border-input: #{$paper-500};
   --border-featured: #{rgba($phthalo-400, 0.4)};
+  --focus-ring: #{$phthalo-400};
 
   --shadow-sm: #{rgba($phthalo-600, 0.06)};
   --shadow-md: #{rgba($phthalo-600, 0.08)};
@@ -24,21 +28,13 @@
   --overlay-hover: #{rgba($color-black, 0.04)};
   --overlay-press: #{rgba($color-black, 0.08)};
 
-  --button-primary-bg: #{$phthalo-600};
-  --button-primary-bg-hover: #{$phthalo-700};
-  --button-secondary-bg: #{$paper-0};
-  --button-secondary-border: #{$paper-300};
-  --button-secondary-text: #{$phthalo-600};
-  --button-disabled-bg: #{rgba($phthalo-600, 0.08)};
-  --button-disabled-text: #{rgba($phthalo-600, 0.35)};
-
-  /* 2. Text & Icons — derived as opacity steps of one ink color */
+  /* 2. Text & Icons */
   --text-primary: #{$phthalo-700};
-  --text-secondary: #{rgba($phthalo-700, 0.68)};
-  --text-muted: #{rgba($phthalo-700, 0.45)};
+  --text-secondary: #{$ink-600};
+  --text-muted: #{$ink-500};
   --text-disabled: #{rgba($phthalo-700, 0.28)};
   --text-on-brand: #{$color-white};
-  --text-accent: #{$champagne-700};
+  --text-accent: #{$champagne-800};
 
   --icon-default: #{rgba($phthalo-700, 0.75)};
   --icon-hover: #{$phthalo-600};
@@ -50,7 +46,14 @@
   --brand-subtle: #{$phthalo-100};
   --brand-on-subtle: #{$phthalo-600};
 
-  /* 4. Gradients */
+  /* 4. Error */
+  --error-fill: #{$brick-500};
+  --text-on-error: #{$color-white};
+  --error-bg: #{$brick-100};
+  --error-border: #{$brick-500};
+  --error-text: #{$brick-700};
+
+  /* 5. Gradients */
   --gradient-hero: radial-gradient(
     120% 100% at 20% 0%,
     #{rgba($phthalo-200, 0.4)},
@@ -63,16 +66,21 @@
     transparent
   ); // scrollable filter-tab edge mask
 
-  /* 5. Toasts */
-  --toast-success-bg: #{$success-100};
-  --toast-success-border: #{$success-500};
-  --toast-success-text: #{$success-700};
-  --toast-success-icon: #{$success-500};
+  /* 6. Toasts */
+  --toast-success-bg: #{$phthalo-100};
+  --toast-success-border: #{$phthalo-400};
+  --toast-success-text: #{$phthalo-600};
+  --toast-success-icon: #{$phthalo-400};
 
-  --toast-warning-bg: #{$warning-100};
-  --toast-warning-border: #{$warning-400};
-  --toast-warning-text: #{$warning-700};
-  --toast-warning-icon: #{$warning-400};
+  --toast-warning-bg: #{$amber-100};
+  --toast-warning-border: #{$amber-400};
+  --toast-warning-text: #{$amber-700};
+  --toast-warning-icon: #{$amber-400};
+
+  --toast-error-bg: #{$brick-100};
+  --toast-error-border: #{$brick-500};
+  --toast-error-text: #{$brick-700};
+  --toast-error-icon: #{$brick-500};
 }
 
 [data-theme='dark'] {
@@ -80,14 +88,16 @@
   // DARK MODE
   // ==========================================
 
-  /* 1. Surfaces, Shadows, Buttons, Dividers */
+  /* 1. Surfaces, Shadows, Dividers */
   --bg-app: #{$charcoal-900};
   --bg-surface: #{$charcoal-800};
   --bg-surface-elevated: #{$charcoal-700};
   --bg-surface-subtle: #{rgba($phthalo-400, 0.12)};
   --border-subtle: #{rgba($color-white, 0.08)};
   --border-strong: #{$charcoal-500};
+  --border-input: #{$charcoal-300};
   --border-featured: #{rgba($phthalo-400, 0.5)};
+  --focus-ring: #{$phthalo-300};
 
   --shadow-sm: #{rgba($color-black, 0.4)};
   --shadow-md: #{rgba($color-black, 0.5)};
@@ -99,32 +109,32 @@
   --overlay-hover: #{rgba($color-white, 0.06)};
   --overlay-press: #{rgba($color-white, 0.12)};
 
-  --button-primary-bg: #{$phthalo-400};
-  --button-primary-bg-hover: #{$phthalo-300};
-  --button-secondary-bg: #{$color-white};
-  --button-secondary-border: transparent;
-  --button-secondary-text: #{$phthalo-700};
-  --button-disabled-bg: #{rgba($color-white, 0.06)};
-  --button-disabled-text: #{rgba($color-white, 0.25)};
-
   /* 2. Text & Icons */
   --text-primary: #{$paper-0};
-  --text-muted: #{rgba($paper-0, 0.45)};
+  --text-secondary: #{$bone-300};
+  --text-muted: #{$bone-400};
   --text-disabled: #{rgba($paper-0, 0.25)};
   --text-on-brand: #{$color-white};
-  --text-accent: #{$champagne-100};
+  --text-accent: #{$champagne-300};
 
   --icon-default: #{rgba($paper-0, 0.75)};
   --icon-hover: #{$phthalo-300};
   --icon-muted: #{rgba($paper-0, 0.35)};
 
   /* 3. Brand */
-  --brand-primary: #{$phthalo-400};
-  --brand-primary-hover: #{$phthalo-300};
+  --brand-primary: #{$phthalo-500};
+  --brand-primary-hover: #{$phthalo-400};
   --brand-subtle: #{rgba($phthalo-400, 0.15)};
   --brand-on-subtle: #{$phthalo-300};
 
-  /* 4. Gradients */
+  /* 4. Error */
+  --error-fill: #{$brick-300};
+  --text-on-error: #{$color-white};
+  --error-bg: #{rgba($brick-300, 0.14)};
+  --error-border: #{$brick-300};
+  --error-text: #{$brick-300};
+
+  /* 5. Gradients */
   --gradient-hero: radial-gradient(
     120% 100% at 20% 0%,
     #{rgba($phthalo-400, 0.35)},
@@ -133,14 +143,19 @@
   --gradient-sheen: linear-gradient(180deg, #{rgba($color-white, 0.06)}, transparent 40%);
   --gradient-edge-fade: linear-gradient(90deg, #{$charcoal-900}, transparent);
 
-  /* 5. Toasts */
-  --toast-success-bg: #{rgba($success-500, 0.15)};
-  --toast-success-border: #{$success-500};
-  --toast-success-text: #{$success-100};
-  --toast-success-icon: #{$success-500};
+  /* 6. Toasts */
+  --toast-success-bg: #{rgba($phthalo-300, 0.15)};
+  --toast-success-border: #{$phthalo-300};
+  --toast-success-text: #{$phthalo-100};
+  --toast-success-icon: #{$phthalo-300};
 
-  --toast-warning-bg: #{rgba($warning-400, 0.15)};
-  --toast-warning-border: #{$warning-400};
-  --toast-warning-text: #{$warning-100};
-  --toast-warning-icon: #{$warning-400};
+  --toast-warning-bg: #{rgba($amber-400, 0.15)};
+  --toast-warning-border: #{$amber-400};
+  --toast-warning-text: #{$amber-100};
+  --toast-warning-icon: #{$amber-400};
+
+  --toast-error-bg: #{rgba($brick-300, 0.14)};
+  --toast-error-border: #{$brick-300};
+  --toast-error-text: #{$brick-100};
+  --toast-error-icon: #{$brick-300};
 }
