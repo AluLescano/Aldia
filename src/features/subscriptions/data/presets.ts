@@ -1,15 +1,6 @@
-import type { IconKey } from '../types'
+import type { Preset } from '@/shared/types'
 
-export interface PresetSubscription {
-  id: string
-  name: string
-  keywords?: string[]
-  defaultCategoryId: string
-  iconUrl?: string // path like '/logos/netflix.svg'
-  iconKey?: IconKey
-}
-
-export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
+export const PRESET_SUBSCRIPTIONS: Preset[] = [
   {
     id: 'adobe-creative-cloud',
     name: 'Adobe Creative Cloud',
@@ -162,7 +153,7 @@ export const PRESET_SUBSCRIPTIONS: PresetSubscription[] = [
       'wom',
       'gtd',
     ],
-    defaultCategoryId: 'home',
+    defaultCategoryId: 'bills',
     iconKey: 'internet',
   },
   {

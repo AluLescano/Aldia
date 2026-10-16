@@ -8,7 +8,7 @@ import { useUIStore } from '@/shared/store/uiStore'
 import { normalizeText } from '@/shared/lib/normalizeText'
 
 // DATA
-import { PRESET_SUBSCRIPTIONS } from '@/shared/lib/presets'
+import { PRESET_SUBSCRIPTIONS } from '@/features/subscriptions/data/presets'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'

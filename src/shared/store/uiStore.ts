@@ -1,12 +1,12 @@
 import { create } from 'zustand'
-import type { SubscriptionTemplate } from '@/shared/types'
+import type { Preset } from '@/shared/types'
 
 export type OverlayType = 'preset-picker' | 'subscription-form'
 
 interface OverlayContext {
   type: OverlayType
   data?: {
-    preset?: SubscriptionTemplate
+    preset?: Preset
     subscriptionId?: string
   }
 }

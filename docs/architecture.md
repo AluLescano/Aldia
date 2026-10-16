@@ -26,18 +26,26 @@ The codebase is organized by business features rather than generic file types. T
 
 ```text
 src/
-├── App.tsx                   # Tab switch (TabType), bottom nav and overlay renderer
+├── App.tsx                   # Tab switch (TabType), bottom nav, overlay renderer, toast host
 ├── main.tsx
-├── assets/icons/             # Icon* components (SVG)
+├── assets/icons/             # Icon* components on the shared Icon base (24px, stroke 2)
 │
 ├── features/                 # Domain-driven feature modules
+│   ├── categories/
+│   │   ├── categoryStore.ts  # Zustand + persist (aldia_categories_v1), OTHERS_ID
+│   │   ├── components/       # CategoryPicker, CategoryFooter
+│   │   ├── hooks/            # useCategoryEditor (add / rename / delete state)
+│   │   └── utils/            # validateCategoryName
 │   ├── homepage/
 │   │   └── components/       # MonthlyExpenses, SubscriptionList, SubscriptionCard, skeletons
 │   ├── subscriptions/
-│   │   ├── components/       # PresetCard
-│   │   └── store/            # subscriptionStore.ts (Zustand + persist)
+│   │   ├── components/       # SubscriptionForm, BillingCyclePicker, PresetCard, PauseToggleIcon
+│   │   ├── data/             # presets.ts (the preset picker list)
+│   │   ├── hooks/            # useSubscriptionActions (pause, delete)
+│   │   ├── store/            # subscriptionStore.ts (Zustand + persist)
+│   │   ├── utils/            # billingCycle, validation, form <-> subscription mapping, status
+│   │   └── types.ts          # SubscriptionFormValues, FormErrors
 │   ├── settings/
-│   │   ├── components/       # CurrencyPicker
 │   │   └── store.ts          # useSettingsStore (selected + favorite currencies)
 │   └── navigation/
 │       └── components/       # BottomNavBar
@@ -49,12 +57,14 @@ src/
 │   ├── cards/CardsPage.tsx
 │   ├── statistics/StatisticsPage.tsx
 │   ├── settings/SettingsPage.tsx
-│   └── presetPicker/PresetPicker.tsx   # Opened as an overlay, not a tab
+│   ├── presetPicker/PresetPicker.tsx              # Overlay, not a tab
+│   └── subscriptionForm/SubscriptionFormPage.tsx  # Overlay: new, detail and edit
 │
 ├── shared/                   # Generic code that has NO domain knowledge
-│   ├── ui/                   # Button, BottomSheet, BackdropFilter, Pill, Toast, Typography
-│   ├── lib/                  # currencies.ts, presets.ts, storage.ts
-│   ├── store/                # uiStore.ts (overlay stack)
+│   ├── ui/                   # Button, Field, Input*, Switch, BottomSheet, DatePicker, CurrencyPicker, Avatar, Toast, Typography...
+│   ├── hooks/                # useFieldIds, useShake
+│   ├── lib/                  # isoDate, calendar, currencies, formatDate, id, icons, normalizeText, storage
+│   ├── store/                # uiStore.ts (overlay stack), toastStore.ts (app toast)
 │   └── types/                # index.ts (all domain types)
 │
 └── styles/                   # _variables.scss (design tokens) and _themes.scss (light/dark)
@@ -71,7 +81,9 @@ All domain types are strictly typed in `src/shared/types/index.ts`. That file is
 ### A. Subscription Entity
 
 ```typescript
-export type BillingCycle = 'one-time' | 'weekly' | 'monthly' | 'bimonthly' | 'semiannual' | 'yearly'
+export type BillingUnit = 'day' | 'week' | 'month' | 'year'
+export type BillingCycle =
+  { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
 export interface Subscription {
@@ -91,7 +103,7 @@ export interface Subscription {
   reminders: SubscriptionReminder[]
 
   iconUrl?: string
-  brandColor?: string
+  iconKey?: IconKey // built-in icon for bills (electricity, water, gas, phone, rent, internet)
   status: SubscriptionStatus
   createdAt: string
 }
@@ -124,7 +136,7 @@ export interface Category {
 }
 ```
 
-### D. Currency, Reminders and Templates
+### D. Currency, Reminders and Presets
 
 ```typescript
 export interface Currency {
@@ -142,12 +154,13 @@ export interface SubscriptionReminder {
   isEnabled: boolean
 }
 
-export interface SubscriptionTemplate {
+export interface Preset {
   id: string
   name: string
-  defaultCategoryId?: string
-  iconUrl: string
-  brandColor?: string
+  keywords?: string[] // company names the search also matches
+  defaultCategoryId: string
+  iconUrl?: string
+  iconKey?: IconKey
 }
 ```
 
@@ -159,8 +172,10 @@ User preferences currently live in `useSettingsStore` (`selectedCurrency`, `favo
 
 State lives in **Zustand** stores:
 
-- `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription`, `updateSubscription`. Uses the `persist` middleware, so it saves itself to `localStorage` under `aldia_subscriptions_v1`.
+- `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription` (keeps `lastDeleted` for the undo toast), `undoDelete`, `updateSubscription`, `reassignCategory`. Uses the `persist` middleware, so it saves itself to `localStorage` under `aldia_subscriptions_v1`.
 - `useSettingsStore` (`features/settings/store.ts`): selected and favorite currencies. Loads from and saves to `localStorage` by hand through `shared/lib/storage.ts`, under `aldia_settings`.
+- `useCategoryStore` (`features/categories/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Persisted under `aldia_categories_v1`.
+- `useToastStore` (`shared/store/toastStore.ts`): the one app-wide toast, rendered by `App.tsx`.
 - `useUIStore` (`shared/store/uiStore.ts`): a stack of overlays (`preset-picker`, `subscription-form`) with `pushOverlay`, `popOverlay` and `closeAllOverlays`. `App.tsx` renders the top of the stack.
 
 Why Zustand: no Redux boilerplate (`actions`, `reducers`, `dispatch`), an out-of-the-box `persist` middleware, and components only re-render for the state slices they select.
@@ -176,7 +191,7 @@ Data is saved under versioned keys:
 - `aldia_subscriptions_v1` (in use)
 - `aldia_settings` (in use)
 - `aldia_cards_v1` (planned)
-- `aldia_categories_v1` (planned)
+- `aldia_categories_v1` (in use)
 
 ### Backup JSON Format (planned)
 

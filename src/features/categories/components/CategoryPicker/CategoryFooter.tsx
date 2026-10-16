@@ -1,5 +1,5 @@
 // TYPES
-import type { CategoryEditor } from '@/features/categories/useCategoryEditor'
+import type { CategoryEditor } from '@/features/categories/hooks/useCategoryEditor'
 
 // COMPONENTS
 import Button from '@/shared/ui/Button/Button'

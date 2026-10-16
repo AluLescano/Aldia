@@ -5,15 +5,13 @@ import { useState } from 'react'
 import { useUIStore } from '@/shared/store/uiStore'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 import { useSettingsStore } from '@/features/settings/store'
-import { useToastStore } from '@/features/subscriptions/store/toastStore'
-
-// ANIMATIONS
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+import { useToastStore } from '@/shared/store/toastStore'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
 import SubscriptionForm from '@/features/subscriptions/components/SubscriptionForm/SubscriptionForm'
+import PauseToggleIcon from '@/features/subscriptions/components/PauseToggleIcon/PauseToggleIcon'
 
 // HOOKS
 import { useSubscriptionActions } from '@/features/subscriptions/hooks/useSubscriptionActions'
@@ -27,40 +25,18 @@ import { formValuesToSubscriptionData } from '@/features/subscriptions/utils/for
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 
 // TYPES
-import type { SubscriptionFormValues } from '@/features/subscriptions/utils/validateSubscriptionForm'
-import type { SubscriptionTemplate } from '@/shared/types'
+import type { SubscriptionFormValues } from '@/features/subscriptions/types'
+import type { Preset } from '@/shared/types'
 
 // ASSETS
 import { IconArrow } from '@/assets/icons/IconArrow'
-import { IconPause } from '@/assets/icons/IconPause'
-import { IconPlay } from '@/assets/icons/IconPlay'
 import { IconEdit } from '@/assets/icons/IconEdit'
 import { IconDelete } from '@/assets/icons/IconDelete'
 
 import styles from './SubscriptionFormPage.module.scss'
 
-// Pause and play swap with a small turn: the old icon leaves, then the new one comes in
-const PauseToggleIcon = ({ isPaused }: { isPaused: boolean }) => {
-  const reduceMotion = useReducedMotion()
-
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.span
-        key={isPaused ? 'play' : 'pause'}
-        style={{ display: 'grid' }}
-        initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
-        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-        exit={{ opacity: 0, scale: 0.5, rotate: 90 }}
-        transition={{ duration: reduceMotion ? 0 : 0.15 }}
-      >
-        {isPaused ? <IconPlay /> : <IconPause />}
-      </motion.span>
-    </AnimatePresence>
-  )
-}
-
 interface Props {
-  preset?: SubscriptionTemplate
+  preset?: Preset
   subscriptionId?: string
 }
 

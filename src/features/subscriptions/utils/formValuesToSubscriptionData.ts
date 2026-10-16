@@ -2,7 +2,8 @@ import { todayISO } from '@/shared/lib/isoDate'
 import type { Subscription } from '@/shared/types'
 
 import { nextBillDate } from './billingCycle'
-import { parsePrice, type SubscriptionFormValues } from './validateSubscriptionForm'
+import type { SubscriptionFormValues } from '../types'
+import { parsePrice } from './validateSubscriptionForm'
 
 // Everything a form can produce. The id, the status and the creation date are not form fields.
 export type SubscriptionData = Omit<Subscription, 'id' | 'status' | 'createdAt'>

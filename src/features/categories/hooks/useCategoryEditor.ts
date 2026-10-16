@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import type { Category } from '@/shared/types'
-import { useCategoryStore } from './categoryStore'
-import { validateCategoryName } from './utils/validateCategoryName'
+import { useCategoryStore } from '../categoryStore'
+import { validateCategoryName } from '../utils/validateCategoryName'
 
 export type EditorMode =
   | { type: 'view' }

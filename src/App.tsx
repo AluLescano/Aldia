@@ -11,7 +11,7 @@ import type { TabType } from '@/shared/types'
 
 // HOOKS
 import { useUIStore } from './shared/store/uiStore'
-import { useToastStore } from './features/subscriptions/store/toastStore'
+import { useToastStore } from '@/shared/store/toastStore'
 
 // ANIMATIONS
 import { AnimatePresence } from 'motion/react'

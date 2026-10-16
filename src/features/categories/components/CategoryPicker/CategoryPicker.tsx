@@ -6,7 +6,7 @@ import { OTHERS_ID, useCategoryStore } from '@/features/categories/categoryStore
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 
 // TYPES
-import type { CategoryEditor } from '@/features/categories/useCategoryEditor'
+import type { CategoryEditor } from '@/features/categories/hooks/useCategoryEditor'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'

@@ -1,5 +1,5 @@
 import type { Subscription } from '@/shared/types'
-import type { SubscriptionFormValues } from './validateSubscriptionForm'
+import type { SubscriptionFormValues } from '../types'
 
 export const subscriptionToFormValues = (sub: Subscription): SubscriptionFormValues => ({
   name: sub.name,

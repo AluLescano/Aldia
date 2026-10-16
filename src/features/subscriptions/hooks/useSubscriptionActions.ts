@@ -1,5 +1,5 @@
 import { useUIStore } from '@/shared/store/uiStore'
-import { useToastStore } from '@/features/subscriptions/store/toastStore'
+import { useToastStore } from '@/shared/store/toastStore'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 import { todayISO } from '@/shared/lib/isoDate'
 import type { Subscription } from '@/shared/types'

@@ -1,12 +1,10 @@
 // HOOKS
 import { type ReactNode, type SubmitEvent, useRef, useState } from 'react'
-import { useCategoryEditor } from '@/features/categories/useCategoryEditor'
+import { useCategoryEditor } from '@/features/categories/hooks/useCategoryEditor'
 
 // TYPES
-import {
-  validateSubscriptionForm,
-  type SubscriptionFormValues,
-} from '../../utils/validateSubscriptionForm'
+import type { SubscriptionFormValues } from '../../types'
+import { validateSubscriptionForm } from '../../utils/validateSubscriptionForm'
 
 // DATA
 import { addCycles, formatBillingCycle } from '../../utils/billingCycle'
@@ -28,8 +26,8 @@ import BillingCyclePicker, {
 } from '../BillingCyclePicker/BillingCyclePicker'
 import DatePicker from '@/shared/ui/DatePicker/DatePicker'
 import CurrencyPicker from '@/shared/ui/CurrencyPicker/CurrencyPicker'
-import CategoryPicker from '../CategoryPicker/CategoryPicker'
-import CategoryFooter from '../CategoryPicker/CategoryFooter'
+import CategoryPicker from '@/features/categories/components/CategoryPicker/CategoryPicker'
+import CategoryFooter from '@/features/categories/components/CategoryPicker/CategoryFooter'
 import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
 
 // ANIMATIONS

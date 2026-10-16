@@ -1,37 +1,5 @@
 import { parseISODate, toISODate } from '@/shared/lib/isoDate'
-import type {
-  BillingCycle,
-  CurrencyCode,
-  IconKey,
-  SubscriptionReminder,
-} from '@/shared/types'
-
-export interface SubscriptionFormValues {
-  name: string
-  price: string
-  currency: CurrencyCode | ''
-  billingCycle: BillingCycle
-
-  // Fechas de cobro y vigencia
-  firstBillDate: string // YYYY-MM-DD
-  endDate?: string // YYYY-MM-DD
-
-  trial?: {
-    startDate: string // YYYY-MM-DD
-    endDate: string // YYYY-MM-DD
-  }
-
-  categoryId: string
-  paymentMethodId?: string
-
-  reminders: SubscriptionReminder[]
-
-  // Branding
-  iconUrl?: string
-  iconKey?: IconKey
-}
-
-export type FormErrors = Partial<Record<keyof SubscriptionFormValues, string>>
+import type { FormErrors, SubscriptionFormValues } from '../types'
 
 const isValidDate = (date: string) => {
   const test = parseISODate(date)

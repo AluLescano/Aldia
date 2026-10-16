@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useSettingsStore } from '@/features/settings/store'
 
 // COMPONENTS
-import MonthlyExpensesSkeleton from './MonthylExpensesSkeleton'
+import MonthlyExpensesSkeleton from './MonthlyExpensesSkeleton'
 import CurrencyPicker from '@/shared/ui/CurrencyPicker/CurrencyPicker'
 import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
 import Typography from '@/shared/ui/Typography/Typography'

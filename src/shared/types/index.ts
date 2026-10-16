@@ -97,12 +97,13 @@ export interface Subscription {
 }
 
 // ==========================================
-// SUBSCRIPTION TEMPLATES / PRESETS
+// PRESETS (the ready-made subscriptions of the picker)
 // ==========================================
-export interface SubscriptionTemplate {
+export interface Preset {
   id: string
   name: string
-  defaultCategoryId?: string
-  iconUrl?: string
+  keywords?: string[] // company names the search also matches (e.g. 'edenor')
+  defaultCategoryId: string
+  iconUrl?: string // path like '/logos/logo_netflix.webp'
   iconKey?: IconKey
 }
