@@ -1,52 +1,50 @@
+// DEPENDENCIES
+import { type SubmitEvent, useRef, useState } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+
 // HOOKS
-import { type ReactNode, type SubmitEvent, useRef, useState } from 'react'
-import { useCategoryEditor } from '@/features/categories/hooks/useCategoryEditor'
+import { useSubscriptionForm } from '../../hooks/useSubscriptionForm'
 
-// TYPES
-import type { SubscriptionFormValues } from '../../types'
-import { validateSubscriptionForm } from '../../utils/validateSubscriptionForm'
+// STORES
+import { useCategoryStore } from '@/features/categories/categoryStore'
 
-// DATA
-import { addCycles, formatBillingCycle } from '../../utils/billingCycle'
-import { daysBetween, todayISO } from '@/shared/lib/isoDate'
-import { DEFAULT_CURRENCIES } from '@/shared/lib/currencies'
-import { OTHERS_ID, useCategoryStore } from '@/features/categories/categoryStore'
+// UTILS
+import { formatBillingCycle } from '../../utils/billingCycle'
 
 // COMPONENTS
 import Avatar from '@/shared/ui/Avatar/Avatar'
-import FormRow from './FormRow'
 import InputText from '@/shared/ui/InputText/InputText'
 import InputAmount from '@/shared/ui/InputAmount/InputAmount'
 import InputSelect from '@/shared/ui/InputSelect/InputSelect'
 import InputDate from '@/shared/ui/InputDate/InputDate'
 import Switch from '@/shared/ui/Switch/Switch'
 import Button from '@/shared/ui/Button/Button'
-import BillingCyclePicker, {
-  type BillingChoice,
-} from '../BillingCyclePicker/BillingCyclePicker'
-import DatePicker from '@/shared/ui/DatePicker/DatePicker'
-import CurrencyPicker from '@/shared/ui/CurrencyPicker/CurrencyPicker'
-import CategoryPicker from '@/features/categories/components/CategoryPicker/CategoryPicker'
-import CategoryFooter from '@/features/categories/components/CategoryPicker/CategoryFooter'
-import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
+import FormRow from './FormRow'
+import SubscriptionFormSheets, { type SheetName } from './SubscriptionFormSheets'
 
-// ANIMATIONS
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
+// TYPES
+import type { SubscriptionFormValues } from '../../types'
 
 // ASSETS
 import { IconArrow } from '@/assets/icons/IconArrow'
 
 import styles from './SubscriptionForm.module.scss'
 
-type SheetName = 'billingCycle' | 'firstBillDate' | 'endDate' | 'currency' | 'categoryId' // add the others when they exist
-
 interface Props {
+  /** Starting values. Read once: to reset the form, give it a new `key`. */
   initialValues: SubscriptionFormValues
+  /** Text of the submit button, e.g. "Guardar". */
   submitLabel: string
+  /** View mode: every control is disabled and the submit button is hidden. */
   readOnly?: boolean
+  /** Called with the values only when the whole form is valid. */
   onSubmit: (values: SubscriptionFormValues) => void
 }
 
+/**
+ * The subscription form used to create, view and edit a subscription.
+ * Its state and rules live in `useSubscriptionForm`; its pickers in `SubscriptionFormSheets`.
+ */
 const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Props) => {
   const {
     fieldSet,
@@ -56,165 +54,28 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
     buttonContainer,
     buttonNotification,
   } = styles
-  const [values, setValues] = useState(initialValues)
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof SubscriptionFormValues, boolean>>
-  >({})
-  const [hasEndDate, setHasEndDate] = useState(Boolean(initialValues.endDate))
 
-  const errors = validateSubscriptionForm(values)
-  const reduceMotion = useReducedMotion()
+  const form = useSubscriptionForm(initialValues)
+  const { values, isValid, hasEndDate, trialDays, setField, touch, touchAll, errorFor } =
+    form
 
   const [openSheet, setOpenSheet] = useState<SheetName | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const reduceMotion = useReducedMotion()
 
   const categoryName = useCategoryStore(
     (state) => state.categories.find((c) => c.id === values.categoryId)?.name ?? '',
   )
 
-  // The hook lives here, not inside the picker, so the sheet footer can use it too.
-  // Because the form owns it, it does not reset by itself when the sheet closes (see closeSheet).
-  const categoryEditor = useCategoryEditor({
-    onCreated: (category) => pick('categoryId', category.id),
-    onDeleted: (id) => {
-      if (id === values.categoryId) pick('categoryId', OTHERS_ID)
-    },
-  })
-
-  const closeSheet = (field: keyof SubscriptionFormValues) => {
-    setTouched((current) => ({ ...current, [field]: true }))
-    setOpenSheet(null)
-    categoryEditor.reset() // reopening the category sheet always starts in the plain list
-  }
-
-  const trialDays = values.trial
-    ? daysBetween(values.trial.startDate, values.trial.endDate)
-    : undefined
-
-  const handleBillingChange = (choice: BillingChoice) => {
-    setValues((current) => ({
-      ...current,
-      billingCycle:
-        choice.mode === 'one-time'
-          ? { type: 'one-time' }
-          : { type: 'every', interval: choice.interval, unit: choice.unit },
-    }))
-  }
-
-  const handleTrialChange = (days: number | undefined) => {
-    setValues((current) => {
-      if (days === undefined) {
-        // Trial off: the first charge goes back to when the trial started (today)
-        return {
-          ...current,
-          trial: undefined,
-          firstBillDate: current.trial?.startDate ?? current.firstBillDate,
-        }
-      }
-      const startDate = todayISO()
-      const endDate = addCycles(
-        startDate,
-        { type: 'every', interval: days, unit: 'day' },
-        1,
-      )
-      return { ...current, trial: { startDate, endDate }, firstBillDate: endDate }
-    })
-  }
-
-  const pick = <K extends keyof SubscriptionFormValues>(
-    field: K,
-    value: SubscriptionFormValues[K],
-  ) => {
-    setValues((current) => ({ ...current, [field]: value }))
-    closeSheet(field)
-  }
-
-  const handleEndDateToggle = (checked: boolean) => {
-    setHasEndDate(checked)
-    setValues((current) => ({
-      ...current,
-      endDate: checked
-        ? current.billingCycle
-          ? addCycles(current.firstBillDate, current.billingCycle, 1)
-          : current.firstBillDate
-        : undefined,
-    }))
-    setTouched((current) => ({ ...current, endDate: false }))
-  }
-
-  const sheets: Record<
-    SheetName,
-    { title?: string; content: ReactNode; footer?: ReactNode }
-  > = {
-    billingCycle: {
-      title: 'Formato del cobro',
-      content: (
-        <BillingCyclePicker
-          cycle={values.billingCycle}
-          trialDays={trialDays}
-          onChange={handleBillingChange}
-          onTrialChange={handleTrialChange}
-        />
-      ),
-    },
-    firstBillDate: {
-      content: (
-        <DatePicker
-          value={values.firstBillDate}
-          onSelect={(iso) => pick('firstBillDate', iso)}
-        />
-      ),
-    },
-    endDate: {
-      content: (
-        <DatePicker
-          value={values.endDate ?? values.firstBillDate}
-          min={addCycles(
-            values.firstBillDate,
-            { type: 'every', interval: 1, unit: 'day' },
-            1,
-          )}
-          onSelect={(iso) => pick('endDate', iso)}
-        />
-      ),
-    },
-    currency: {
-      title: 'Tipo de moneda',
-      content: (
-        <CurrencyPicker
-          currencies={DEFAULT_CURRENCIES}
-          selectedCode={values.currency}
-          onSelect={(code) => pick('currency', code)}
-        />
-      ),
-    },
-    categoryId: {
-      title: 'Categoría',
-      content: (
-        <CategoryPicker
-          value={values.categoryId}
-          onSelect={(id) => pick('categoryId', id)}
-          editor={categoryEditor}
-        />
-      ),
-      footer: <CategoryFooter editor={categoryEditor} />,
-    },
-  }
-
-  const sheet = openSheet ? sheets[openSheet] : null
+  const billingLabel =
+    trialDays !== undefined
+      ? `Prueba ${trialDays} d · ${formatBillingCycle(values.billingCycle)}`
+      : formatBillingCycle(values.billingCycle)
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setTouched({
-      name: true,
-      billingCycle: true,
-      firstBillDate: true,
-      endDate: true,
-      currency: true,
-      price: true,
-      categoryId: true,
-    })
-    if (Object.keys(errors).length === 0) {
+    touchAll()
+    if (isValid) {
       onSubmit(values)
       return
     }
@@ -237,33 +98,26 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             size="large"
           />
         </div>
+
         <div className={container}>
           <FormRow label="Nombre">
             <InputText
               size="medium"
               width="fit"
               value={values.name}
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setValues((current) => ({ ...current, name: value }))
-                setTouched((current) => ({ ...current, name: false }))
-              }}
-              onBlur={() => setTouched((current) => ({ ...current, name: true }))}
-              errorMessage={touched.name ? errors.name : undefined}
+              onChange={(event) => setField('name', event.currentTarget.value)}
+              onBlur={() => touch('name')}
+              errorMessage={errorFor('name')}
             />
           </FormRow>
           <FormRow label="Formato del Cobro">
             <InputSelect
               size="medium"
               width="auto"
-              placeholder={'Formato del Cobro'}
-              value={
-                trialDays !== undefined
-                  ? `Prueba ${trialDays} d · ${formatBillingCycle(values.billingCycle)}`
-                  : formatBillingCycle(values.billingCycle)
-              }
+              placeholder="Formato del Cobro"
+              value={billingLabel}
               onClick={() => setOpenSheet('billingCycle')}
-              errorMessage={touched.billingCycle ? errors.billingCycle : undefined}
+              errorMessage={errorFor('billingCycle')}
             />
           </FormRow>
           <FormRow label="Inicio del Cobro">
@@ -272,14 +126,14 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               width="fit"
               value={values.firstBillDate}
               onClick={() => setOpenSheet('firstBillDate')}
-              errorMessage={touched.firstBillDate ? errors.firstBillDate : undefined}
-              disabled={values.trial !== undefined}
+              errorMessage={errorFor('firstBillDate')}
+              disabled={values.trial !== undefined} // the trial end decides the first charge
             />
           </FormRow>
           <FormRow label="Fin del Cobro">
             <Switch
               checked={hasEndDate}
-              onChange={handleEndDateToggle}
+              onChange={form.toggleEndDate}
               label="Tiene fecha de fin"
             />
           </FormRow>
@@ -299,7 +153,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
                     width="fit"
                     value={values.endDate ?? ''}
                     onClick={() => setOpenSheet('endDate')}
-                    errorMessage={touched.endDate ? errors.endDate : undefined}
+                    errorMessage={errorFor('endDate')}
                   />
                 </FormRow>
               </motion.div>
@@ -312,10 +166,10 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             <InputSelect
               size="medium"
               width="auto"
-              placeholder={'Moneda'}
+              placeholder="Moneda"
               value={values.currency}
               onClick={() => setOpenSheet('currency')}
-              errorMessage={touched.currency ? errors.currency : undefined}
+              errorMessage={errorFor('currency')}
             />
           </FormRow>
           <FormRow label="Monto">
@@ -323,19 +177,17 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               size="medium"
               width="fit"
               value={values.price}
-              onChange={(event) => {
-                const { value } = event.currentTarget
-                setValues((current) => ({ ...current, price: value }))
-                setTouched((current) => ({ ...current, price: false }))
-              }}
-              onBlur={() => setTouched((current) => ({ ...current, price: true }))}
-              errorMessage={touched.price ? errors.price : undefined}
+              onChange={(event) => setField('price', event.currentTarget.value)}
+              onBlur={() => touch('price')}
+              errorMessage={errorFor('price')}
             />
           </FormRow>
         </div>
+
         <div className={container}>
+          {/* Reminders sheet comes with the notifications work */}
           <FormRow label="Notificaciones">
-            <Button size="small" onClick={() => {}} className={buttonNotification}>
+            <Button size="small" className={buttonNotification}>
               <IconArrow />
             </Button>
           </FormRow>
@@ -346,45 +198,39 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             <InputSelect
               size="medium"
               width="auto"
-              placeholder={'Categoría'}
+              placeholder="Categoría"
               value={categoryName}
               onClick={() => setOpenSheet('categoryId')}
-              errorMessage={touched.categoryId ? errors.categoryId : undefined}
+              errorMessage={errorFor('categoryId')}
             />
           </FormRow>
+          {/* Payment methods come with the Cards screen */}
           <FormRow label="Cobrado en">
             <InputSelect
               size="medium"
               width="fit"
-              placeholder={'Cobrado en'}
+              placeholder="Cobrado en"
               value={values.paymentMethodId ?? ''}
               onClick={() => {}}
-              errorMessage={touched.paymentMethodId ? errors.paymentMethodId : undefined}
               disabled
             />
           </FormRow>
         </div>
+
         {!readOnly && (
           <div className={buttonContainer}>
-            <Button
-              width="full"
-              size="large"
-              type="submit"
-              aria-disabled={Object.keys(errors).length > 0}
-            >
+            <Button width="full" size="large" type="submit" aria-disabled={!isValid}>
               {submitLabel}
-            </Button>{' '}
+            </Button>
           </div>
         )}
       </fieldset>
-      <BottomSheet
-        isOpen={sheet !== null}
-        title={sheet?.title}
-        onClose={() => openSheet && closeSheet(openSheet)}
-        footer={sheet?.footer}
-      >
-        {sheet?.content}
-      </BottomSheet>
+
+      <SubscriptionFormSheets
+        form={form}
+        openSheet={openSheet}
+        onClose={() => setOpenSheet(null)}
+      />
     </form>
   )
 }

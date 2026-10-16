@@ -1,11 +1,20 @@
 import { parseISODate, toISODate } from '@/shared/lib/isoDate'
 import type { FormErrors, SubscriptionFormValues } from '../types'
 
+// A real calendar day: '2026-02-31' has the right shape, but turns into March 3rd and fails
 const isValidDate = (date: string) => {
-  const test = parseISODate(date)
-  return !isNaN(test!.getTime()) && toISODate(test!) === date
+  const parsed = parseISODate(date)
+  return parsed !== null && !isNaN(parsed.getTime()) && toISODate(parsed) === date
 }
 
+/**
+ * Reads a typed price. Accepts a comma or a dot and at most 2 decimals.
+ *
+ * @returns the number, or `null` if the text is not a valid price.
+ * @example
+ * parsePrice('1299,5') // 1299.5
+ * parsePrice('12.345') // null (3 decimals)
+ */
 export function parsePrice(raw: string): number | null {
   const normalized = raw.trim().replace(',', '.')
   if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return null
@@ -13,6 +22,11 @@ export function parsePrice(raw: string): number | null {
   return Number.isFinite(value) ? value : null
 }
 
+/**
+ * Checks the whole form. Pure: no React, no stores.
+ *
+ * @returns one Spanish message per invalid field. An empty object means the form is valid.
+ */
 export function validateSubscriptionForm(values: SubscriptionFormValues): FormErrors {
   const errors: FormErrors = {}
   if (values.name.trim().length === 0) {

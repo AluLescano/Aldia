@@ -1,5 +1,7 @@
-// HOOKS
+// DEPENDENCIES
 import { useState } from 'react'
+
+// UTILS
 import { cn } from '@/shared/lib/cn'
 
 // TYPES
@@ -24,9 +26,6 @@ const {
   wheelItem,
   dimmed,
 } = styles
-
-export type BillingChoice =
-  { mode: 'one-time' } | { mode: 'every'; interval: number; unit: BillingUnit }
 
 const UNITS: { value: BillingUnit; label: string }[] = [
   { value: 'day', label: 'Día' },
@@ -75,17 +74,25 @@ const UnitWheel = ({ value, onChange }: UnitWheelProps) => {
   )
 }
 
-interface BodyProps {
+interface Props {
+  /** The cycle currently saved in the form. */
   cycle: BillingCycle
+  /** Length of the free trial in days, or `undefined` when there is no trial. */
   trialDays?: number
-  onChange: (choice: BillingChoice) => void
+  /** Called on every valid change (no confirm button): the form updates live. */
+  onChange: (cycle: BillingCycle) => void
+  /** Called with the trial length, or `undefined` when the trial is switched off. */
   onTrialChange: (days: number | undefined) => void
 }
 
-// Lives inside the sheet, so its state starts fresh every time the sheet opens
-const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyProps) => {
+/**
+ * Content of the "Formato del cobro" sheet: free trial (on top of the cycle),
+ * one-time payment, or "every N days / weeks / months / years".
+ * It lives inside the sheet, so its typing state starts fresh every time the sheet opens.
+ */
+const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: Props) => {
   const hasTrial = trialDays !== undefined
-  const mode = cycle.type === 'one-time' ? 'one-time' : 'every'
+  const isOneTime = cycle.type === 'one-time'
 
   // The text can be empty or invalid for a moment while typing, so it is kept apart
   const [trialText, setTrialText] = useState(String(trialDays ?? DEFAULT_TRIAL_DAYS))
@@ -103,7 +110,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
 
   const selectEvery = (text = intervalText, nextUnit = unit) => {
     const interval = parsePositive(text)
-    if (interval !== null) onChange({ mode: 'every', interval, unit: nextUnit })
+    if (interval !== null) onChange({ type: 'every', interval, unit: nextUnit })
   }
 
   return (
@@ -143,13 +150,13 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
         </div>
       </div>
       {/* One time payment */}
-      <div className={cn(card, compact, mode === 'one-time' && selected)}>
+      <div className={cn(card, compact, isOneTime && selected)}>
         <button
           type="button"
           className={cardButton}
-          aria-pressed={mode === 'one-time'}
+          aria-pressed={isOneTime}
           aria-label="Pago único"
-          onClick={() => onChange({ mode: 'one-time' })}
+          onClick={() => onChange({ type: 'one-time' })}
         />
         <div className={content}>
           <Typography variant="body" size="medium">
@@ -158,11 +165,11 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
         </div>
       </div>
       {/* Every x days/weeks/months/years */}
-      <div className={cn(card, mode === 'every' && selected)}>
+      <div className={cn(card, !isOneTime && selected)}>
         <button
           type="button"
           className={cardButton}
-          aria-pressed={mode === 'every'}
+          aria-pressed={!isOneTime}
           aria-label="Cobro recurrente"
           onClick={() => selectEvery()}
         />
