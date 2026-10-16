@@ -1,3 +1,5 @@
+import { cn } from '@/shared/lib/cn'
+
 // TYPES
 import type { Currency } from '@/shared/types'
 
@@ -32,7 +34,7 @@ const CurrencyPicker = ({
   } = styles
 
   return (
-    <ul className={`${list} ${className}`}>
+    <ul className={cn(list, className)}>
       {currencies.map((currency) => {
         const isSelected = currency.code === selectedCode
 
@@ -41,11 +43,11 @@ const CurrencyPicker = ({
             <button
               type="button"
               onClick={() => onSelect?.(currency.code)}
-              className={`${button} ${isSelected ? selected : unselected}`}
+              className={cn(button, isSelected ? selected : unselected)}
             >
               {/* Left: Flag + Code + Name */}
               <div className={leftSection}>
-                <span className={`fi fi-${currency.countryCode} fis ${flag}`} />
+                <span className={cn(`fi fi-${currency.countryCode} fis`, flag)} />
                 <div className={currencyInfo}>
                   <Typography variant="label" size="medium">
                     {currency.code}

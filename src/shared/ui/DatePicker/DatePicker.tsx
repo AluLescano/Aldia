@@ -4,6 +4,7 @@ import { useState } from 'react'
 // UTILS
 import { getMonthGrid } from '@/shared/lib/calendar'
 import { parseISODate, todayISO } from '@/shared/lib/isoDate'
+import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -96,7 +97,7 @@ const Selector = ({
       size="small"
       width="fit"
       type="button"
-      className={`${navButton} ${nextArrow}`}
+      className={cn(navButton, nextArrow)}
       aria-label={`${label} siguiente`}
       onClick={onNext}
     >
@@ -175,14 +176,12 @@ const DatePicker = ({ value, min, onSelect }: Props) => {
                 size="small"
                 type="button"
                 disabled={isBeforeMin}
-                className={[
+                className={cn(
                   day,
                   isOutsideMonth && muted,
                   iso === todayIso && today,
                   isSelected && selected,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                )}
                 aria-label={fullDate(iso)}
                 aria-pressed={isSelected}
                 onClick={() => onSelect(iso)}

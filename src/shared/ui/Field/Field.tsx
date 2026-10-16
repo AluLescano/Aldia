@@ -6,6 +6,7 @@ import Typography from '../Typography/Typography'
 
 // ASSETS
 import styles from './Field.module.scss'
+import { cn } from '@/shared/lib/cn'
 
 type Size = 'large' | 'medium'
 type Width = 'full' | 'fit'
@@ -72,16 +73,14 @@ const Field = ({
   // An error replaces the hint, never shows next to it
   const message = errorMessage || subText
 
-  const classes = [
+  const classes = cn(
     base,
     sizeClasses[size],
     widthClasses[width],
     filled && floated,
     errorMessage && errorState,
     className,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  )
 
   return (
     <div>

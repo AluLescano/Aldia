@@ -1,4 +1,5 @@
 import { useRef, useState, type ButtonHTMLAttributes } from 'react'
+import { cn } from '@/shared/lib/cn'
 
 // ASSETS
 import styles from './Button.module.scss'
@@ -77,7 +78,13 @@ const Button = ({
       {...rest}
       type={type}
       onClick={handleClick}
-      className={`${buttonSizeClasses[size]} ${buttonVariants[variant]} ${buttonWidthClasses[width]} ${base} ${className || ''}`.trim()}
+      className={cn(
+        buttonSizeClasses[size],
+        buttonVariants[variant],
+        buttonWidthClasses[width],
+        base,
+        className,
+      )}
     >
       {children}
       {ripples.map((r) => (

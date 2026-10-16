@@ -1,3 +1,5 @@
+import { cn } from '@/shared/lib/cn'
+
 import styles from './Typography.module.scss'
 
 interface TypographyProps {
@@ -65,23 +67,23 @@ const Typography = ({
         medium: titleMedium,
         small: titleSmall,
       }
-      return (
-        <h1 className={`${font} ${titleSizeClasses[size]} ${className}`.trim()}>
-          {children}
-        </h1>
-      )
+      return <h1 className={cn(font, titleSizeClasses[size], className)}>{children}</h1>
     }
 
     case 'body':
-      return (
-        <p className={`${font} ${sizeClasses[size]} ${className}`.trim()}>{children}</p>
-      )
+      return <p className={cn(font, sizeClasses[size], className)}>{children}</p>
 
     case 'overline':
     case 'label':
       return (
         <span
-          className={`${font} ${sizeClasses[size]} ${trackingWidest} ${variant === 'overline' ? uppercase : ''} ${className}`.trim()}
+          className={cn(
+            font,
+            sizeClasses[size],
+            trackingWidest,
+            variant === 'overline' && uppercase,
+            className,
+          )}
         >
           {children}
         </span>
@@ -103,11 +105,11 @@ const Typography = ({
       const { integerPart, decimalPart } = splitCurrency(children)
 
       return (
-        <div className={`${currencyWrapper} ${className}`.trim()}>
-          <span className={`${font} ${currencySizeClasses[size]}`}>{currencySymbol}</span>
-          <span className={`${font} ${currencySizeClasses[size]}`}>{integerPart}</span>
+        <div className={cn(currencyWrapper, className)}>
+          <span className={cn(font, currencySizeClasses[size])}>{currencySymbol}</span>
+          <span className={cn(font, currencySizeClasses[size])}>{integerPart}</span>
           {decimalPart && (
-            <span className={`${font} ${currencyDecimalWrapper} ${decimalSizes[size]}`}>
+            <span className={cn(font, currencyDecimalWrapper, decimalSizes[size])}>
               {decimalPart}
             </span>
           )}

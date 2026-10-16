@@ -1,6 +1,7 @@
 // DEPENDENCIES
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
+import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
 import Button from '../Button/Button'
@@ -115,7 +116,7 @@ const Toast = ({
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
-      className={`${container} ${positionData.className} ${className || ''}`.trim()}
+      className={cn(container, positionData.className, className)}
     >
       <div className={contentWrapper}>
         {icon}

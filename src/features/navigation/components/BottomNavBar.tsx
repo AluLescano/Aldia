@@ -1,5 +1,8 @@
 import React from 'react'
+import { cn } from '@/shared/lib/cn'
+
 import type { TabType } from '@/shared/types'
+
 import styles from './BottomNavBar.module.scss'
 
 interface BottomNavBarProps {
@@ -156,7 +159,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onSelectT
             <button
               key={item.id}
               onClick={() => onSelectTab(item.id)}
-              className={`${navItem} ${isActive ? activeStyle : inactiveStyle}`}
+              className={cn(navItem, isActive ? activeStyle : inactiveStyle)}
             >
               <div className={iconWrapper}>
                 {item.icon(isActive)}

@@ -7,6 +7,7 @@ import { ICONS } from '@/shared/lib/icons'
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
+import { cn } from '@/shared/lib/cn'
 
 // ASSETS
 import styles from './PresetCard.module.scss'
@@ -24,7 +25,7 @@ const PresetCard = ({ name, logo, iconKey, onClick, className }: Props) => {
   const Icon = iconKey ? ICONS[iconKey] : null
 
   return (
-    <Button onClick={onClick} className={`${container} ${className || ''}`}>
+    <Button onClick={onClick} className={cn(container, className)}>
       {logo && <img src={logo} alt="" />}
       {Icon && <Icon />}
       <div className={text}>

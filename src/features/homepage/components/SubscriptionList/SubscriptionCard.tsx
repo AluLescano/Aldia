@@ -1,6 +1,6 @@
 // DEPENDENCIES
 import { motion, useAnimation } from 'motion/react'
-import type { CSSProperties } from 'react'
+import { cn } from '@/shared/lib/cn'
 
 // HOOKS
 import { formatDate } from '@/shared/lib/formatDate'
@@ -12,6 +12,7 @@ import Button from '@/shared/ui/Button/Button'
 import Avatar from '@/shared/ui/Avatar/Avatar'
 
 // TYPES
+import type { CSSProperties } from 'react'
 import type { Subscription } from '@/shared/types'
 
 // ASSETS
@@ -84,26 +85,26 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
             controls.start({ x: 0 })
           }
         }}
-        className={`${subscriptionContainer} ${isDisabled ? disabled : ''}`}
+        className={cn(subscriptionContainer, isDisabled && disabled)}
       >
         <div style={{ '--image': `url("${subscription.iconUrl}")` } as CSSProperties}>
           {subscription.iconUrl ? (
             <img
               src={subscription.iconUrl}
-              className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
+              className={cn(cardImg, isDisabled && opacity50)}
             />
           ) : (
             <Avatar
               iconKey={subscription.iconKey}
               name={subscription.name}
-              className={`${cardImg} ${isDisabled ? opacity50 : ''}`}
+              className={cn(cardImg, isDisabled && opacity50)}
             />
           )}
           <div className={cardInfo}>
             <Typography
               variant="label"
               size="medium"
-              className={isDisabled ? opacity50 : ''}
+              className={cn(isDisabled && opacity50)}
             >
               {subscription.name}
             </Typography>
@@ -117,7 +118,7 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
             <Typography
               variant="currency"
               size="medium"
-              className={isDisabled ? opacity50 : ''}
+              className={cn(isDisabled && opacity50)}
             >
               {subscription.price}
             </Typography>

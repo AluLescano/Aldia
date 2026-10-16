@@ -1,3 +1,5 @@
+import { cn } from '@/shared/lib/cn'
+
 import styles from './Switch.module.scss'
 
 interface Props {
@@ -16,7 +18,7 @@ const Switch = ({ checked, onChange, label, disabled }: Props) => (
     aria-checked={checked}
     aria-label={label}
     disabled={disabled}
-    className={[track, checked && on].filter(Boolean).join(' ')}
+    className={cn(track, checked && on)}
     onClick={() => onChange(!checked)}
   >
     <span className={knob} />

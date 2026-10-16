@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 're
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
+import { cn } from '@/shared/lib/cn'
+
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import BackdropFilter from '../BackdropFilter/BackdropFilter'
@@ -62,9 +64,7 @@ const Panel = ({ onClose, title, children, footer, className }: PanelProps) => {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={[container, isExpanded ? expanded : collapsed, className]
-          .filter(Boolean)
-          .join(' ')}
+        className={cn(container, isExpanded ? expanded : collapsed, className)}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}

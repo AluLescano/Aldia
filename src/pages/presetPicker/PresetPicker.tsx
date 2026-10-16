@@ -21,6 +21,7 @@ import { IconAdd } from '@/assets/icons/IconAdd'
 import { IconSearch } from '@/assets/icons/IconSearch'
 
 import styles from './PresetPicker.module.scss'
+import { cn } from '@/shared/lib/cn'
 
 export const PresetPicker = () => {
   const { container, header, searchbar, button, listContainer, presetGrid } = styles
@@ -69,7 +70,7 @@ export const PresetPicker = () => {
         </div>
       </header>
 
-      <div className={`${listContainer} no-scrollbar`}>
+      <div className={cn(listContainer, `no-scrollbar`)}>
         <div>
           <Typography variant="label" size="small">
             Subscripciones Populares

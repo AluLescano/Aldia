@@ -1,8 +1,10 @@
-import { type CSSProperties, useState } from 'react'
-
 import { ICONS } from '@/shared/lib/icons'
-import { IconQuestion } from '@/assets/icons/IconQuestion'
+import { cn } from '@/shared/lib/cn'
+
+import { type CSSProperties, useState } from 'react'
 import type { IconKey } from '@/shared/types'
+
+import { IconQuestion } from '@/assets/icons/IconQuestion'
 
 import styles from './Avatar.module.scss'
 
@@ -24,7 +26,7 @@ const sizeClasses = {
 const Avatar = ({ src, iconKey, name, size = 'medium', className }: Props) => {
   // Remember WHICH src failed, so a new src gets a fresh try without an effect
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
-  const classes = [base, sizeClasses[size], className].filter(Boolean).join(' ')
+  const classes = cn(base, sizeClasses[size], className)
 
   if (src && failedSrc !== src) {
     return (
@@ -38,7 +40,7 @@ const Avatar = ({ src, iconKey, name, size = 'medium', className }: Props) => {
   const letter = name.trim().charAt(0).toUpperCase()
 
   return (
-    <div className={`${classes} ${fallback}`} aria-hidden="true">
+    <div className={cn(classes, fallback)} aria-hidden="true">
       {Icon ? <Icon /> : letter || <IconQuestion />}
     </div>
   )

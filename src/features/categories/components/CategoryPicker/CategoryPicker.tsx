@@ -1,5 +1,6 @@
 // HOOKS
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { cn } from '@/shared/lib/cn'
 
 // STORE
 import { OTHERS_ID, useCategoryStore } from '@/features/categories/categoryStore'
@@ -91,7 +92,7 @@ const CategoryPicker = ({ value, onSelect, editor }: Props) => {
               ? editRow
               : state === 'deleting'
                 ? confirmRow
-                : `${row} ${isSelected ? selected : ''}`
+                : cn(row, isSelected && selected)
 
           const affected =
             state === 'deleting'

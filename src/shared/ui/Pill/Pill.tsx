@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { cn } from '@/shared/lib/cn'
 
 import styles from './Pill.module.scss'
 
@@ -14,7 +15,7 @@ const Pill = ({ children, className = '', isActive, ...rest }: PillProps) => {
     <button
       {...rest}
       type="button"
-      className={`${container} ${isActive ? active : ''} ${className || ''}`.trim()}
+      className={cn(container, isActive && active, className)}
     >
       {children}
     </button>

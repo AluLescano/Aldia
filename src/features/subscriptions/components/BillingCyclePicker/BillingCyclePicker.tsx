@@ -1,5 +1,6 @@
 // HOOKS
 import { useState } from 'react'
+import { cn } from '@/shared/lib/cn'
 
 // TYPES
 import type { BillingCycle, BillingUnit } from '@/shared/types'
@@ -60,7 +61,7 @@ const UnitWheel = ({ value, onChange }: UnitWheelProps) => {
           <button
             key={unit.value}
             type="button"
-            className={`${wheelItem} ${position === 1 ? '' : dimmed}`}
+            className={cn(wheelItem, position === 1 ? undefined : dimmed)}
             aria-pressed={position === 1}
             onClick={() => onChange(unit.value)}
           >
@@ -108,7 +109,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
   return (
     <div className={list}>
       {/* Trial */}
-      <div className={`${card} ${compact} ${hasTrial ? selected : ''}`}>
+      <div className={cn(card, compact, hasTrial && selected)}>
         <button
           type="button"
           className={cardButton}
@@ -143,7 +144,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
         </div>
       </div>
       {/* One time payment */}
-      <div className={`${card} ${compact} ${mode === 'one-time' ? selected : ''}`}>
+      <div className={cn(card, compact, mode === 'one-time' && selected)}>
         <button
           type="button"
           className={cardButton}
@@ -158,7 +159,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
         </div>
       </div>
       {/* Every x days/weeks/months/years */}
-      <div className={`${card} ${mode === 'every' ? selected : ''}`}>
+      <div className={cn(card, mode === 'every' && selected)}>
         <button
           type="button"
           className={cardButton}
@@ -166,7 +167,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: BodyP
           aria-label="Cobro recurrente"
           onClick={() => selectEvery()}
         />
-        <div className={`${content} ${centered}`}>
+        <div className={cn(content, centered)}>
           <Typography variant="body" size="medium">
             Cada
           </Typography>

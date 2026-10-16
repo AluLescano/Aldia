@@ -1,3 +1,5 @@
+import { cn } from '@/shared/lib/cn'
+
 // ASSETS
 import styles from './MonthlyExpenses.module.scss'
 
@@ -14,11 +16,11 @@ const MonthlyExpensesSkeleton = () => {
   return (
     <div className={skeleton}>
       <div className={skeletonHeader}>
-        <div className={`${skeletonElement} ${skeletonTitle}`} />
-        <div className={`${skeletonElement} ${skeletonPill}`} />
+        <div className={cn(skeletonElement, skeletonTitle)} />
+        <div className={cn(skeletonElement, skeletonPill)} />
       </div>
-      <div className={`${skeletonElement} ${skeletonAmount}`} />
-      <div className={`${skeletonElement} ${skeletonSubtitle}`} />
+      <div className={cn(skeletonElement, skeletonAmount)} />
+      <div className={cn(skeletonElement, skeletonSubtitle)} />
     </div>
   )
 }
