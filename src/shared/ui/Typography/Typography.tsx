@@ -1,13 +1,24 @@
+// UTILS
 import { cn } from '@/shared/lib/cn'
 import { formatAmount } from '@/shared/lib/currencies'
 
+// ASSETS
 import styles from './Typography.module.scss'
 
 interface TypographyProps {
+  /** Defaults to `medium`. */
   size?: 'large' | 'medium' | 'small'
+  /**
+   * - `title`: an `<h1>`.
+   * - `body`: a `<p>` (note: browser paragraph margins apply until the base cleanup).
+   * - `label` / `overline`: a `<span>` with wide letter spacing (`overline` is uppercase).
+   * - `currency`: an amount, symbol + integer + smaller raised decimals.
+   */
   variant: 'title' | 'body' | 'overline' | 'label' | 'currency'
+  /** For `currency`, a number gets thousands dots ("15.130" + "69"). */
   children: string | number
-  currencySymbol?: string // optional: defaults to '$'
+  /** Only for `currency`. Defaults to `$`. */
+  currencySymbol?: string
   className?: string
 }
 
@@ -29,6 +40,13 @@ const splitCurrency = (value: string | number) => {
   return { integerPart: str, decimalPart: undefined }
 }
 
+/**
+ * All the app's text styles in one component, so sizes and weights stay consistent.
+ *
+ * @example
+ * <Typography variant="body" size="small">Hola</Typography>
+ * <Typography variant="currency" size="large" currencySymbol="U$S">{12.5}</Typography>
+ */
 const Typography = ({
   size = 'medium',
   variant,

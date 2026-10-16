@@ -1,19 +1,33 @@
+// DEPENDENCIES
 import { useState } from 'react'
 
-import type { Category } from '@/shared/types'
-import { useCategoryStore } from '../categoryStore'
+// STORES
+import { useCategoryStore } from '../store/categoryStore'
+
+// UTILS
 import { validateCategoryName } from '../utils/validateCategoryName'
 
+// TYPES
+import type { Category } from '@/shared/types'
+
+/** What the category sheet is doing: showing the list, editing a name, or confirming a delete. */
 export type EditorMode =
   | { type: 'view' }
   | { type: 'editing'; id: string | 'new' } // 'new' is the add row
   | { type: 'deleting'; id: string }
 
 interface Options {
-  onCreated: (category: Category) => void // the form selects it
-  onDeleted: (id: string) => void // the form falls back if it was the selected one
+  /** Called with a newly created category (the form selects it). */
+  onCreated: (category: Category) => void
+  /** Called after a delete (the form falls back to "Otros" if it was the selected one). */
+  onDeleted: (id: string) => void
 }
 
+/**
+ * State of the category sheet's add / rename / delete flow. It lives in the sheet's
+ * parent, not in the picker, because the sheet footer (the buttons) needs it too.
+ * `error` is calculated from the draft on every render, so it's never out of date.
+ */
 export function useCategoryEditor({ onCreated, onDeleted }: Options) {
   const categories = useCategoryStore((state) => state.categories)
   const addCategory = useCategoryStore((state) => state.addCategory)
@@ -79,4 +93,5 @@ export function useCategoryEditor({ onCreated, onDeleted }: Options) {
   }
 }
 
+/** Everything `useCategoryEditor` returns, for the picker and the footer to receive as a prop. */
 export type CategoryEditor = ReturnType<typeof useCategoryEditor>

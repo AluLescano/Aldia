@@ -1,4 +1,4 @@
-// ANIMATIONS
+// DEPENDENCIES
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 
 // ASSETS
@@ -6,10 +6,11 @@ import { IconPause } from '@/assets/icons/IconPause'
 import { IconPlay } from '@/assets/icons/IconPlay'
 
 interface Props {
+  /** Paused shows "play" (the action to resume); running shows "pause". */
   isPaused: boolean
 }
 
-// Pause and play swap with a small turn: the old icon leaves, then the new one comes in
+/** The pause/play icon of the detail header. They swap with a small turn: the old one leaves, then the new one comes in. */
 const PauseToggleIcon = ({ isPaused }: Props) => {
   const reduceMotion = useReducedMotion()
 

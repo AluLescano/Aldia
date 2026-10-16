@@ -1,7 +1,10 @@
-import React from 'react'
+// ASSETS
+import { IconChartPie } from '@/assets/icons/IconChartPie'
+
 import styles from './StatisticsPage.module.scss'
 
-export const StatisticsPage: React.FC = () => {
+/** Placeholder until the screen is built (v1.x): describes what it will show. */
+export const StatisticsPage = () => {
   const { container, title, subtitle, card, iconContainer, icon, cardTitle, cardText } =
     styles
 
@@ -14,24 +17,7 @@ export const StatisticsPage: React.FC = () => {
 
       <div className={card}>
         <div className={iconContainer}>
-          <svg
-            className={icon}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.75}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
-            />
-          </svg>
+          <IconChartPie className={icon} strokeWidth={1.75} />
         </div>
         <p className={cardTitle}>Category Expense Analysis</p>
         <p className={cardText}>

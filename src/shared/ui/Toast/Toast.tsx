@@ -1,6 +1,8 @@
 // DEPENDENCIES
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
+
+// UTILS
 import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
@@ -15,14 +17,24 @@ import { IconClose } from '@/assets/icons/IconClose'
 import styles from './Toast.module.scss'
 
 interface Props {
+  /** Usually a `Typography`; can hold a button too (the undo toast). */
   message: ReactNode
+  /** Sets the icon and the progress bar color. Defaults to `info`. */
   type?: 'success' | 'alert' | 'info'
+  /** `top` slides in from the side, `bottom` rises from below. */
   position?: 'top' | 'bottom'
+  /** Milliseconds before it closes by itself. Defaults to 5000. */
   duration?: number
+  /** Called by the close button and when the time runs out. */
   onDismiss: () => void
   className?: string
 }
 
+/**
+ * A short message that closes by itself, with a bar showing the time left. Touching
+ * it (or hovering on desktop) pauses the countdown. Render it inside `AnimatePresence`
+ * so it can animate out.
+ */
 const Toast = ({
   message,
   type = 'info',

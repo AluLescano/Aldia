@@ -1,12 +1,12 @@
 // DEPENDENCIES
 import { useState } from 'react'
 
-// ZUSTAND
+// STORES
 import { useUIStore } from '@/shared/store/uiStore'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
-import { useSettingsStore } from '@/features/settings/store'
+import { useSettingsStore } from '@/features/settings/store/settingsStore'
 import { useToastStore } from '@/shared/store/toastStore'
-import { useCategoryStore } from '@/features/categories/categoryStore'
+import { useCategoryStore } from '@/features/categories/store/categoryStore'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -120,16 +120,16 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
             <div className={iconContainer}>
               <IconButton
                 onClick={togglePause}
-                label={isPaused ? 'Reanudar suscripción' : 'Pausar suscripción'}
+                label={isPaused ? 'Reanudar subscripción' : 'Pausar subscripción'}
               >
                 <PauseToggleIcon isPaused={isPaused} />
               </IconButton>
               {!isEditing && (
-                <IconButton onClick={() => setIsEditing(true)} label="Editar suscripción">
+                <IconButton onClick={() => setIsEditing(true)} label="Editar subscripción">
                   <IconEdit />
                 </IconButton>
               )}
-              <IconButton onClick={remove} label="Eliminar suscripción">
+              <IconButton onClick={remove} label="Eliminar subscripción">
                 <IconDelete />
               </IconButton>
             </div>

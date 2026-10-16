@@ -13,7 +13,7 @@ import styles from './IconButton.module.scss'
 
 interface Props extends Omit<ButtonProps, 'aria-label' | 'children'> {
   /**
-   * What the button does, read by screen readers (e.g. "Volver", "Eliminar suscripción").
+   * What the button does, read by screen readers (e.g. "Volver", "Eliminar subscripción").
    * Required: an icon has no text, so without it the button is announced as just "botón".
    */
   label: string

@@ -1,14 +1,21 @@
+// UTILS
 import { todayISO } from '@/shared/lib/isoDate'
-import type { Subscription } from '@/shared/types'
-
 import { nextBillDate } from './billingCycle'
-import type { SubscriptionFormValues } from '../types'
 import { parsePrice } from './validateSubscriptionForm'
 
-// Everything a form can produce. The id, the status and the creation date are not form fields.
+// TYPES
+import type { Subscription } from '@/shared/types'
+import type { SubscriptionFormValues } from '../types'
+
+/** Everything a form can produce. The id, the status and the creation date are not form fields. */
 export type SubscriptionData = Omit<Subscription, 'id' | 'status' | 'createdAt'>
 
-// Turns the form's text values into the stored shape, or null if the price or currency is not usable
+/**
+ * Turns the form's values (price as text) into the stored shape (price as a number).
+ * The opposite of `subscriptionToFormValues`.
+ *
+ * @returns the data, or `null` if the price or the currency is not usable.
+ */
 export const formValuesToSubscriptionData = (
   values: SubscriptionFormValues,
 ): SubscriptionData | null => {

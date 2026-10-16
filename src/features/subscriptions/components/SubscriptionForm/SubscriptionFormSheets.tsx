@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { useCategoryEditor } from '@/features/categories/hooks/useCategoryEditor'
 
 // STORES
-import { OTHERS_ID } from '@/features/categories/categoryStore'
+import { OTHERS_ID } from '@/features/categories/store/categoryStore'
 
 // UTILS
 import { addDays } from '@/shared/lib/isoDate'

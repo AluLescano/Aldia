@@ -1,13 +1,11 @@
 // DEPENDENCIES
 import { useState } from 'react'
 
-// ZUSTAND
+// STORES
 import { useUIStore } from '@/shared/store/uiStore'
 
-// HOOKS
-import { normalizeText } from '@/shared/lib/normalizeText'
-
 // UTILS
+import { normalizeText } from '@/shared/lib/normalizeText'
 import { cn } from '@/shared/lib/cn'
 
 // DATA

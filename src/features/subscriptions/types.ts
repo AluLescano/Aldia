@@ -1,3 +1,4 @@
+// TYPES
 import type {
   BillingCycle,
   CurrencyCode,
@@ -6,7 +7,10 @@ import type {
   TrialConfig,
 } from '@/shared/types'
 
-// What the form edits: like a Subscription, but the price stays text while typing
+/**
+ * What the subscription form edits: like a `Subscription`, but the price stays text
+ * while typing ("12," is half-typed, not a number yet) and there is no id or status.
+ */
 export interface SubscriptionFormValues {
   name: string
   price: string
@@ -29,4 +33,5 @@ export interface SubscriptionFormValues {
   iconKey?: IconKey
 }
 
+/** One Spanish message per invalid field; a field that is valid has no key. */
 export type FormErrors = Partial<Record<keyof SubscriptionFormValues, string>>

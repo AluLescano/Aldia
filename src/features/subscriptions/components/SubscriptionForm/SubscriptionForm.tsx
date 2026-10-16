@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { useSubscriptionForm } from '../../hooks/useSubscriptionForm'
 
 // STORES
-import { useCategoryStore } from '@/features/categories/categoryStore'
+import { useCategoryStore } from '@/features/categories/store/categoryStore'
 
 // UTILS
 import { formatBillingCycle } from '../../utils/billingCycle'

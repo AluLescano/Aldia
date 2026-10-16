@@ -1,12 +1,18 @@
+// DEPENDENCIES
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { createId } from '@/shared/lib/id'
+// STORES
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 
-import type { Category } from '@/shared/types'
-import { validateCategoryName } from './utils/validateCategoryName'
+// UTILS
+import { createId } from '@/shared/lib/id'
+import { validateCategoryName } from '../utils/validateCategoryName'
 
+// TYPES
+import type { Category } from '@/shared/types'
+
+/** The id of "Otros": the fallback category. It can't be renamed or deleted. */
 export const OTHERS_ID = 'others'
 
 // New categories get the next color of this list (Statistics will need a color per category)
@@ -37,12 +43,17 @@ const DEFAULT_CATEGORIES: Category[] = [
 ]
 
 interface CategoryStore {
+  /** The 12 defaults (unless deleted) plus the user's own, in creation order. */
   categories: Category[]
+  /** Creates a category with the next color. Returns it, or `null` if the name is invalid or taken. */
   addCategory: (name: string) => Category | null
+  /** Renames a category. Ignores "Otros" and invalid or taken names. */
   renameCategory: (id: string, name: string) => void
+  /** Deletes a category after moving its subscriptions to "Otros". Ignores "Otros". */
   deleteCategory: (id: string) => void
 }
 
+/** The user's categories, saved on the device (`aldia_categories_v1`). */
 export const useCategoryStore = create<CategoryStore>()(
   persist(
     (set, get) => ({

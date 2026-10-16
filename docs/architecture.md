@@ -38,21 +38,21 @@ src/
 │
 ├── features/                 # Domain-driven feature modules
 │   ├── categories/
-│   │   ├── categoryStore.ts  # Zustand + persist (aldia_categories_v1), OTHERS_ID
 │   │   ├── components/       # CategoryPicker, CategoryFooter
 │   │   ├── hooks/            # useCategoryEditor (add / rename / delete state)
+│   │   ├── store/            # categoryStore.ts (Zustand + persist, aldia_categories_v1), OTHERS_ID
 │   │   └── utils/            # validateCategoryName
 │   ├── homepage/
 │   │   └── components/       # MonthlyExpenses, SubscriptionList, SubscriptionCard, skeletons
 │   ├── subscriptions/
-│   │   ├── components/       # SubscriptionForm, BillingCyclePicker, PresetCard, PauseToggleIcon
+│   │   ├── components/       # SubscriptionForm (+ FormRow, SubscriptionFormSheets), BillingCyclePicker, PresetCard, PauseToggleIcon
 │   │   ├── data/             # presets.ts (the preset picker list)
-│   │   ├── hooks/            # useSubscriptionActions (pause, delete)
+│   │   ├── hooks/            # useSubscriptionForm (form state), useSubscriptionActions (pause, delete)
 │   │   ├── store/            # subscriptionStore.ts (Zustand + persist)
-│   │   ├── utils/            # billingCycle, validation, form <-> subscription mapping, status
+│   │   ├── utils/            # billingCycle, validation, form <-> subscription mapping, status, monthlyTotal, subscriptionList
 │   │   └── types.ts          # SubscriptionFormValues, FormErrors
 │   ├── settings/
-│   │   └── store.ts          # useSettingsStore (selected + favorite currencies)
+│   │   └── store/            # settingsStore.ts (selected + favorite currencies, persist)
 │   └── navigation/
 │       └── components/       # BottomNavBar
 │   (planned: cards/, calendar/, statistics/)
@@ -66,11 +66,11 @@ src/
 │   ├── presetPicker/PresetPicker.tsx              # Overlay, not a tab
 │   └── subscriptionForm/SubscriptionFormPage.tsx  # Overlay: new, detail and edit
 │
-├── shared/                   # Generic code that has NO domain knowledge
-│   ├── ui/                   # Button, Field, Input*, Switch, BottomSheet, DatePicker, CurrencyPicker, Avatar, Toast, Typography...
+├── shared/                   # Used by 2+ features; never imports from features/
+│   ├── ui/                   # Button, IconButton, Field, Input*, Switch, BottomSheet, DatePicker, CurrencyPicker, Avatar, Toast, Typography...
 │   ├── hooks/                # useFieldControl (field ids, aria links, shake), useShake
-│   ├── lib/                  # isoDate, calendar, currencies, formatDate, id, icons, normalizeText, storage
-│   ├── store/                # uiStore.ts (overlay stack), toastStore.ts (app toast)
+│   ├── lib/                  # cn, isoDate, calendar, currencies, exchangeRates, formatDate, id, icons, normalizeText
+│   ├── store/                # uiStore.ts (overlay stack), toastStore.ts (app toast), ratesStore.ts (exchange rates)
 │   └── types/                # index.ts (all domain types)
 │
 └── styles/                   # _variables.scss (design tokens) and _themes.scss (light/dark)
@@ -78,7 +78,7 @@ src/
 
 Each component lives in its own folder with a matching `*.module.scss` file (SCSS Modules). Styling is SCSS only.
 
-Known leftovers to tidy later: the three stores use three file layouts (`subscriptions/store/subscriptionStore.ts`, `categories/categoryStore.ts`, `settings/store.ts`); the target is `features/<feature>/store/<name>Store.ts`. `features/homepage` is named after a page; its list and card components belong in `features/subscriptions`.
+Stores always live in `features/<feature>/store/<name>Store.ts` (or `shared/store/` when the whole app uses them). Known leftover: `features/homepage` is named after a page; its list and card components belong in `features/subscriptions`.
 
 ---
 
@@ -181,8 +181,8 @@ User preferences currently live in `useSettingsStore` (`selectedCurrency`, `favo
 State lives in **Zustand** stores:
 
 - `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription` (keeps `lastDeleted` for the undo toast), `undoDelete`, `updateSubscription`, `reassignCategory`. Uses the `persist` middleware, so it saves itself to `localStorage` under `aldia_subscriptions_v1`.
-- `useSettingsStore` (`features/settings/store.ts`): selected and favorite currencies. Loads from and saves to `localStorage` by hand through `shared/lib/storage.ts`, under `aldia_settings` (to move onto `persist` like the others).
-- `useCategoryStore` (`features/categories/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Persisted under `aldia_categories_v1`.
+- `useSettingsStore` (`features/settings/store/settingsStore.ts`): selected and favorite currencies. Uses `persist` like the others, under `aldia_settings`.
+- `useCategoryStore` (`features/categories/store/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Persisted under `aldia_categories_v1`.
 - `useToastStore` (`shared/store/toastStore.ts`): the one app-wide toast, rendered by `App.tsx`.
 - `useUIStore` (`shared/store/uiStore.ts`): a stack of overlays (`preset-picker`, `subscription-form`) with `pushOverlay`, `popOverlay` and `closeAllOverlays`. `App.tsx` renders the top of the stack.
 

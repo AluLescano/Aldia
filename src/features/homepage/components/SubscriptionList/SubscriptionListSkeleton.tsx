@@ -1,6 +1,7 @@
 // ASSETS
 import styles from './SubscriptionList.module.scss'
 
+/** Grey placeholder shapes of the filter tabs and cards, shown while the list loads (`isLoading`). */
 const SubscriptionListSkeleton = () => {
   const {
     skeletonList,

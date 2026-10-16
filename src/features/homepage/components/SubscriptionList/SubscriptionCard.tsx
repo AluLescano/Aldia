@@ -5,7 +5,7 @@ import { motion, useAnimation } from 'motion/react'
 // STORES
 import { useUIStore } from '@/shared/store/uiStore'
 import { useRatesStore } from '@/shared/store/ratesStore'
-import { useSettingsStore } from '@/features/settings/store'
+import { useSettingsStore } from '@/features/settings/store/settingsStore'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'

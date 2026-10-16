@@ -1,5 +1,11 @@
+// TYPES
 import type { Preset } from '@/shared/types'
 
+/**
+ * The ready-made subscriptions of the preset picker (shown in this order).
+ * `defaultCategoryId` must be one of the default category ids in `categoryStore`
+ * (if the user deleted it, a new subscription falls back to "Otros").
+ */
 export const PRESET_SUBSCRIPTIONS: Preset[] = [
   {
     id: 'adobe-creative-cloud',

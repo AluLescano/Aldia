@@ -38,7 +38,7 @@ Typical flow:
 6. Cards → which card or account pays what.
 7. Settings → currencies, theme, export/import.
 
-The app language is **Spanish** (UI copy: "Agregar Suscripción", "Formato del cobro", "Categoría"...). English comes later, picked from the system language or from Settings.
+The app language is **Spanish** (UI copy: "Agregar Subscripción", "Formato del cobro", "Categoría"...). English comes later, picked from the system language or from Settings.
 
 ## Capabilities and Constraints
 

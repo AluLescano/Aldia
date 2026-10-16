@@ -1,17 +1,19 @@
-// HOOKS
+// DEPENDENCIES
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { cn } from '@/shared/lib/cn'
 
-// STORE
-import { OTHERS_ID, useCategoryStore } from '@/features/categories/categoryStore'
+// STORES
+import { OTHERS_ID, useCategoryStore } from '../../store/categoryStore'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 
-// TYPES
-import type { CategoryEditor } from '@/features/categories/hooks/useCategoryEditor'
+// UTILS
+import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import InputText from '@/shared/ui/InputText/InputText'
+
+// TYPES
+import type { CategoryEditor } from '../../hooks/useCategoryEditor'
 
 // ASSETS
 import { IconDelete } from '@/assets/icons/IconDelete'
@@ -63,11 +65,18 @@ const NameInput = ({ editor }: NameInputProps) => {
 }
 
 interface Props {
-  value: string // the selected category id
+  /** The selected category id. */
+  value: string
   onSelect: (categoryId: string) => void
+  /** From `useCategoryEditor`, shared with `CategoryFooter`. */
   editor: CategoryEditor
 }
 
+/**
+ * The category sheet's list: tap a row to pick it, or use the pencil and trash on each
+ * row to rename or delete ("Otros" can't be changed). The add / save / delete buttons
+ * live in `CategoryFooter`.
+ */
 const CategoryPicker = ({ value, onSelect, editor }: Props) => {
   const categories = useCategoryStore((state) => state.categories)
   const subscriptions = useSubscriptionStore((state) => state.subscriptions)
@@ -120,8 +129,8 @@ const CategoryPicker = ({ value, onSelect, editor }: Props) => {
                   </Typography>
                   <Typography variant="body" size="small">
                     {affected === 0
-                      ? 'Ninguna suscripción la usa.'
-                      : `${affected} ${affected === 1 ? 'suscripción pasa' : 'suscripciones pasan'} a Otros.`}
+                      ? 'Ninguna subscripción la usa.'
+                      : `${affected} ${affected === 1 ? 'subscripción pasa' : 'subscripciones pasan'} a Otros.`}
                   </Typography>
                 </>
               )}

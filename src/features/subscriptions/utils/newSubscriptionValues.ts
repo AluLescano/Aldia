@@ -1,5 +1,5 @@
 // STORES
-import { OTHERS_ID } from '@/features/categories/categoryStore'
+import { OTHERS_ID } from '@/features/categories/store/categoryStore'
 
 // UTILS
 import { todayISO } from '@/shared/lib/isoDate'

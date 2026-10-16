@@ -1,25 +1,27 @@
-// TYPE
-import type { IconKey } from '@/shared/types'
-
-// DATA
+// UTILS
 import { ICONS } from '@/shared/lib/icons'
+import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
-import { cn } from '@/shared/lib/cn'
+
+// TYPES
+import type { IconKey } from '@/shared/types'
 
 // ASSETS
 import styles from './PresetCard.module.scss'
 
 interface Props {
   name: string
+  /** Logo path; presets without one use `iconKey`. */
   logo?: string
   iconKey?: IconKey
   onClick: () => void
   className?: string
 }
 
+/** One tile of the preset picker grid: logo (or bill icon) and name. */
 const PresetCard = ({ name, logo, iconKey, onClick, className }: Props) => {
   const { container, text } = styles
   const Icon = iconKey ? ICONS[iconKey] : null

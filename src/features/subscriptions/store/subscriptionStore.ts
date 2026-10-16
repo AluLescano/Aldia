@@ -1,38 +1,39 @@
+// DEPENDENCIES
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+
+// TYPES
 import type { Subscription } from '@/shared/types'
 
 interface SubscriptionState {
   subscriptions: Subscription[]
-  // The last deleted subscription, kept so the Home screen can offer to undo it
+  /** The last deleted subscription, kept (not saved) so Home can offer to undo it. */
   lastDeleted: Subscription | null
   addSubscription: (sub: Subscription) => void
+  /** Removes a subscription and remembers it as `lastDeleted`. */
   deleteSubscription: (id: string) => void
+  /** Puts `lastDeleted` back in the list. Does nothing if there is none. */
   undoDelete: () => void
+  /** Forgets `lastDeleted` (when the undo toast closes). */
   clearLastDeleted: () => void
+  /** Merges the given fields into one subscription. A field set to `undefined` is cleared. */
   updateSubscription: (id: string, updatedSub: Partial<Subscription>) => void
-  // Moves every subscription of one category to another (used when a category is deleted)
+  /** Moves every subscription of one category to another (used when a category is deleted). */
   reassignCategory: (fromId: string, toId: string) => void
 }
 
+/** All the user's subscriptions, saved on the device (`aldia_subscriptions_v1`). */
 export const useSubscriptionStore = create<SubscriptionState>()(
-  // 3. We use the 'persist' middleware to automatically save to localStorage
   persist(
     (set) => ({
-      // Initial state
       subscriptions: [],
       lastDeleted: null,
 
-      // Actions
       addSubscription: (newSub) =>
-        set((state) => ({
-          // Spread the old array and add the new item at the end
-          subscriptions: [...state.subscriptions, newSub],
-        })),
+        set((state) => ({ subscriptions: [...state.subscriptions, newSub] })),
 
       deleteSubscription: (id) =>
         set((state) => ({
-          // Filter out the subscription with the matching ID
           subscriptions: state.subscriptions.filter((sub) => sub.id !== id),
           lastDeleted: state.subscriptions.find((sub) => sub.id === id) ?? null,
         })),
@@ -51,7 +52,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       updateSubscription: (id, updatedSub) =>
         set((state) => ({
-          // Map over the array, update the matching one, leave the rest alone
           subscriptions: state.subscriptions.map((sub) =>
             sub.id === id ? { ...sub, ...updatedSub } : sub,
           ),
@@ -65,7 +65,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         })),
     }),
     {
-      name: 'aldia_subscriptions_v1', // The key used in localStorage (defined in README)
+      name: 'aldia_subscriptions_v1',
       partialize: (state) => ({ subscriptions: state.subscriptions }), // lastDeleted is not saved
     },
   ),

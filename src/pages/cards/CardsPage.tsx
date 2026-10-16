@@ -1,7 +1,8 @@
-import React from 'react'
+// ASSETS
 import styles from './CardsPage.module.scss'
 
-export const CardsPage: React.FC = () => {
+/** Placeholder until the screen is built (v1.x): describes what it will show. */
+export const CardsPage = () => {
   const {
     container,
     header,

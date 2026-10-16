@@ -1,20 +1,27 @@
+// UTILS
 import { cn } from '@/shared/lib/cn'
+
+// COMPONENTS
+import Typography from '@/shared/ui/Typography/Typography'
 
 // TYPES
 import type { Currency } from '@/shared/types'
 
-// COMPONENTS
-import Typography from '@/shared/ui/Typography/Typography'
+// ASSETS
 import styles from './CurrencyPicker.module.scss'
 
 interface CurrencyPickerProps {
+  /** The rows to show, in order (usually `DEFAULT_CURRENCIES`). */
   currencies: Currency[]
+  /** The highlighted row. */
   selectedCode?: string
   onSelect?: (code: string) => void
-  onReorder?: (newOrder: Currency[]) => void // Presence of this will trigger dnd-kit later
+  /** Planned: drag to reorder favorites in Settings. Not used yet. */
+  onReorder?: (newOrder: Currency[]) => void
   className?: string
 }
 
+/** A list of currencies (flag, code, name, symbol) to pick one from, made for a bottom sheet. */
 const CurrencyPicker = ({
   currencies,
   selectedCode,

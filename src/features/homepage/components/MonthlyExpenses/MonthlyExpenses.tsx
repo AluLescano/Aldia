@@ -2,7 +2,7 @@
 import { useState } from 'react'
 
 // STORES
-import { useSettingsStore } from '@/features/settings/store'
+import { useSettingsStore } from '@/features/settings/store/settingsStore'
 
 // UTILS
 import { DEFAULT_CURRENCIES, getCurrencySymbol } from '@/shared/lib/currencies'

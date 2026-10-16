@@ -1,13 +1,21 @@
+// STORES
 import { useUIStore } from '@/shared/store/uiStore'
 import { useToastStore } from '@/shared/store/toastStore'
-import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
-import { todayISO } from '@/shared/lib/isoDate'
-import type { Subscription } from '@/shared/types'
+import { useSubscriptionStore } from '../store/subscriptionStore'
 
+// UTILS
+import { todayISO } from '@/shared/lib/isoDate'
 import { nextBillDate } from '../utils/billingCycle'
 import { statusFor } from '../utils/subscriptionStatus'
 
-// What the detail screen can do to an existing subscription besides editing its fields
+// TYPES
+import type { Subscription } from '@/shared/types'
+
+/**
+ * What the detail screen can do to a saved subscription besides editing its fields:
+ * pause / resume (with a toast) and delete (closes the screen; Home offers the undo).
+ * Every action does nothing while `subscription` is `undefined`.
+ */
 export const useSubscriptionActions = (subscription: Subscription | undefined) => {
   const updateSubscription = useSubscriptionStore((state) => state.updateSubscription)
   const deleteSubscription = useSubscriptionStore((state) => state.deleteSubscription)
@@ -29,10 +37,10 @@ export const useSubscriptionActions = (subscription: Subscription | undefined) =
           todayISO(),
         ),
       })
-      showToast('Suscripción reanudada', 'success')
+      showToast('Subscripción reanudada', 'success')
     } else {
       updateSubscription(subscription.id, { status: 'inactive' })
-      showToast('Suscripción pausada', 'info')
+      showToast('Subscripción pausada', 'info')
     }
   }
 

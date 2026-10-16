@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
 // STORES
-import { useCategoryStore } from '@/features/categories/categoryStore'
+import { useCategoryStore } from '@/features/categories/store/categoryStore'
 
 // UTILS
 import {

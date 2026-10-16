@@ -1,21 +1,19 @@
 // DEPENDENCIES
 import { useEffect, useState } from 'react'
+import { AnimatePresence } from 'motion/react'
 
-// COMPONENTS
-import { BottomNavBar } from '@/features/navigation/components/BottomNavBar'
-import Toast from './shared/ui/Toast/Toast'
-import Typography from './shared/ui/Typography/Typography'
-
-// TYPES
-import type { TabType } from '@/shared/types'
-
-// HOOKS
-import { useUIStore } from './shared/store/uiStore'
+// STORES
+import { useUIStore } from '@/shared/store/uiStore'
 import { useToastStore } from '@/shared/store/toastStore'
 import { useRatesStore } from '@/shared/store/ratesStore'
 
-// ANIMATIONS
-import { AnimatePresence } from 'motion/react'
+// COMPONENTS
+import BottomNavBar from '@/features/navigation/components/BottomNavBar'
+import Toast from '@/shared/ui/Toast/Toast'
+import Typography from '@/shared/ui/Typography/Typography'
+
+// TYPES
+import type { TabType } from '@/shared/types'
 
 // PAGES
 import { HomePage } from '@/pages/home/HomePage'
@@ -23,12 +21,17 @@ import { CalendarPage } from '@/pages/calendar/CalendarPage'
 import { CardsPage } from '@/pages/cards/CardsPage'
 import { StatisticsPage } from '@/pages/statistics/StatisticsPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
-import { PresetPicker } from './pages/presetPicker/PresetPicker'
-import { SubscriptionFormPage } from './pages/subscriptionForm/SubscriptionFormPage'
+import { PresetPicker } from '@/pages/presetPicker/PresetPicker'
+import { SubscriptionFormPage } from '@/pages/subscriptionForm/SubscriptionFormPage'
 
 // ASSETS
 import styles from './App.module.scss'
 
+/**
+ * The app shell: the active tab with the bottom nav, the top overlay of the
+ * `uiStore` stack (preset picker, subscription screen), and the app-wide toast.
+ * Also keeps the exchange rates fresh.
+ */
 function App() {
   const { appContainer, appWrapper, mainContent, overlayContainer } = styles
   const [activeTab, setActiveTab] = useState<TabType>('home')

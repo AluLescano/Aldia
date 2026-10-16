@@ -1,4 +1,4 @@
-// HOOKS
+// DEPENDENCIES
 import { useState } from 'react'
 
 // UTILS

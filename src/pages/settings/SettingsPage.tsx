@@ -1,7 +1,8 @@
-import React from 'react'
+// ASSETS
 import styles from './SettingsPage.module.scss'
 
-export const SettingsPage: React.FC = () => {
+/** Placeholder until the screen is built (v1.x): describes what it will show. */
+export const SettingsPage = () => {
   const {
     container,
     title,

@@ -5,7 +5,7 @@ import { AnimatePresence } from 'motion/react'
 import { useUIStore } from '@/shared/store/uiStore'
 import { useRatesStore } from '@/shared/store/ratesStore'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
-import { useSettingsStore } from '@/features/settings/store'
+import { useSettingsStore } from '@/features/settings/store/settingsStore'
 
 // UTILS
 import { getMonthlyTotal } from '@/features/subscriptions/utils/monthlyTotal'

@@ -1,6 +1,16 @@
+// UTILS
 import { parseISODate, toISODate } from '@/shared/lib/isoDate'
+
+// TYPES
 import type { BillingCycle } from '@/shared/types'
 
+/**
+ * The cycle in words, for the form and the cards.
+ *
+ * @example
+ * formatBillingCycle({ type: 'every', interval: 1, unit: 'month' }) // 'Mensual'
+ * formatBillingCycle({ type: 'every', interval: 2, unit: 'week' })  // 'Cada 2 semanas'
+ */
 export function formatBillingCycle(cycle: BillingCycle): string {
   if (cycle.type === 'one-time') return 'Pago único'
   if (cycle.unit === 'month' && cycle.interval === 1) return 'Mensual'
@@ -16,6 +26,7 @@ export function formatBillingCycle(cycle: BillingCycle): string {
   return `Cada ${cycle.interval} ${units[cycle.unit]}`
 }
 
+// One cycle as whole months or as days (a year is 12 months, a week 7 days)
 function cycleStep(cycle: BillingCycle) {
   if (cycle.type === 'one-time') return { months: 0, days: 0 }
   if (cycle.unit === 'day') return { months: 0, days: cycle.interval }
@@ -24,6 +35,15 @@ function cycleStep(cycle: BillingCycle) {
   return { months: 12 * cycle.interval, days: 0 }
 }
 
+/**
+ * The date `count` cycles after `date`. Months keep the day when they can and clamp
+ * to the month's last day when they can't (Jan 31 + 1 month = Feb 28, or 29 in a leap year).
+ * Always counts from the original date, so a clamp never "drifts" into later months.
+ *
+ * @example
+ * addCycles('2026-01-31', { type: 'every', interval: 1, unit: 'month' }, 1) // '2026-02-28'
+ * addCycles('2026-01-31', { type: 'every', interval: 1, unit: 'month' }, 2) // '2026-03-31'
+ */
 export function addCycles(date: string, cycle: BillingCycle, count: number) {
   const parsed = parseISODate(date)
   if (!parsed) return date
@@ -45,6 +65,13 @@ export function addCycles(date: string, cycle: BillingCycle, count: number) {
   return toISODate(result)
 }
 
+/**
+ * The next charge on or after `today`. A first charge in the future is returned as is;
+ * a one-time payment always returns its date. Pure: pass `todayISO()` as `today`.
+ *
+ * @example
+ * nextBillDate('2026-01-31', { type: 'every', interval: 1, unit: 'month' }, '2026-03-01') // '2026-03-31'
+ */
 export function nextBillDate(firstBillDate: string, cycle: BillingCycle, today: string) {
   const { months, days } = cycleStep(cycle)
   // Anything that does not move forward (one-time, 0, negative, NaN) has no next date.

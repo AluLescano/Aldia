@@ -1,8 +1,10 @@
+// UTILS
 import { cn } from '@/shared/lib/cn'
 
 // ASSETS
 import styles from './MonthlyExpenses.module.scss'
 
+/** Grey placeholder shapes of the Home header, shown while it loads (`isLoading`). */
 const MonthlyExpensesSkeleton = () => {
   const {
     skeleton,
