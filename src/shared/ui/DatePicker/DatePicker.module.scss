@@ -15,14 +15,6 @@
       background-color: var(--bg-surface-elevated);
       border-radius: 1rem;
 
-      .navButton {
-        aspect-ratio: 1 / 1;
-
-        svg {
-          width: 0.75rem;
-        }
-      }
-
       .select {
         width: fit-content;
         border: none;
@@ -34,9 +26,7 @@
       }
 
       .nextArrow {
-        svg {
-          transform: rotate(180deg);
-        }
+        transform: rotate(180deg);
       }
     }
   }

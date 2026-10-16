@@ -7,12 +7,15 @@ import { useUIStore } from '@/shared/store/uiStore'
 // HOOKS
 import { normalizeText } from '@/shared/lib/normalizeText'
 
+// UTILS
+import { cn } from '@/shared/lib/cn'
+
 // DATA
 import { PRESET_SUBSCRIPTIONS } from '@/features/subscriptions/data/presets'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
-import Button from '@/shared/ui/Button/Button'
+import IconButton from '@/shared/ui/IconButton/IconButton'
 import PresetCard from '@/features/subscriptions/components/PresetCard/PresetCard'
 
 // ASSETS
@@ -21,10 +24,14 @@ import { IconAdd } from '@/assets/icons/IconAdd'
 import { IconSearch } from '@/assets/icons/IconSearch'
 
 import styles from './PresetPicker.module.scss'
-import { cn } from '@/shared/lib/cn'
 
+/**
+ * Full-screen overlay for adding a subscription: search the presets (by name or by
+ * company, ignoring accents and case) and tap one, or tap `+` for a custom one.
+ * Either way it pushes the `subscription-form` overlay on top.
+ */
 export const PresetPicker = () => {
-  const { container, header, searchbar, button, listContainer, presetGrid } = styles
+  const { container, header, searchbar, listContainer, presetGrid } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const pushOverlay = useUIStore((state) => state.pushOverlay)
 
@@ -41,19 +48,18 @@ export const PresetPicker = () => {
     <div className={container}>
       <header className={header}>
         <div>
-          <Button size="small" onClick={popOverlay} className={button}>
+          <IconButton onClick={popOverlay} label="Volver">
             <IconArrow />
-          </Button>
+          </IconButton>
           <Typography variant="title" size="small">
             Agregar Subscripción
           </Typography>
-          <Button
-            size="small"
+          <IconButton
             onClick={() => pushOverlay('subscription-form')}
-            className={button}
+            label="Crear subscripción personalizada"
           >
             <IconAdd />
-          </Button>
+          </IconButton>
         </div>
 
         {/* Search Bar */}

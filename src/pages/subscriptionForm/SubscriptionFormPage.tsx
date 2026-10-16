@@ -9,7 +9,7 @@ import { useToastStore } from '@/shared/store/toastStore'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
-import Button from '@/shared/ui/Button/Button'
+import IconButton from '@/shared/ui/IconButton/IconButton'
 import SubscriptionForm from '@/features/subscriptions/components/SubscriptionForm/SubscriptionForm'
 import PauseToggleIcon from '@/features/subscriptions/components/PauseToggleIcon/PauseToggleIcon'
 
@@ -19,8 +19,8 @@ import { useSubscriptionActions } from '@/features/subscriptions/hooks/useSubscr
 // UTILS
 import { todayISO } from '@/shared/lib/isoDate'
 import { createId } from '@/shared/lib/id'
-import { OTHERS_ID } from '@/features/categories/categoryStore'
 import { subscriptionToFormValues } from '@/features/subscriptions/utils/subscriptionToFormValues'
+import { newSubscriptionValues } from '@/features/subscriptions/utils/newSubscriptionValues'
 import { formValuesToSubscriptionData } from '@/features/subscriptions/utils/formValuesToSubscriptionData'
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 
@@ -36,12 +36,18 @@ import { IconDelete } from '@/assets/icons/IconDelete'
 import styles from './SubscriptionFormPage.module.scss'
 
 interface Props {
+  /** The preset picked to create a subscription from. Ignored when `subscriptionId` is set. */
   preset?: Preset
+  /** Opens an existing subscription in view mode (edit, pause and delete from the header). */
   subscriptionId?: string
 }
 
+/**
+ * Overlay screen for one subscription. Without `subscriptionId` it creates a new one
+ * (from a preset or empty); with it, it shows the saved one and can edit, pause or delete it.
+ */
 export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
-  const { container, header, iconContainer, button } = styles
+  const { container, header, iconContainer } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const closeAllOverlays = useUIStore((state) => state.closeAllOverlays)
   const addSubscription = useSubscriptionStore((state) => state.addSubscription)
@@ -58,19 +64,14 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
   const [isEditing, setIsEditing] = useState(false)
   const readOnly = existing !== undefined && !isEditing
 
-  const initialValues: SubscriptionFormValues = existing
+  const initialValues = existing
     ? subscriptionToFormValues(existing)
-    : {
-        name: preset?.name ?? '',
-        price: '',
-        currency: selectedCurrency,
-        billingCycle: { type: 'every', interval: 1, unit: 'month' },
-        firstBillDate: todayISO(),
-        reminders: [],
-        categoryId: preset?.defaultCategoryId ?? OTHERS_ID,
-        iconUrl: preset?.iconUrl,
-        iconKey: preset?.iconKey,
-      }
+    : newSubscriptionValues(preset, selectedCurrency)
+
+  // In edit mode, back drops the changes and returns to view mode; otherwise it closes the screen.
+  // The changes are dropped by the form's `key` below: a new key mounts a fresh form
+  // that reads the saved values again (no reset code needed).
+  const handleBack = isEditing ? () => setIsEditing(false) : popOverlay
 
   const handleSubmit = (values: SubscriptionFormValues) => {
     const data = formValuesToSubscriptionData(values)
@@ -102,16 +103,12 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
     <div className={container}>
       <header className={header}>
         <div>
-          <Button
-            variant="secondary"
-            size="small"
-            width="fit"
-            onClick={popOverlay}
-            aria-label="Volver"
-            className={button}
+          <IconButton
+            onClick={handleBack}
+            label={isEditing ? 'Descartar cambios' : 'Volver'}
           >
             <IconArrow />
-          </Button>
+          </IconButton>
           <div>
             <Typography variant="title" size="small">
               {existing?.name ?? 'Nueva Subscripción'}
@@ -119,44 +116,27 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
           </div>
           {existing && (
             <div className={iconContainer}>
-              <Button
-                variant="secondary"
-                size="small"
-                width="fit"
+              <IconButton
                 onClick={togglePause}
-                aria-label={isPaused ? 'Reanudar suscripción' : 'Pausar suscripción'}
-                className={button}
+                label={isPaused ? 'Reanudar suscripción' : 'Pausar suscripción'}
               >
                 <PauseToggleIcon isPaused={isPaused} />
-              </Button>
+              </IconButton>
               {!isEditing && (
-                <Button
-                  variant="secondary"
-                  size="small"
-                  width="fit"
-                  onClick={() => setIsEditing(true)}
-                  aria-label="Editar suscripción"
-                  className={button}
-                >
+                <IconButton onClick={() => setIsEditing(true)} label="Editar suscripción">
                   <IconEdit />
-                </Button>
+                </IconButton>
               )}
-              <Button
-                variant="secondary"
-                size="small"
-                width="fit"
-                onClick={remove}
-                aria-label="Eliminar suscripción"
-                className={button}
-              >
+              <IconButton onClick={remove} label="Eliminar suscripción">
                 <IconDelete />
-              </Button>
+              </IconButton>
             </div>
           )}
         </div>
       </header>
       <div>
         <SubscriptionForm
+          key={isEditing ? 'edit' : 'view'} // see handleBack
           initialValues={initialValues}
           submitLabel={existing ? 'Guardar' : 'Agregar Subscripción'}
           readOnly={readOnly}

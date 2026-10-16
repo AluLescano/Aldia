@@ -8,6 +8,7 @@ import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
+import IconButton from '../IconButton/IconButton'
 import Button from '../Button/Button'
 
 // ASSETS
@@ -19,7 +20,6 @@ const {
   calendar,
   header,
   navGroup,
-  navButton,
   select,
   nextArrow,
   weekdays,
@@ -32,8 +32,11 @@ const {
 } = styles
 
 interface Props {
-  value: string // YYYY-MM-DD the selected day
-  min?: string // days before this one cannot be picked
+  /** The selected day as `YYYY-MM-DD`. The calendar opens on its month (or on today's if empty). */
+  value: string
+  /** First day that can be picked, as `YYYY-MM-DD`. Earlier days show up disabled. */
+  min?: string
+  /** Called with the tapped day as `YYYY-MM-DD`. */
   onSelect: (iso: string) => void
 }
 
@@ -52,7 +55,9 @@ const MONTHS = Array.from({ length: 12 }, (_, month) => {
 const monthOptions = MONTHS.map((label, value) => ({ value, label }))
 
 interface SelectorProps {
+  /** What it picks ("Mes" or "Año"). Also builds the arrows' labels: "Mes anterior", "Mes siguiente". */
   label: string
+  /** The value on screen: a month index (0 = January) or a year. */
   value: number
   options: { value: number; label: string }[]
   onChange: (value: number) => void
@@ -60,6 +65,7 @@ interface SelectorProps {
   onNext: () => void
 }
 
+/** A `<select>` between a previous and a next arrow. Used twice: for the month and for the year. */
 const Selector = ({
   label,
   value,
@@ -69,17 +75,9 @@ const Selector = ({
   onNext,
 }: SelectorProps) => (
   <div className={navGroup}>
-    <Button
-      variant="secondary"
-      size="small"
-      width="fit"
-      type="button"
-      className={navButton}
-      aria-label={`${label} anterior`}
-      onClick={onPrevious}
-    >
+    <IconButton onClick={onPrevious} label={`${label} anterior`}>
       <IconArrow />
-    </Button>
+    </IconButton>
     <select
       className={select}
       aria-label={label}
@@ -92,20 +90,20 @@ const Selector = ({
         </option>
       ))}
     </select>
-    <Button
-      variant="secondary"
-      size="small"
-      width="fit"
-      type="button"
-      className={cn(navButton, nextArrow)}
-      aria-label={`${label} siguiente`}
-      onClick={onNext}
-    >
-      <IconArrow />
-    </Button>
+    <IconButton label={`${label} siguiente`} onClick={onNext}>
+      <IconArrow className={nextArrow} />
+    </IconButton>
   </div>
 )
 
+/**
+ * Month calendar for picking one day, made to sit inside a `BottomSheet`.
+ * Weeks start on Sunday (D L M X J V S) and there are always 6 rows, with the
+ * neighbour months' days dimmed. Today and the selected day are highlighted.
+ *
+ * @example
+ * <DatePicker value={values.firstBillDate} onSelect={(iso) => pick('firstBillDate', iso)} />
+ */
 const DatePicker = ({ value, min, onSelect }: Props) => {
   // The month on screen is not the same thing as the selected day, so it has its own state
   const todayIso = todayISO()
