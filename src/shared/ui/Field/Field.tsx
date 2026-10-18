@@ -105,6 +105,14 @@ const Field = ({
     className,
   )
 
+  // The adornment sits next to the control, not over it, so a tap on it is passed on
+  // by hand: an input gets the focus, a button (like the date picker) gets the click
+  const forwardTap = () => {
+    const control = document.getElementById(id)
+    control?.focus()
+    if (control instanceof HTMLButtonElement) control.click()
+  }
+
   // The SCSS reads `--field-min-width` and falls back to 9rem when it isn't set
   const boxStyle = minWidth
     ? ({ ...style, '--field-min-width': minWidth } as CSSProperties)
@@ -123,7 +131,11 @@ const Field = ({
             {label}
           </label>
         )}
-        {startAdornment && <div className={adornmentContainer}>{startAdornment}</div>}
+        {startAdornment && (
+          <div className={adornmentContainer} onClick={forwardTap}>
+            {startAdornment}
+          </div>
+        )}
         {children}
       </div>
       {message && (

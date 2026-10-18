@@ -20,7 +20,7 @@ interface TypographyProps {
   variant: 'title' | 'body' | 'overline' | 'label' | 'currency'
   /** For `currency`, a number gets thousands dots ("15.130" + "69"). */
   children: string | number
-  /** Only for `currency`. Defaults to `$`. */
+  /** Only for `currency`. Defaults to `$`; pass `''` to show the amount alone. */
   currencySymbol?: string
   className?: string
 }
@@ -132,7 +132,7 @@ const Typography = ({
 
       return (
         <div className={cn(currencyWrapper, className)}>
-          <span className={amountClass}>{currencySymbol}</span>
+          {currencySymbol && <span className={amountClass}>{currencySymbol}</span>}
           <span className={amountClass}>{integerPart}</span>
           {decimalPart && (
             <>

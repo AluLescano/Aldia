@@ -1,29 +1,81 @@
-.container {
-  display: flex;
+// The input and the pretty copy (`.display`) sit in the same grid cell, one over the other
+.stack {
+  display: grid;
   flex: 1;
-  // Room for the currency symbol: 1.75rem fits one character ("$", "€"),
-  // each extra character ("U$S") adds about one more symbol width
-  padding: 0 0.75rem 0 calc(1.75rem + (var(--symbol-chars, 1) - 1) * 0.75em);
   align-self: stretch;
+}
+
+.input,
+.display {
+  grid-area: 1 / 1;
+  // The symbol is its own flex item in Field, so only a small gap is needed after it
+  padding: 0 0.75rem 0 0.25rem;
+}
+
+.input {
+  min-width: 0;
   background: none;
   border: none;
   outline: none;
   font: inherit;
-  color: var(--text-primary);
   font-size: 1rem;
-
+  color: var(--text-primary);
   cursor: text;
 
+  // The pretty copy is the placeholder, so the plain one never shows
   &::placeholder {
-    color: var(--text-muted);
+    color: transparent;
+  }
+
+  // Not being edited: the text hides and the pretty copy shows on top. It can't be
+  // selected either, or the browser paints the selected raw text over the copy.
+  &:not(:focus) {
+    color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &::selection {
+      color: transparent;
+      background: transparent;
+    }
   }
 
   &:disabled {
-    color: var(--text-disabled);
     cursor: not-allowed;
   }
 
   &:focus-visible {
     outline: none;
   }
+}
+
+.display {
+  align-self: center;
+  justify-self: start;
+  color: var(--text-primary);
+  pointer-events: none; // taps go to the input underneath
+  user-select: none; // a copy for the eyes only; the input holds the real value
+  -webkit-user-select: none;
+}
+
+// Empty: the copy reads as a placeholder ("0⁰⁰"), and the caret can sit in front of it
+.empty {
+  color: var(--text-muted);
+}
+
+// `:where` keeps this weak, so the view-mode rule below can override it
+.input:where(:disabled) ~ .display {
+  color: var(--text-disabled);
+}
+
+// Editing a value: show the real text, hide the copy
+.input:focus:not(:placeholder-shown) ~ .display {
+  visibility: hidden;
+}
+
+// View mode (disabled fieldset): the copy reads as a normal value, at the end of the row
+fieldset:disabled .display {
+  justify-self: end;
+  padding-right: 0;
+  color: var(--text-primary);
 }

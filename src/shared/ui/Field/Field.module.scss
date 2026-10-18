@@ -66,15 +66,27 @@ $label-transition: 150ms ease;
   }
 }
 
+// Sits next to the control in the flex row (not on top of it), so it takes its real width
 .adornmentContainer {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 0.75rem;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
+  align-self: stretch;
+  padding-left: 0.75rem;
   font-size: 1.15rem;
   color: var(--text-secondary);
+  // Same cursor as the control the tap goes to: text for an input, pointer for a button
+  cursor: text;
+}
+
+.base:has(button) .adornmentContainer {
+  cursor: pointer;
+}
+
+// Disabled (or view mode): the tap goes nowhere, so no hint that it does
+.base[aria-disabled='true'] .adornmentContainer,
+fieldset:disabled .adornmentContainer {
+  cursor: auto;
 }
 
 .labelContainer {
@@ -125,5 +137,20 @@ $label-transition: 150ms ease;
 
   .labelContainer {
     color: var(--error-text);
+  }
+}
+
+// View mode: SubscriptionForm wraps the fields in a disabled <fieldset>. The values read as
+// plain text at the end of the row instead of controls that look tappable. Each input sets
+// its own text color for this (see the `fieldset:disabled` rule in its module).
+fieldset:disabled .base {
+  padding-right: 0;
+  border-color: transparent;
+
+  :is(input, button) {
+    justify-content: flex-end;
+    padding-right: 0;
+    text-align: end;
+    cursor: auto;
   }
 }
