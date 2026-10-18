@@ -30,3 +30,25 @@
       var(--shadow-glow-brand);
   }
 }
+
+// Sliding variant (Pill gets a `layoutId`): the green background and its ring move onto
+// `.highlight`, one shared element that Motion slides from pill to pill
+.sliding {
+  isolation: isolate; // keeps the highlight (z-index -1) behind the label
+
+  &.active {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.highlight {
+  position: absolute;
+  inset: -1px; // also covers the pill's 1px border
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--brand);
+  box-shadow:
+    0 0 0 3px var(--brand-subtle),
+    var(--shadow-glow-brand);
+}

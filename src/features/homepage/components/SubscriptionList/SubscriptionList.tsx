@@ -80,6 +80,7 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
           <Pill
             key={filterKey(filter)}
             isActive={filterKey(filter) === filterKey(activeFilter)}
+            layoutId="homeFilter" // the green background slides to the tapped filter
             onClick={() => setChosenFilter(filter)}
             className={filterPill}
           >
