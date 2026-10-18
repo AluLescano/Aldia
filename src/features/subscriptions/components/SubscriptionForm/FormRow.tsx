@@ -22,7 +22,7 @@ const FormRow = ({ label, children }: Props) => {
 
   return (
     <div className={inputContainer}>
-      <Typography variant="body" size="medium">
+      <Typography variant="body" size="md">
         {label}
       </Typography>
       {children}

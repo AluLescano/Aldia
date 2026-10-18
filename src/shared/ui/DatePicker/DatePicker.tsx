@@ -155,7 +155,7 @@ const DatePicker = ({ value, min, onSelect }: Props) => {
 
         <div className={weekdays} aria-hidden="true">
           {WEEKDAYS.map((letter, index) => (
-            <Typography key={index} variant="overline" size="small" className={weekday}>
+            <Typography key={index} variant="overline" size="sm" className={weekday}>
               {letter}
             </Typography>
           ))}
@@ -184,7 +184,7 @@ const DatePicker = ({ value, min, onSelect }: Props) => {
                 aria-pressed={isSelected}
                 onClick={() => onSelect(iso)}
               >
-                <Typography variant="overline" size="small">
+                <Typography variant="overline" size="sm">
                   {Number(iso.slice(8, 10))}
                 </Typography>
               </Button>

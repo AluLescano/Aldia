@@ -124,10 +124,10 @@ const CategoryPicker = ({ value, onSelect, editor }: Props) => {
 
               {state === 'deleting' && (
                 <>
-                  <Typography variant="body" size="medium">
+                  <Typography variant="body" size="md">
                     {`¿Eliminar «${category.name}»?`}
                   </Typography>
-                  <Typography variant="body" size="small">
+                  <Typography variant="body" size="sm">
                     {affected === 0
                       ? 'Ninguna subscripción la usa.'
                       : `${affected} ${affected === 1 ? 'subscripción pasa' : 'subscripciones pasan'} a Otros.`}
@@ -143,7 +143,7 @@ const CategoryPicker = ({ value, onSelect, editor }: Props) => {
                     aria-pressed={isSelected}
                     onClick={() => onSelect(category.id)}
                   >
-                    <Typography variant="body" size="medium">
+                    <Typography variant="body" size="md">
                       {category.name}
                     </Typography>
                   </button>

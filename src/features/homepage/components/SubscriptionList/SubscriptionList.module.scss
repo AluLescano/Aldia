@@ -247,12 +247,16 @@
 // Grows with the amount (no fixed width: "$ 15.130,69" did not fit in 5rem) and right-aligns,
 // so prices still line up in a column
 .cardPrice {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  padding-left: 0.5rem;
+  flex-shrink: 0;
+  align-items: center;
   white-space: nowrap;
+  gap: 0.5rem;
+}
+
+.centered {
+  padding-top: 0.5rem;
 }
 
 // What the card is really charged, under the converted amount

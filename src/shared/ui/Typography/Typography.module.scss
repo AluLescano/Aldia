@@ -7,90 +7,82 @@
     'Segoe UI',
     Roboto,
     sans-serif;
+  font-style: normal;
+  font-weight: 400;
 }
 
-.large {
+// Type scale: one set of sizes shared by every variant
+
+.xxl {
+  font-size: 2rem;
+  line-height: 2.375rem;
+}
+
+.xl {
+  font-size: 1.5rem;
+  line-height: 1.875rem;
+}
+
+.lg {
   font-size: 1.25rem;
-  line-height: 1.75rem;
+  line-height: 1.625rem;
 }
 
-.medium {
+.md {
   font-size: 1rem;
   line-height: 1.5rem;
 }
 
-.small {
+.sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.xs {
   font-size: 0.75rem;
   line-height: 1rem;
 }
 
-.titleLarge {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 700;
-}
+// Weights: 400 by default, 500 for emphasis, 300 only for big amounts
 
-.titleMedium {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  font-weight: 600;
-}
-
-.titleSmall {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+.title {
   font-weight: 500;
 }
 
-.trackingWidest {
-  letter-spacing: 0.1em;
+.overline {
+  font-weight: 500;
+  letter-spacing: 0.08em;
 }
 
 .uppercase {
   text-transform: uppercase;
 }
 
-.currencyLarge {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  font-weight: 600;
+.light {
+  font-weight: 300;
 }
 
-.currencyMedium {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-  font-weight: 600;
-}
-
-.currencySmall {
-  font-size: 1rem;
-  line-height: 1.5rem;
-  font-weight: 600;
-}
-
-.currencyDecimalLarge {
-  font-size: 1rem;
-  line-height: 1.5rem;
-  font-weight: 600;
-}
-
-.currencyDecimalMedium {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-}
-
-.currencyDecimalSmall {
-  font-size: 0.75rem;
-  line-height: 1rem;
-  font-weight: 400;
-}
+// Currency: the decimals sit raised, their tops lined up with the top of the digits.
+// `text-box` trims each span to cap height, so aligning the boxes to the top aligns the digits.
 
 .currencyWrapper {
+  position: relative;
   display: inline-flex;
+  align-items: flex-start;
   gap: 0.125rem;
+  font-variant-numeric: proportional-nums;
+
+  > span {
+    text-box: trim-both cap alphabetic;
+  }
 }
 
-.currencyDecimalWrapper {
-  margin-top: 0.15rem;
+// Read by screen readers, invisible on screen
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

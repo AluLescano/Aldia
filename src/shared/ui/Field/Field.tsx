@@ -120,11 +120,7 @@ const Field = ({
       </div>
       {message && (
         <div id={descriptionId} className={description}>
-          <Typography
-            variant="label"
-            size="small"
-            className={errorMessage ? error : info}
-          >
+          <Typography variant="label" size="xs" className={errorMessage ? error : info}>
             {message}
           </Typography>
         </div>

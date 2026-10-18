@@ -31,7 +31,7 @@ const PresetCard = ({ name, logo, iconKey, onClick, className }: Props) => {
       {logo && <img src={logo} alt="" />}
       {Icon && <Icon />}
       <div className={text}>
-        <Typography variant="body" size="small">
+        <Typography variant="body" size="sm">
           {name}
         </Typography>
       </div>

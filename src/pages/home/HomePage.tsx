@@ -80,7 +80,7 @@ export const HomePage = () => {
             onDismiss={clearLastDeleted}
             message={
               <div className={toastContent}>
-                <Typography variant="body" size="medium">
+                <Typography variant="body" size="sm">
                   {`Se eliminó ${lastDeleted.name} exitosamente`}
                 </Typography>
                 <Button onClick={undoDelete} className={undoButton} aria-label="Deshacer">

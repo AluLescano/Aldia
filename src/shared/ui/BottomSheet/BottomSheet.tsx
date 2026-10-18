@@ -82,7 +82,7 @@ const Panel = ({ onClose, title, children, footer, className }: PanelProps) => {
         >
           <div className={dragHandle} />
           {title && (
-            <Typography variant="title" size="large">
+            <Typography variant="title" size="lg">
               {title}
             </Typography>
           )}

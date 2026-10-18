@@ -5,14 +5,17 @@ import { formatAmount } from '@/shared/lib/currencies'
 // ASSETS
 import styles from './Typography.module.scss'
 
+type Size = '2xl' | 'xl' | 'lg' | 'md' | 'sm' | 'xs'
+
 interface TypographyProps {
-  /** Defaults to `medium`. */
-  size?: 'large' | 'medium' | 'small'
+  /** Step of the type scale: 2xl 32px, xl 24, lg 20, md 16, sm 14, xs 12. Defaults to `md`. */
+  size?: Size
   /**
-   * - `title`: an `<h1>`.
-   * - `body`: a `<p>` (note: browser paragraph margins apply until the base cleanup).
-   * - `label` / `overline`: a `<span>` with wide letter spacing (`overline` is uppercase).
-   * - `currency`: an amount, symbol + integer + smaller raised decimals.
+   * - `title`: an `<h1>`, weight 500.
+   * - `body`: a `<p>`.
+   * - `label`: a `<span>`.
+   * - `overline`: an uppercase `<span>`, weight 500 with wide letter spacing.
+   * - `currency`: an amount, symbol + integer + smaller raised decimals (Light at xl and 2xl).
    */
   variant: 'title' | 'body' | 'overline' | 'label' | 'currency'
   /** For `currency`, a number gets thousands dots ("15.130" + "69"). */
@@ -40,15 +43,35 @@ const splitCurrency = (value: string | number) => {
   return { integerPart: str, decimalPart: undefined }
 }
 
+// Decimals use a smaller step of the same scale (about 0.6 of the amount, never under 12px)
+const decimalSizes: Record<Size, Size> = {
+  '2xl': 'lg',
+  xl: 'md',
+  lg: 'sm',
+  md: 'xs',
+  sm: 'xs',
+  xs: 'xs',
+}
+
+// Big amounts go Light; smaller ones stay Regular so they don't look faded
+const isBigAmount: Record<Size, boolean> = {
+  '2xl': true,
+  xl: true,
+  lg: false,
+  md: false,
+  sm: false,
+  xs: false,
+}
+
 /**
  * All the app's text styles in one component, so sizes and weights stay consistent.
  *
  * @example
- * <Typography variant="body" size="small">Hola</Typography>
- * <Typography variant="currency" size="large" currencySymbol="U$S">{12.5}</Typography>
+ * <Typography variant="body" size="sm">Hola</Typography>
+ * <Typography variant="currency" size="xl" currencySymbol="U$S">{12.5}</Typography>
  */
 const Typography = ({
-  size = 'medium',
+  size = 'md',
   variant,
   children,
   currencySymbol = '$',
@@ -56,38 +79,32 @@ const Typography = ({
 }: TypographyProps) => {
   const {
     font,
-    large,
-    medium,
-    small,
-    titleLarge,
-    titleMedium,
-    titleSmall,
-    trackingWidest,
+    xxl,
+    xl,
+    lg,
+    md,
+    sm,
+    xs,
+    title,
+    overline,
     uppercase,
-    currencyLarge,
-    currencyMedium,
-    currencySmall,
-    currencyDecimalLarge,
-    currencyDecimalMedium,
-    currencyDecimalSmall,
+    light,
     currencyWrapper,
-    currencyDecimalWrapper,
+    srOnly,
   } = styles
 
   const sizeClasses = {
-    large: large,
-    medium: medium,
-    small: small,
+    '2xl': xxl,
+    xl: xl,
+    lg: lg,
+    md: md,
+    sm: sm,
+    xs: xs,
   }
 
   switch (variant) {
     case 'title': {
-      const titleSizeClasses = {
-        large: titleLarge,
-        medium: titleMedium,
-        small: titleSmall,
-      }
-      return <h1 className={cn(font, titleSizeClasses[size], className)}>{children}</h1>
+      return <h1 className={cn(font, sizeClasses[size], title, className)}>{children}</h1>
     }
 
     case 'body':
@@ -100,8 +117,7 @@ const Typography = ({
           className={cn(
             font,
             sizeClasses[size],
-            trackingWidest,
-            variant === 'overline' && uppercase,
+            variant === 'overline' && cn(overline, uppercase),
             className,
           )}
         >
@@ -110,28 +126,22 @@ const Typography = ({
       )
 
     case 'currency': {
-      const currencySizeClasses = {
-        large: currencyLarge,
-        medium: currencyMedium,
-        small: currencySmall,
-      }
-      const decimalSizes = {
-        large: currencyDecimalLarge,
-        medium: currencyDecimalMedium,
-        small: currencyDecimalSmall,
-      }
-
       // Automatically extract integer & decimal!
       const { integerPart, decimalPart } = splitCurrency(children)
+      const amountClass = cn(font, sizeClasses[size], isBigAmount[size] && light)
 
       return (
         <div className={cn(currencyWrapper, className)}>
-          <span className={cn(font, currencySizeClasses[size])}>{currencySymbol}</span>
-          <span className={cn(font, currencySizeClasses[size])}>{integerPart}</span>
+          <span className={amountClass}>{currencySymbol}</span>
+          <span className={amountClass}>{integerPart}</span>
           {decimalPart && (
-            <span className={cn(font, currencyDecimalWrapper, decimalSizes[size])}>
-              {decimalPart}
-            </span>
+            <>
+              {/* The comma is hidden on screen, but screen readers need it */}
+              <span className={srOnly}>,</span>
+              <span className={cn(font, sizeClasses[decimalSizes[size]])}>
+                {decimalPart}
+              </span>
+            </>
           )}
         </div>
       )

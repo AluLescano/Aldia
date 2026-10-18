@@ -58,11 +58,13 @@ const MonthlyExpenses = ({
     <>
       <div className={container}>
         <div className={header}>
-          <Typography variant="overline">{title}</Typography>
+          <Typography variant="overline" size="sm">
+            {title}
+          </Typography>
           <Pill onClick={() => setIsSheetOpen(true)} className={currencyPill}>
             <span className={flagWrapper}>
               <span className={`fi fi-${currentCountryCode} fi ${flag}`} />
-              <Typography variant="label" size="small">
+              <Typography variant="label" size="sm">
                 {selectedCurrency}
               </Typography>
             </span>
@@ -72,16 +74,16 @@ const MonthlyExpenses = ({
         <div className={amounts}>
           <Typography
             variant="currency"
-            size="large"
+            size="2xl"
             currencySymbol={getCurrencySymbol(selectedCurrency)}
           >
             {monthlyAmount}
           </Typography>
-          <Typography variant="body" size="medium">
+          <Typography variant="body" size="sm">
             {subAmount}
           </Typography>
           {note && (
-            <Typography variant="body" size="small" className={currencyRate}>
+            <Typography variant="body" size="xs" className={currencyRate}>
               {note}
             </Typography>
           )}

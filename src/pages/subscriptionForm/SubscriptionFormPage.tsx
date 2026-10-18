@@ -112,7 +112,7 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
             <IconArrow />
           </IconButton>
           <div>
-            <Typography variant="title" size="small">
+            <Typography variant="title" size="md">
               {existing?.name ?? 'Nueva Subscripción'}
             </Typography>
           </div>

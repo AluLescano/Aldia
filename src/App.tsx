@@ -98,7 +98,7 @@ function App() {
               position="top"
               type={toast.type}
               message={
-                <Typography variant="body" size="medium">
+                <Typography variant="body" size="sm">
                   {toast.message}
                 </Typography>
               }

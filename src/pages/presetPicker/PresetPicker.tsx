@@ -49,7 +49,7 @@ export const PresetPicker = () => {
           <IconButton onClick={popOverlay} label="Volver">
             <IconArrow />
           </IconButton>
-          <Typography variant="title" size="small">
+          <Typography variant="title" size="md">
             Agregar Subscripción
           </Typography>
           <IconButton
@@ -76,7 +76,7 @@ export const PresetPicker = () => {
 
       <div className={cn(listContainer, `no-scrollbar`)}>
         <div>
-          <Typography variant="label" size="small">
+          <Typography variant="label" size="sm">
             Subscripciones Populares
           </Typography>
         </div>
