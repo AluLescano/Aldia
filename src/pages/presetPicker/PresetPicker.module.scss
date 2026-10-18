@@ -67,6 +67,33 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1rem;
+
+      // Cascade: the cards rise in one after another while the screen slides in.
+      // `translate` (not `transform`) and `backwards` (styles only before it starts), so it
+      // never overrides the Button's press shrink. Capped at 12: the rest come in with the 12th
+      > * {
+        animation: card-rise 300ms ease-out backwards;
+        animation-delay: #{80 + 12 * 30}ms;
+      }
+
+      @for $i from 1 through 12 {
+        > :nth-child(#{$i}) {
+          animation-delay: #{80 + ($i - 1) * 30}ms;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        > * {
+          animation: none;
+        }
+      }
     }
+  }
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.75rem;
   }
 }
