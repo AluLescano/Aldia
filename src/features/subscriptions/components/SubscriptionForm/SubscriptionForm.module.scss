@@ -27,11 +27,27 @@ form {
       margin-bottom: 1rem;
       border-radius: 1.5rem;
 
+      // FormRow: label and control on one line; the message slot wraps to its own line below
       .inputContainer {
         display: flex;
+        flex-wrap: wrap;
         justify-content: space-between;
         align-items: center;
         padding: 0.5rem 1rem;
+      }
+
+      .rowLabel {
+        cursor: default;
+      }
+
+      // Field sends its hint or error here (portal), so it gets the full row width
+      .messageSlot {
+        flex-basis: 100%;
+        padding-top: 0.25rem;
+
+        &:empty {
+          display: none;
+        }
       }
 
       .buttonNotification {

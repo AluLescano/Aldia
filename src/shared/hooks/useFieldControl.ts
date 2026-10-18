@@ -1,6 +1,7 @@
 import { useId } from 'react'
 
 import { useShake } from './useShake'
+import { useFieldRow } from '@/shared/ui/Field/FieldRowContext'
 import type { FieldSize, FieldWidth } from '@/shared/ui/Field/Field'
 
 /** Props every input built on `Field` shares. */
@@ -40,6 +41,8 @@ interface Options extends FieldControlProps {
 /**
  * Wires an input to its `Field` box: one id for both, the link between the
  * control and its hint or error (for screen readers), and the shake on error.
+ * Inside a row with `FieldRowContext` (like `FormRow`), the control uses the row's id,
+ * so the row's `<label>` names it.
  *
  * @returns `fieldProps` to spread on `<Field>`, and `controlProps` to spread on the
  * real `<input>` or `<button>`. Spread `controlProps` after `...rest` so they always win.
@@ -64,7 +67,9 @@ export function useFieldControl({
   filled,
 }: Options) {
   const generatedId = useId()
-  const fieldId = id ?? generatedId
+  const row = useFieldRow()
+  // Inside a row the control takes the id the row's <label htmlFor> points at
+  const fieldId = id ?? row?.controlId ?? generatedId
   const hasError = Boolean(errorMessage)
 
   // Field only renders the description when there is a hint or an error,
@@ -93,5 +98,12 @@ export function useFieldControl({
       'aria-invalid': hasError || undefined,
       'aria-describedby': descriptionId,
     },
+    /**
+     * For controls that are `<button>`s (select, date): a `<label>` alone would replace the
+     * button's text as its name, so screen readers would say "Formato del Cobro" and skip
+     * "Mensual". Pointing at the row label and at the button itself reads both.
+     * Inputs don't need it: the `<label htmlFor>` names them and their value is read anyway.
+     */
+    buttonLabelledBy: row ? `${row.labelId} ${fieldId}` : undefined,
   }
 }

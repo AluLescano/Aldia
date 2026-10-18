@@ -1,6 +1,8 @@
 // DEPENDENCIES
 import type { CSSProperties, ReactNode, Ref } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/shared/lib/cn'
+import { useFieldRow } from './FieldRowContext'
 
 // COMPONENTS
 import Typography from '../Typography/Typography'
@@ -72,6 +74,8 @@ const sizeClasses: Record<FieldSize, string> = {
 /**
  * The box every input shares: border, size, floating label, hint or error underneath.
  * It holds no logic: use it through an `Input*` component, which wires it with `useFieldControl`.
+ * Inside a row that provides `FieldRowContext` (like `FormRow`), the hint or error is
+ * rendered under the whole row instead of under the box.
  */
 const Field = ({
   id,
@@ -90,6 +94,8 @@ const Field = ({
   className,
   style,
 }: Props) => {
+  const row = useFieldRow()
+
   // Only the large size floats its label; medium rows get theirs from FormRow
   const showLabel = Boolean(label) && size === 'large'
 
@@ -112,6 +118,15 @@ const Field = ({
     control?.focus()
     if (control instanceof HTMLButtonElement) control.click()
   }
+
+  // The hint or error. Same element (and id, for `aria-describedby`) wherever it's shown
+  const messageElement = message && (
+    <div id={descriptionId} className={description}>
+      <Typography variant="label" size="xs" className={errorMessage ? error : info}>
+        {message}
+      </Typography>
+    </div>
+  )
 
   // The SCSS reads `--field-min-width` and falls back to 9rem when it isn't set
   const boxStyle = minWidth
@@ -138,13 +153,11 @@ const Field = ({
         )}
         {children}
       </div>
-      {message && (
-        <div id={descriptionId} className={description}>
-          <Typography variant="label" size="xs" className={errorMessage ? error : info}>
-            {message}
-          </Typography>
-        </div>
-      )}
+      {/* Inside a row the message goes to the row's slot (full width), otherwise under the box */}
+      {messageElement &&
+        (row?.messageSlot
+          ? createPortal(messageElement, row.messageSlot)
+          : messageElement)}
     </div>
   )
 }

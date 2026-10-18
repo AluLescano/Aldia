@@ -1,5 +1,5 @@
 // DEPENDENCIES
-import { type SubmitEvent, useRef, useState } from 'react'
+import { type SubmitEvent, useId, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 
 // HOOKS
@@ -57,6 +57,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
   } = styles
 
   const form = useSubscriptionForm(initialValues)
+  // The notifications row holds a plain Button, so the row label needs its id by hand
+  const notificationsId = useId()
   const { values, isValid, hasEndDate, trialDays, setField, touch, touchAll, errorFor } =
     form
 
@@ -190,8 +192,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
 
         <div className={container}>
           {/* Reminders sheet comes with the notifications work */}
-          <FormRow label="Notificaciones">
-            <Button size="small" className={buttonNotification}>
+          <FormRow label="Notificaciones" controlId={notificationsId}>
+            <Button id={notificationsId} size="small" className={buttonNotification}>
               <IconArrow />
             </Button>
           </FormRow>
