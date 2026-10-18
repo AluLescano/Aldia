@@ -12,13 +12,13 @@
 
     .navGroup {
       display: flex;
-      background-color: var(--bg-surface-elevated);
+      background-color: var(--bg-surface-raised);
       border-radius: 1rem;
 
       .select {
         width: fit-content;
         border: none;
-        background-color: var(--bg-surface-elevated);
+        background-color: var(--bg-surface-raised);
         text-align: center;
         appearance: none;
         border-radius: 1rem;
@@ -67,7 +67,7 @@
     }
 
     .selected {
-      background-color: var(--brand-primary);
+      background-color: var(--brand);
     }
   }
 }

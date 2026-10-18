@@ -1,5 +1,3 @@
-@use '@/styles/_variables.scss' as *;
-
 .container {
   display: inline-flex;
   align-items: center;
@@ -24,7 +22,7 @@
   }
 
   &.active {
-    background-color: var(--brand-primary);
+    background-color: var(--brand);
     color: var(--text-on-brand);
     border-color: transparent;
     box-shadow:

@@ -11,7 +11,7 @@ $label-transition: 150ms ease;
   border-radius: var(--field-radius);
 
   &:focus-within {
-    border-color: var(--focus-ring);
+    border-color: var(--border-focus);
   }
 
   &[aria-disabled='true'] {

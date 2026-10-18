@@ -1,62 +1,86 @@
 // ==============================================================================
-// Aldia Design System — Primitives
+// Aldia Design System — Primitives (raw colors)
 // ==============================================================================
-// Hues: phthalo 159-168, champagne 78-86, paper 86-88, charcoal 154-164,
-// amber 62, brick 28. Never reference these directly from components: use the
-// semantic tokens in _themes.scss.
+// Hues: phthalo 159-168, champagne 78-86, paper 34-44 (cream), charcoal 154-164,
+// amber 62, red 0, success (leaf) 85, info (dusty blue) 208.
+// Never reference these from components: use the semantic tokens in _themes.scss.
+// Contrast notes are against the light surfaces (paper-0/50/100) or the dark
+// ones (charcoal-700/800/900), checked 2026-10-18.
 
 // --- Phthalo Green (Brand) ---
 $phthalo-50: #eef8f2;
 $phthalo-100: #d2ecdf;
 $phthalo-200: #a1d6bb;
-$phthalo-300: #5cb386;
-$phthalo-400: #228a5c;
-$phthalo-500: #0f5c3e;
-$phthalo-600: #0a3d2c; // core brand anchor — light-mode brand, dark-mode ink
-$phthalo-700: #082a1f; // deepest — light-mode text ink
+$phthalo-300: #5cb386; // dark-mode brand accents, success text on dark (6.1:1)
+$phthalo-400: #228a5c; // light-mode focus ring (3.8:1)
+$phthalo-500: #0f5c3e; // dark-mode brand fill; white text on it 8:1
+$phthalo-600: #0a3d2c; // core brand anchor: light-mode brand, success text (10.8:1)
+$phthalo-700: #082a1f; // deepest: light-mode text ink (13.6:1)
 
 // --- Champagne (Accent) ---
 $champagne-50: #fcf3e2;
 $champagne-100: #f6e5c4;
 $champagne-200: #efd6a5;
-$champagne-300: #e6c583;
+$champagne-300: #e6c583; // accent text on dark (9.4:1)
 $champagne-400: #d9b367;
 $champagne-500: #caa24d;
 $champagne-600: #ac883a;
 $champagne-700: #91712d;
-$champagne-800: #6f5721; // accessible bronze text on light surfaces
+$champagne-800: #6f5721; // accent text on light (6:1)
 
-// --- Paper (Light-mode warm neutrals, low chroma so cards read clean) ---
-$paper-0: #fffefc; // elevated surfaces (modals/sheets)
-$paper-50: #fbfaf5; // base card surface
-$paper-100: #f0ede5; // app canvas
-$paper-200: #e4dfd5; // pressed/selected washes
-$paper-300: #cdc7b9; // dividers, strong borders
-$paper-500: #8c8577; // input borders (3:1 on every light surface)
+// --- Paper (light-mode cream neutrals: soft and warm, easier on the eyes than white) ---
+$paper-0: #fffefd; // raised surfaces: rows, chips, sheets
+$paper-50: #fffbf5; // cards
+$paper-100: #f6f0e8; // screen (app canvas), splash
+$paper-150: #f1ebe2; // hovered rows on a card (1.18:1 against the row, like the dark step)
+$paper-200: #e4dfd5; // pressed / selected washes
+$paper-300: #cdc7b9; // strong dividers, drag handle
+$paper-500: #8c8577; // input borders (3.2:1)
+$paper-900: #3d3426; // warm ink for shadows, hairlines and the scrim (never text)
 
-// --- Charcoal (Dark-mode neutrals, subtle green undertone) ---
-$charcoal-900: #0a0f0c; // app canvas
-$charcoal-800: #131916; // base card surface
-$charcoal-700: #1d2620; // elevated surface
-$charcoal-500: #3a453d; // strong border/divider
-$charcoal-300: #707e75; // input borders (3:1 on every dark surface)
+// --- Charcoal (dark-mode neutrals, subtle green undertone) ---
+$charcoal-900: #0a0f0c; // screen (app canvas), splash
+$charcoal-800: #131916; // cards
+$charcoal-700: #1d2620; // raised surfaces: rows, chips, sheets
+$charcoal-500: #3a453d; // strong dividers, drag handle
+$charcoal-300: #707e75; // input borders (3.6:1)
 
 // --- Text neutrals (solid, so contrast does not depend on what is underneath) ---
-$ink-600: #46574f; // light-mode secondary text
-$ink-500: #586760; // light-mode muted text (4.5:1 on the canvas)
-$bone-300: #b9b8b0; // dark-mode secondary text
-$bone-400: #94928a; // dark-mode muted text (4.5:1 on elevated surfaces)
+$ink-600: #46574f; // light-mode secondary text (6.8:1)
+$ink-500: #586267; // light-mode muted text (5.3:1)
+$bone-300: #b9b8b0; // dark-mode secondary text (7.8:1)
+$bone-400: #94928a; // dark-mode muted text (5:1)
+
+// --- Success (leaf green, built around #7baa39: too light for text or icons on cream on its own) ---
+$success-100: #e8f2d8; // light-mode success background
+$success-400: #7baa39; // dark-mode success fill and text (5.7:1); dark text on it 5.6:1
+$success-600: #56802a; // light-mode success fill, icon and border; white text on it 4.65:1
+$success-700: #456a17; // light-mode success text (5.6:1, 5.5:1 on success-100)
+
+// --- Info (dusty blue: reads as "notice", not as faded grey text) ---
+$info-100: #e4ebf2; // light-mode info background
+$info-300: #9db8d1; // dark-mode info text and fill (7.6:1)
+$info-500: #4f7392; // light-mode info fill and border; white text on it 5:1
+$info-700: #3d5a73; // light-mode info text (6.4:1, 6:1 on info-100)
 
 // --- Warning (orange-amber: far enough from champagne to mean "careful") ---
 $amber-100: #ffe6d1;
-$amber-400: #f4993c;
-$amber-700: #995600;
+$amber-400: #f4993c; // warning fill (dark text on it), dark-mode warning text (7:1)
+$amber-700: #995600; // light-mode warning text (5:1, 4.8:1 on amber-100)
 
-// --- Error (warm brick, sits with the paper tones instead of clashing) ---
-$brick-100: #ffe4e0;
-$brick-300: #ed8c80;
-$brick-500: #cb473d;
-$brick-700: #9e2d26;
+// --- Error (bright red, built around #ef4444: says "error" at a glance) ---
+// The fill is too light for small text on cream (3.3:1), so text uses red-700 (light)
+// or red-300 (dark): same red family, readable.
+$red-100: #fde8e8; // light-mode error background (red-700 text on it 4.8:1)
+$red-300: #f87171; // dark-mode error text (5.6:1)
+$red-500: #ef4444; // error fill, icon and border, both themes (3.3:1 light, 4.1:1 dark);
+// white on it 3.8:1: fine for icons and large text, not for small text
+$red-700: #c62828; // light-mode error text (5:1)
+
+// --- Card faces (identity, not brand: a card looks the same in both themes) ---
+$card-basic-1: #7e22ce; // purple
+$card-basic-2: #4338ca; // indigo
+$card-basic-3: #0891b2; // cyan
 
 // --- Base ---
 $color-white: #ffffff;

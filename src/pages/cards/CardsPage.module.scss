@@ -15,28 +15,28 @@
   font-size: 1.5rem;
   line-height: 2rem;
   font-weight: 700;
-  color: #f4f4f5;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
 .subtitle {
   font-size: 0.75rem;
   line-height: 1rem;
-  color: #a1a1aa;
+  color: var(--text-secondary);
   margin-top: 0.25rem;
 }
 
 .headerButton {
   padding: 0.5rem;
   border-radius: 0.75rem;
-  background-color: #27272a;
-  color: #e4e4e7;
+  background-color: var(--bg-surface-raised);
+  color: var(--text-primary);
   transition: all 0.15s ease-in-out;
   border: none;
   cursor: pointer;
 
   &:hover {
-    background-color: #3f3f46;
+    background-color: var(--bg-surface-sunken);
   }
 
   &:active {
@@ -54,10 +54,10 @@
   height: 12rem;
   width: 100%;
   border-radius: 1.5rem;
-  background-image: linear-gradient(to top right, #7e22ce, #4338ca, #0891b2);
+  background-image: var(--card-face-basic);
   padding: 1.5rem;
-  color: white;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  color: var(--text-on-brand);
+  box-shadow: 0 25px 50px -12px var(--shadow-lg);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -70,7 +70,11 @@
   bottom: -2rem;
   width: 10rem;
   height: 10rem;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: color-mix(
+    in srgb,
+    var(--text-on-brand) 10%,
+    transparent
+  ); // glow on the brand card
   border-radius: 9999px;
   filter: blur(24px);
   pointer-events: none;
@@ -100,7 +104,7 @@
   font-size: 1.125rem;
   font-family: monospace;
   letter-spacing: 0.1em;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+  filter: drop-shadow(0 1px 1px var(--shadow-sm));
 }
 
 .cardFooter {

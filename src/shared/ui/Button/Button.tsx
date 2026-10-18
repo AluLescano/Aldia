@@ -1,5 +1,5 @@
 // DEPENDENCIES
-import { useRef, useState, type ButtonHTMLAttributes, type MouseEvent } from 'react'
+import { useRef, useState, type ButtonHTMLAttributes, type PointerEvent } from 'react'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
@@ -42,7 +42,7 @@ const widthClasses = { full: widthFull, fit: widthFit }
 const variantClasses = { primary: ButtonPrimary, secondary: ButtonSecondary }
 
 /**
- * The app's button for actions ("Guardar", "Agregar"...), with a ripple on every tap.
+ * The app's button for actions ("Guardar", "Agregar"...), with a ripple on every press.
  * Defaults to `type="button"`, so it never submits a form by accident; pass
  * `type="submit"` for that. For icon-only buttons use `IconButton`; for the inside
  * of a form field use a plain `<button>` (the field owns that look).
@@ -52,7 +52,7 @@ const Button = ({
   size = 'large',
   type = 'button',
   width = 'fit',
-  onClick,
+  onPointerDown,
   children,
   className,
   ...rest
@@ -60,8 +60,10 @@ const Button = ({
   const [ripples, setRipples] = useState<Ripple[]>([])
   const rippleIdRef = useRef(0)
 
-  // Each tap adds a ripple where the finger landed; it removes itself when its animation ends
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+  // The ripple starts when the finger lands, not on click (when it lifts): a button that
+  // opens another screen would otherwise ripple underneath it, where nobody sees it.
+  // It removes itself when its animation ends.
+  const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect()
     const newRipple: Ripple = {
       id: rippleIdRef.current++,
@@ -69,7 +71,7 @@ const Button = ({
       y: event.clientY - rect.top,
     }
     setRipples((prev) => [...prev, newRipple])
-    onClick?.(event)
+    onPointerDown?.(event)
   }
 
   const removeRipple = (id: number) => {
@@ -80,7 +82,7 @@ const Button = ({
     <button
       {...rest}
       type={type}
-      onClick={handleClick}
+      onPointerDown={handlePointerDown}
       className={cn(
         sizeClasses[size],
         variantClasses[variant],

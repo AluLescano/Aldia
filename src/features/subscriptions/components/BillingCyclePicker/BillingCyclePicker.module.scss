@@ -13,7 +13,7 @@
   min-height: 6rem; // 96px, like Figma
   border: 2px solid transparent; // reserved, so the selected border never shifts the layout
   border-radius: 0.75rem;
-  background-color: var(--bg-surface-elevated);
+  background-color: var(--bg-surface-raised);
   transition:
     border-color 150ms ease,
     background-color 150ms ease;
@@ -24,7 +24,7 @@
 }
 
 .selected {
-  border-color: var(--focus-ring);
+  border-color: var(--border-focus);
   background-color: var(--brand-subtle);
 }
 

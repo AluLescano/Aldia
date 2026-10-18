@@ -61,10 +61,11 @@ const Toast = ({
     info: <IconInfo className={iconInfo} />,
   }[type]
 
+  // Theme tokens, so the bar follows light and dark mode like the icon does
   const progressBarColor = {
-    alert: '#B23333',
-    success: '#7BAA39',
-    info: '#FFFFFFB3',
+    alert: 'var(--error-fill)',
+    success: 'var(--success-fill)',
+    info: 'var(--info-fill)',
   }[type]
 
   const positionData = {
@@ -136,7 +137,7 @@ const Toast = ({
       </div>
 
       <div className={closeWrapper}>
-        <Button onClick={onDismiss} className={closeButton} aria-label="Close">
+        <Button onClick={onDismiss} className={closeButton} aria-label="Cerrar">
           <IconClose />
         </Button>
       </div>

@@ -4,9 +4,9 @@
   left: 0;
   right: 0;
   z-index: 40;
-  background-color: color-mix(in srgb, var(--bg-app) 90%, transparent);
+  background-color: color-mix(in srgb, var(--bg-screen) 90%, transparent);
   backdrop-filter: blur(24px);
-  border-top: 1px solid color-mix(in srgb, #27272a 60%, transparent);
+  border-top: 1px solid var(--border-subtle);
   padding-bottom: max(env(safe-area-inset-bottom), 12px);
   padding-top: 0.5rem;
 }
@@ -42,14 +42,14 @@
   }
 
   &.active {
-    color: #818cf8;
+    color: var(--icon-active);
     font-weight: 500;
   }
 
   &.inactive {
-    color: #71717a;
+    color: var(--text-muted);
     &:hover {
-      color: #d4d4d8;
+      color: var(--text-secondary);
     }
   }
 }
@@ -70,7 +70,7 @@
   transform: translateX(-50%);
   width: 0.25rem;
   height: 0.25rem;
-  background-color: #818cf8;
+  background-color: var(--icon-active);
   border-radius: 9999px;
 }
 

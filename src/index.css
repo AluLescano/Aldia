@@ -61,7 +61,7 @@ h6 {
 }
 
 :focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
 
@@ -82,7 +82,7 @@ h6 {
 html,
 body {
   height: 100%;
-  background-color: var(--bg-app);
+  background-color: var(--bg-screen);
   color: var(--text-primary);
   font-family:
     'Red Hat Text',

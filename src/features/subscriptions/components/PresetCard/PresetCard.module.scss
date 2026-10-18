@@ -12,12 +12,12 @@
   padding: 0.35rem 0.5rem;
   border: 2px solid var(--border-subtle);
   border-radius: 1.5rem;
-  background-color: var(--bg-surface-elevated);
+  background-color: var(--bg-surface-raised);
   box-shadow: 0 1px 2px 0 var(--shadow-sm);
 
   // Keep the card color on hover instead of Button's hover color
   &:hover {
-    background-color: var(--bg-surface-elevated);
+    background-color: var(--bg-surface-raised);
   }
 
   // Light sheen from the top-left corner. The content is positioned, so it paints on top of it.

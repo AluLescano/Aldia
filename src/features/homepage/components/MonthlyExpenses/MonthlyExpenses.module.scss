@@ -9,7 +9,7 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
   .skeletonElement {
-    background-color: var(--bg-surface-elevated);
+    background-color: var(--bg-surface-raised);
   }
 
   .skeletonHeader {
@@ -70,9 +70,10 @@
     z-index: 1;
   }
 
+  // Frosted cream in light mode, brand green in dark (see --brand-chip-* in _themes.scss)
   .currencyPill {
-    background-color: var(--brand-subtle);
-    border-color: var(--border-featured);
+    background-color: var(--brand-chip-bg);
+    border-color: var(--brand-chip-border);
   }
 
   .header {
