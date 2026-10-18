@@ -85,14 +85,3 @@
   height: 0.25rem;
   width: 100%;
 }
-
-:global {
-  @keyframes shrink {
-    from {
-      width: 100%;
-    }
-    to {
-      width: 0%;
-    }
-  }
-}
