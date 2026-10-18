@@ -34,6 +34,8 @@ interface Props {
   id: string
   size?: FieldSize
   width?: FieldWidth
+  /** Smallest width with `width="fit"`, as a CSS length. Defaults to 9rem (in the SCSS). */
+  minWidth?: string
   /** Floating label, shown only on `size="large"`. */
   label?: string
   /** The control has a value: the floating label stays up on the border. */
@@ -75,6 +77,7 @@ const Field = ({
   id,
   size = 'large',
   width = 'full',
+  minWidth,
   label,
   filled,
   subText,
@@ -102,13 +105,18 @@ const Field = ({
     className,
   )
 
+  // The SCSS reads `--field-min-width` and falls back to 9rem when it isn't set
+  const boxStyle = minWidth
+    ? ({ ...style, '--field-min-width': minWidth } as CSSProperties)
+    : style
+
   return (
     <div>
       <div
         ref={ref}
         aria-disabled={disabled || undefined}
         className={classes}
-        style={style}
+        style={boxStyle}
       >
         {showLabel && (
           <label htmlFor={id} className={labelContainer}>

@@ -45,7 +45,8 @@ $label-transition: 150ms ease;
 
 .widthFit {
   width: fit-content;
-  min-width: 9rem;
+  // A field can set its own with the `minWidth` prop
+  min-width: var(--field-min-width, 9rem);
 
   input {
     width: auto;

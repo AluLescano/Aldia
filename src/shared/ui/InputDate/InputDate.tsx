@@ -35,6 +35,7 @@ const InputDate = ({
   onClick,
   size,
   width,
+  minWidth,
   subText,
   errorMessage,
   ...rest
@@ -46,6 +47,7 @@ const InputDate = ({
     label,
     size,
     width,
+    minWidth,
     subText,
     errorMessage,
     disabled: rest.disabled,

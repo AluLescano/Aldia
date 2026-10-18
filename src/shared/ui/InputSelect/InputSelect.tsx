@@ -36,6 +36,7 @@ const InputSelect = ({
   onClick,
   size,
   width,
+  minWidth,
   subText,
   errorMessage,
   ...rest
@@ -47,6 +48,7 @@ const InputSelect = ({
     label,
     size,
     width,
+    minWidth,
     subText,
     errorMessage,
     disabled: rest.disabled,

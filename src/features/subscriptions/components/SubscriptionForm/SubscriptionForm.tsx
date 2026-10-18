@@ -177,6 +177,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             <InputAmount
               size="medium"
               width="fit"
+              minWidth="0" // hug "0.00" when empty, grow while typing
               value={values.price}
               // The symbol of the currency picked in this form; '$' if none is picked yet
               currencySymbol={values.currency ? getCurrencySymbol(values.currency) : '$'}

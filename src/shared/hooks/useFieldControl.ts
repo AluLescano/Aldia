@@ -16,10 +16,15 @@ export interface FieldControlProps {
   size?: FieldSize
   /**
    * - `full`: fills the row.
-   * - `fit`: grows with the content, at least 9rem.
+   * - `fit`: grows with the content, at least 9rem (or `minWidth`).
    * - `auto`: grows with the content, no minimum, 1rem padding on each side.
    */
   width?: FieldWidth
+  /**
+   * Smallest width of the box, as a CSS length (`'5rem'`, `'0'`). Only works with
+   * `width="fit"`, where it replaces the 9rem default.
+   */
+  minWidth?: string
   /** Hint under the box. Hidden while there is an error. */
   subText?: string
   /** Error under the box. Turns the border red, sets `aria-invalid` and shakes the box once. */
@@ -52,6 +57,7 @@ export function useFieldControl({
   label,
   size = 'large',
   width = 'full',
+  minWidth,
   subText,
   errorMessage,
   disabled,
@@ -73,6 +79,7 @@ export function useFieldControl({
       label,
       size,
       width,
+      minWidth,
       subText,
       errorMessage,
       disabled,
