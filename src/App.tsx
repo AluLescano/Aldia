@@ -107,8 +107,8 @@ function App() {
           {toast && (
             <Toast
               key={toast.id}
-              position="top"
               type={toast.type}
+              action={toast.action}
               message={
                 <Typography variant="body" size="sm">
                   {toast.message}

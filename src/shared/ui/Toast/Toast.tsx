@@ -6,7 +6,10 @@ import { motion, type PanInfo } from 'motion/react'
 import { cn } from '@/shared/lib/cn'
 
 // COMPONENTS
-import Button from '../Button/Button'
+import IconButton from '../IconButton/IconButton'
+
+// TYPES
+import type { ToastAction } from '@/shared/store/toastStore'
 
 // ASSETS
 import { IconAlert } from '@/assets/icons/IconAlert'
@@ -17,12 +20,12 @@ import { IconClose } from '@/assets/icons/IconClose'
 import styles from './Toast.module.scss'
 
 interface Props {
-  /** Usually a `Typography`; can hold a button too (the undo toast). */
+  /** Usually a `Typography`. */
   message: ReactNode
   /** Sets the icon and the progress bar color. Defaults to `info`. */
   type?: 'success' | 'alert' | 'info'
-  /** `top` slides in from the side, `bottom` rises from below. */
-  position?: 'top' | 'bottom'
+  /** Optional button next to the message, like "Deshacer". Runs its `onClick`, then closes. */
+  action?: ToastAction
   /** Milliseconds before it closes by itself. Defaults to 5000. */
   duration?: number
   /** Called by the close button and when the time runs out. */
@@ -31,15 +34,14 @@ interface Props {
 }
 
 /**
- * A short message that closes by itself, with a bar showing the time left. Swipe it back
- * the way it came (right for `top`, down for `bottom`) to close it early. Touching
- * it (or hovering on desktop) pauses the countdown. Render it inside `AnimatePresence`
- * so it can animate out.
+ * A short message just above the nav bar that closes by itself, with a bar showing the
+ * time left. Swipe it right to close it early. Touching it (or hovering on desktop)
+ * pauses the countdown. Render it inside `AnimatePresence` so it can animate out.
  */
 const Toast = ({
   message,
   type = 'info',
-  position = 'top',
+  action,
   duration = 5000,
   onDismiss,
   className = '',
@@ -49,8 +51,8 @@ const Toast = ({
     iconAlert,
     iconSuccess,
     iconInfo,
-    positionTop,
-    positionBottom,
+    position,
+    actionButton,
     contentWrapper,
     closeWrapper,
     closeButton,
@@ -69,32 +71,9 @@ const Toast = ({
     info: 'var(--info-fill)',
   }[type]
 
-  const positionData = {
-    // Each toast can be swiped back the way it came: right for the top one, down for the
-    // bottom one. Elastic 1 follows the finger that way; 0.05 barely moves the other way.
-    top: {
-      initial: { x: '120%', opacity: 0 },
-      animate: { x: 0, opacity: 1 },
-      exit: { x: '120%', opacity: 0 },
-      className: positionTop,
-      drag: 'x' as const,
-      dragConstraints: { left: 0, right: 0 },
-      dragElastic: { left: 0.05, right: 1 },
-      isDismissSwipe: ({ offset, velocity }: PanInfo) =>
-        offset.x > 80 || velocity.x > 500,
-    },
-    bottom: {
-      initial: { y: 20, opacity: 0 },
-      animate: { y: 0, opacity: 1 },
-      exit: { y: '100%', opacity: 0 },
-      className: positionBottom,
-      drag: 'y' as const,
-      dragConstraints: { top: 0, bottom: 0 },
-      dragElastic: { top: 0.05, bottom: 1 },
-      isDismissSwipe: ({ offset, velocity }: PanInfo) =>
-        offset.y > 40 || velocity.y > 500,
-    },
-  }[position]
+  // Swipe right to close: elastic 1 follows the finger that way, 0.05 barely moves left
+  const isDismissSwipe = ({ offset, velocity }: PanInfo) =>
+    offset.x > 80 || velocity.x > 500
 
   const onDismissRef = useRef(onDismiss)
   useEffect(() => {
@@ -134,23 +113,21 @@ const Toast = ({
 
   return (
     <motion.div
-      initial={positionData.initial}
-      animate={positionData.animate}
-      exit={positionData.exit}
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ x: 0, y: 0, opacity: 1 }}
+      exit={{ x: '120%', opacity: 0 }} // leaves to the right, like the swipe
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
-      drag={positionData.drag}
-      dragConstraints={positionData.dragConstraints}
-      dragElastic={positionData.dragElastic}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0.05, right: 1 }}
       onDragStart={() => setIsPaused(true)}
       // Far or fast enough: close (the exit keeps going that way). Otherwise it springs back
-      onDragEnd={(_, info) =>
-        positionData.isDismissSwipe(info) ? onDismiss() : setIsPaused(false)
-      }
-      className={cn(container, positionData.className, className)}
+      onDragEnd={(_, info) => (isDismissSwipe(info) ? onDismiss() : setIsPaused(false))}
+      className={cn(container, position, className)}
     >
       <div className={contentWrapper}>
         {icon}
@@ -158,9 +135,21 @@ const Toast = ({
       </div>
 
       <div className={closeWrapper}>
-        <Button onClick={onDismiss} className={closeButton} aria-label="Cerrar">
+        {action && (
+          <IconButton
+            onClick={() => {
+              action.onClick()
+              onDismiss()
+            }}
+            className={actionButton}
+            label={action.label}
+          >
+            {action.icon ?? action.label}
+          </IconButton>
+        )}
+        <IconButton onClick={onDismiss} className={closeButton} label="Cerrar">
           <IconClose />
-        </Button>
+        </IconButton>
       </div>
 
       {/* Status Timer bar at the absolute bottom edge */}

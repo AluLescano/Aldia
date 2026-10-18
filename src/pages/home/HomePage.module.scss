@@ -11,32 +11,6 @@
   width: 100%;
 }
 
-.toastContent {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  margin-right: 0.75rem; // mr-3
-}
-
-.undoButton {
-  color: var(--icon-muted);
-  transition: color 250ms ease-in-out;
-  background-color: transparent;
-  border: none;
-  aspect-ratio: 1 / 1;
-
-  &:hover {
-    background-color: transparent;
-    color: var(--icon-default);
-  }
-
-  svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-}
-
 .fabWrapper {
   position: fixed;
   // Just above the nav bar and the gesture area
