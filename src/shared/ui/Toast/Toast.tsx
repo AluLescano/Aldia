@@ -1,6 +1,6 @@
 // DEPENDENCIES
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { motion } from 'motion/react'
+import { motion, type PanInfo } from 'motion/react'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
@@ -31,7 +31,8 @@ interface Props {
 }
 
 /**
- * A short message that closes by itself, with a bar showing the time left. Touching
+ * A short message that closes by itself, with a bar showing the time left. Swipe it back
+ * the way it came (right for `top`, down for `bottom`) to close it early. Touching
  * it (or hovering on desktop) pauses the countdown. Render it inside `AnimatePresence`
  * so it can animate out.
  */
@@ -69,17 +70,29 @@ const Toast = ({
   }[type]
 
   const positionData = {
+    // Each toast can be swiped back the way it came: right for the top one, down for the
+    // bottom one. Elastic 1 follows the finger that way; 0.05 barely moves the other way.
     top: {
       initial: { x: '120%', opacity: 0 },
       animate: { x: 0, opacity: 1 },
       exit: { x: '120%', opacity: 0 },
       className: positionTop,
+      drag: 'x' as const,
+      dragConstraints: { left: 0, right: 0 },
+      dragElastic: { left: 0.05, right: 1 },
+      isDismissSwipe: ({ offset, velocity }: PanInfo) =>
+        offset.x > 80 || velocity.x > 500,
     },
     bottom: {
       initial: { y: 20, opacity: 0 },
       animate: { y: 0, opacity: 1 },
-      exit: { y: 20, opacity: 0 },
+      exit: { y: '100%', opacity: 0 },
       className: positionBottom,
+      drag: 'y' as const,
+      dragConstraints: { top: 0, bottom: 0 },
+      dragElastic: { top: 0.05, bottom: 1 },
+      isDismissSwipe: ({ offset, velocity }: PanInfo) =>
+        offset.y > 40 || velocity.y > 500,
     },
   }[position]
 
@@ -129,6 +142,14 @@ const Toast = ({
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
+      drag={positionData.drag}
+      dragConstraints={positionData.dragConstraints}
+      dragElastic={positionData.dragElastic}
+      onDragStart={() => setIsPaused(true)}
+      // Far or fast enough: close (the exit keeps going that way). Otherwise it springs back
+      onDragEnd={(_, info) =>
+        positionData.isDismissSwipe(info) ? onDismiss() : setIsPaused(false)
+      }
       className={cn(container, positionData.className, className)}
     >
       <div className={contentWrapper}>

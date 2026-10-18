@@ -1,6 +1,6 @@
 .container {
   background-color: var(--bg-surface-raised);
-  z-index: 50;
+  z-index: 80; // above overlays (50+) and sheets (60-70): a toast is always readable
   display: flex;
   align-items: center;
   justify-content: space-between;
