@@ -1,5 +1,5 @@
 // ASSETS
-import { IconCalendarMonth } from '@/assets/icons/IconCalendarMonth'
+import { IconCalendar } from '@/assets/icons/IconCalendar'
 
 import styles from './CalendarPage.module.scss'
 
@@ -26,7 +26,7 @@ export const CalendarPage = () => {
 
       <div className={card}>
         <div className={iconContainer}>
-          <IconCalendarMonth className={icon} strokeWidth={1.75} />
+          <IconCalendar className={icon} strokeWidth={1.75} />
         </div>
         <p className={cardTitle}>Interactive Calendar View</p>
         <p className={cardText}>

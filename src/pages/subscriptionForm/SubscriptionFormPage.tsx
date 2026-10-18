@@ -9,7 +9,6 @@ import { useToastStore } from '@/shared/store/toastStore'
 import { useCategoryStore } from '@/features/categories/store/categoryStore'
 
 // COMPONENTS
-import Typography from '@/shared/ui/Typography/Typography'
 import IconButton from '@/shared/ui/IconButton/IconButton'
 import SubscriptionForm from '@/features/subscriptions/components/SubscriptionForm/SubscriptionForm'
 import PauseToggleIcon from '@/features/subscriptions/components/PauseToggleIcon/PauseToggleIcon'
@@ -30,11 +29,11 @@ import type { SubscriptionFormValues } from '@/features/subscriptions/types'
 import type { Preset } from '@/shared/types'
 
 // ASSETS
-import { IconArrow } from '@/assets/icons/IconArrow'
 import { IconEdit } from '@/assets/icons/IconEdit'
 import { IconDelete } from '@/assets/icons/IconDelete'
 
 import styles from './SubscriptionFormPage.module.scss'
+import PageHeader from '@/shared/ui/PageHeader/PageHeader'
 
 interface Props {
   /** The preset picked to create a subscription from. Ignored when `subscriptionId` is set. */
@@ -48,7 +47,7 @@ interface Props {
  * (from a preset or empty); with it, it shows the saved one and can edit, pause or delete it.
  */
 export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
-  const { container, header, iconContainer } = styles
+  const { container } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const closeAllOverlays = useUIStore((state) => state.closeAllOverlays)
   const addSubscription = useSubscriptionStore((state) => state.addSubscription)
@@ -103,21 +102,14 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
 
   return (
     <div className={container}>
-      <header className={header}>
-        <div>
-          <IconButton
-            onClick={handleBack}
-            label={isEditing ? 'Descartar cambios' : 'Volver'}
-          >
-            <IconArrow />
-          </IconButton>
-          <div>
-            <Typography variant="title" size="small">
-              {existing?.name ?? 'Nueva Subscripción'}
-            </Typography>
-          </div>
-          {existing && (
-            <div className={iconContainer}>
+      <PageHeader
+        glass
+        title={existing?.name ?? 'Nueva Subscripción'}
+        onBack={handleBack}
+        backLabel={isEditing ? 'Descartar cambios' : 'Volver'}
+        actions={
+          existing && (
+            <>
               <IconButton
                 onClick={togglePause}
                 label={isPaused ? 'Reanudar subscripción' : 'Pausar subscripción'}
@@ -135,10 +127,10 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
               <IconButton onClick={remove} label="Eliminar subscripción">
                 <IconDelete />
               </IconButton>
-            </div>
-          )}
-        </div>
-      </header>
+            </>
+          )
+        }
+      />
       <div>
         <SubscriptionForm
           key={isEditing ? 'edit' : 'view'} // see handleBack

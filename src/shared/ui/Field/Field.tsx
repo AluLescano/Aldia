@@ -1,6 +1,8 @@
 // DEPENDENCIES
 import type { CSSProperties, ReactNode, Ref } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/shared/lib/cn'
+import { useFieldRow } from './FieldRowContext'
 
 // COMPONENTS
 import Typography from '../Typography/Typography'
@@ -32,8 +34,18 @@ const {
 interface Props {
   /** Id of the control inside, so the label can point at it with `htmlFor`. */
   id: string
+  /**
+   * `large`: 3.5rem, with the floating label. `medium`: 2.625rem, no label.
+   * Defaults to `large`.
+   */
   size?: FieldSize
+  /**
+   * `full` fills the row, `fit` hugs the value (at least `minWidth`), `auto` hugs it with
+   * no minimum. Defaults to `full`.
+   */
   width?: FieldWidth
+  /** Smallest width with `width="fit"`, as a CSS length. Defaults to 9rem (in the SCSS). */
+  minWidth?: string
   /** Floating label, shown only on `size="large"`. */
   label?: string
   /** The control has a value: the floating label stays up on the border. */
@@ -50,9 +62,11 @@ interface Props {
   children: ReactNode
   /** Dims the box and blocks clicks. The control itself still needs `disabled`. */
   disabled?: boolean
+  /** Extra classes on the box. */
   className?: string
   /** Id for the hint/error element. The control points at it with `aria-describedby`. */
   descriptionId?: string
+  /** Inline style on the box. `minWidth` is added to it. */
   style?: CSSProperties
 }
 
@@ -70,11 +84,14 @@ const sizeClasses: Record<FieldSize, string> = {
 /**
  * The box every input shares: border, size, floating label, hint or error underneath.
  * It holds no logic: use it through an `Input*` component, which wires it with `useFieldControl`.
+ * Inside a row that provides `FieldRowContext` (like `FormRow`), the hint or error is
+ * rendered under the whole row instead of under the box.
  */
 const Field = ({
   id,
   size = 'large',
   width = 'full',
+  minWidth,
   label,
   filled,
   subText,
@@ -87,6 +104,8 @@ const Field = ({
   className,
   style,
 }: Props) => {
+  const row = useFieldRow()
+
   // Only the large size floats its label; medium rows get theirs from FormRow
   const showLabel = Boolean(label) && size === 'large'
 
@@ -102,33 +121,53 @@ const Field = ({
     className,
   )
 
+  // The adornment sits next to the control, not over it, so a tap on it is passed on
+  // by hand: an input gets the focus, a button (like the date picker) gets the click
+  const forwardTap = () => {
+    const control = document.getElementById(id)
+    control?.focus()
+    if (control instanceof HTMLButtonElement) control.click()
+  }
+
+  // The hint or error. Same element (and id, for `aria-describedby`) wherever it's shown
+  const messageElement = message && (
+    <div id={descriptionId} className={description}>
+      <Typography variant="label" size="xs" className={errorMessage ? error : info}>
+        {message}
+      </Typography>
+    </div>
+  )
+
+  // The SCSS reads `--field-min-width` and falls back to 9rem when it isn't set
+  const boxStyle = minWidth
+    ? ({ ...style, '--field-min-width': minWidth } as CSSProperties)
+    : style
+
   return (
     <div>
       <div
         ref={ref}
         aria-disabled={disabled || undefined}
         className={classes}
-        style={style}
+        style={boxStyle}
       >
         {showLabel && (
           <label htmlFor={id} className={labelContainer}>
             {label}
           </label>
         )}
-        {startAdornment && <div className={adornmentContainer}>{startAdornment}</div>}
+        {startAdornment && (
+          <div className={adornmentContainer} onClick={forwardTap}>
+            {startAdornment}
+          </div>
+        )}
         {children}
       </div>
-      {message && (
-        <div id={descriptionId} className={description}>
-          <Typography
-            variant="label"
-            size="small"
-            className={errorMessage ? error : info}
-          >
-            {message}
-          </Typography>
-        </div>
-      )}
+      {/* Inside a row the message goes to the row's slot (full width), otherwise under the box */}
+      {messageElement &&
+        (row?.messageSlot
+          ? createPortal(messageElement, row.messageSlot)
+          : messageElement)}
     </div>
   )
 }

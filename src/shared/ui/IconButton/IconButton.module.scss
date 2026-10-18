@@ -3,8 +3,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0.75rem;
-  background-color: var(--bg-surface-elevated);
+  width: 3rem;
+  background-color: var(--bg-surface-raised);
   transition: transform 250ms ease-in-out;
   color: var(--text-secondary);
 

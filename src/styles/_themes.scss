@@ -1,104 +1,223 @@
 @use './variables' as *;
 
-// Success has no color of its own: saving is the app's happy path, so it uses the brand green.
+// ==============================================================================
+// Aldia Design System — Semantic tokens (roles)
+// ==============================================================================
+// Components only use these. Each role says WHERE it goes, and gets one value per theme.
+// The theme comes from `data-theme` on <html> ("light" or "dark").
+//
+//  1. Screens      the canvas under everything, and the splash screen
+//  2. Surfaces     cards, raised rows / chips / sheets, pressed washes
+//  3. Text         reading order: primary > secondary > muted > disabled
+//  4. Icons
+//  5. Borders      hairlines, inputs, focus
+//  6. Brand        the main buttons and brand tints
+//  7. Status       success / warning / error / info, each with fill, bg, border, text, on-fill
+//  8. Overlay      scrim behind sheets, hover and press washes
+//  9. Shadows
+// 10. Gradients
+// 11. Glass        frosted panels (use on 2-3 big surfaces per screen, never per card)
+// 12. Card faces   payment card looks, same in both themes (bottom of the file)
+//
+// Status parts: `-fill` solid (buttons, icons), `-on-fill` text on that fill,
+// `-bg` pale tint (toasts, banners), `-text` text on surfaces or on `-bg`, `-border`.
 
-:root {
+:root,
+[data-theme='light'] {
   // ==========================================
-  // LIGHT MODE (Default)
+  // LIGHT MODE (default): cream paper
   // ==========================================
 
-  /* 1. Surfaces, Shadows, Dividers */
-  --bg-app: #{$paper-100};
-  --bg-surface: #{$paper-50};
-  --bg-surface-elevated: #{$paper-0};
-  --bg-surface-subtle: #{$phthalo-100};
-  --border-subtle: #{rgba($color-black, 0.06)};
-  --border-strong: #{$paper-300};
-  --border-input: #{$paper-500};
-  --border-featured: #{rgba($phthalo-400, 0.4)};
-  --focus-ring: #{$phthalo-400};
+  /* 1. Screens */
+  --bg-screen: #{$paper-100};
+  --bg-splash: #{$paper-100}; // same as the screen, so the app fades in without a flash
 
-  --shadow-sm: #{rgba($phthalo-600, 0.06)};
-  --shadow-md: #{rgba($phthalo-600, 0.08)};
-  --shadow-lg: #{rgba($phthalo-600, 0.12)};
-  --shadow-glow-brand:
-    0 20px 25px -5px #{rgba($phthalo-300, 0.1)},
-    0 8px 10px -6px #{rgba($phthalo-300, 0.06)};
+  /* 2. Surfaces */
+  --bg-surface: #{$paper-50}; // cards
+  --bg-surface-raised: #{$paper-0}; // rows, chips, sheets, anything on top of a card
+  --bg-surface-sunken: #{$paper-200}; // pressed / selected
+  --bg-surface-hover: #{$paper-150}; // a raised row under the cursor or finger
+  --bg-surface-subtle: #{rgba($phthalo-500, 0.15)}; // brand-tinted wash
 
-  --overlay-hover: #{rgba($color-black, 0.04)};
-  --overlay-press: #{rgba($color-black, 0.08)};
-
-  /* 2. Text & Icons */
+  /* 3. Text */
   --text-primary: #{$phthalo-700};
   --text-secondary: #{$ink-600};
   --text-muted: #{$ink-500};
   --text-disabled: #{rgba($phthalo-700, 0.28)};
-  --text-on-brand: #{$color-white};
   --text-accent: #{$champagne-800};
+  --text-on-brand: #{$color-white};
 
+  /* 4. Icons */
   --icon-default: #{rgba($phthalo-700, 0.75)};
-  --icon-hover: #{$phthalo-600};
   --icon-muted: #{rgba($phthalo-700, 0.35)};
+  --icon-active: #{$phthalo-600};
 
-  /* 3. Brand */
-  --brand-primary: #{$phthalo-600};
-  --brand-primary-hover: #{$phthalo-700};
+  /* 5. Borders */
+  --border-subtle: #{rgba($color-black, 0.06)};
+  --border-card: #{rgba($paper-900, 0.1)}; // hairline around cards: cream is close to the canvas
+  --border-strong: #{$paper-300};
+  --border-input: #{$paper-500};
+  --border-focus: #{$phthalo-400};
+  --border-featured: #{rgba($phthalo-400, 0.4)};
+
+  /* 6. Brand */
+  --brand: #{$phthalo-600};
+  --brand-hover: #{$phthalo-700};
   --brand-subtle: #{$phthalo-100};
   --brand-on-subtle: #{$phthalo-600};
+  --brand-chip-bg: #{rgba($paper-0, 0.7)}; // a chip on a brand-tinted card (the monthly total)
+  --brand-chip-border: #{rgba($paper-900, 0.1)};
 
-  /* 4. Error */
-  --error-fill: #{$brick-500};
-  --text-on-error: #{$color-white};
-  --error-bg: #{$brick-100};
-  --error-border: #{$brick-500};
-  --error-text: #{$brick-700};
+  /* 7. Status */
+  --success-fill: #{$success-600};
+  --success-on-fill: #{$color-white};
+  --success-bg: #{$success-100};
+  --success-border: #{$success-600};
+  --success-text: #{$success-700};
 
-  /* 5. Gradients */
+  --warning-fill: #{$amber-400};
+  --warning-on-fill: #{$phthalo-700};
+  --warning-bg: #{$amber-100};
+  --warning-border: #{$amber-400};
+  --warning-text: #{$amber-700};
+
+  --error-fill: #{$red-500};
+  --error-on-fill: #{$color-white}; // icons and large text only (3.8:1)
+  --error-bg: #{$red-100};
+  --error-border: #{$red-500};
+  --error-text: #{$red-700};
+
+  --info-fill: #{$info-700};
+  --info-on-fill: #{$color-white};
+  --info-bg: #{$info-100};
+  --info-border: #{$info-500};
+  --info-text: #{$info-700};
+
+  /* 8. Overlay */
+  --overlay-scrim: #{rgba($paper-900, 0.4)}; // behind sheets and dialogs
+  --overlay-hover: #{rgba($color-black, 0.04)};
+  --overlay-press: #{rgba($color-black, 0.08)};
+  --overlay-press-tint: #{$phthalo-200}; // Button press flash (shown at 12% opacity)
+
+  /* 9. Shadows (warm brown, so they sit on cream instead of looking dirty) */
+  --shadow-sm: #{rgba($paper-900, 0.06)};
+  --shadow-md: #{rgba($paper-900, 0.08)};
+  --shadow-lg: #{rgba($paper-900, 0.12)};
+  --shadow-glow-brand:
+    0 20px 25px -5px #{rgba($phthalo-300, 0.1)},
+    0 8px 10px -6px #{rgba($phthalo-300, 0.06)};
+
+  /* 10. Gradients */
   --gradient-hero: radial-gradient(
-    120% 100% at 20% 0%,
-    #{rgba($phthalo-200, 0.4)},
-    transparent 60%
-  );
+    90% 80% at 15% 0%,
+    #{rgba($phthalo-100, 0.7)},
+    transparent 70%
+  ); // smaller and paler than dark mode: a strong mint smears on cream
   --gradient-sheen: linear-gradient(180deg, #{rgba($color-white, 0.6)}, transparent 50%);
   --gradient-edge-fade: linear-gradient(
     90deg,
     #{$paper-100},
     transparent
-  ); // scrollable filter-tab edge mask
+  ); // scrollable tab edges
+  // Soft brand light behind glass surfaces (the "fake glass" backdrop: gradients are
+  // already blurry, so no blur filter is needed). Keep muted text off it: glass only.
+  --gradient-aura:
+    radial-gradient(60% 40% at 10% 0%, #{rgba($phthalo-200, 0.55)}, transparent 70%),
+    radial-gradient(55% 35% at 95% 20%, #{rgba($champagne-200, 0.6)}, transparent 70%),
+    radial-gradient(70% 30% at 35% 60%, #{rgba($phthalo-100, 0.5)}, transparent 75%);
 
-  /* 6. Toasts */
-  --toast-success-bg: #{$phthalo-100};
-  --toast-success-border: #{$phthalo-400};
-  --toast-success-text: #{$phthalo-600};
-  --toast-success-icon: #{$phthalo-400};
-
-  --toast-warning-bg: #{$amber-100};
-  --toast-warning-border: #{$amber-400};
-  --toast-warning-text: #{$amber-700};
-  --toast-warning-icon: #{$amber-400};
-
-  --toast-error-bg: #{$brick-100};
-  --toast-error-border: #{$brick-500};
-  --toast-error-text: #{$brick-700};
-  --toast-error-icon: #{$brick-500};
+  /* 11. Glass */
+  --glass-bg: #{rgba($paper-0, 0.6)};
+  --glass-border: #{rgba($color-white, 0.7)};
+  --glass-blur: 16px;
+  // Glass cards lit by a logo (the form). Light mode is lit from the front: frosted white,
+  // white top rim, soft drop shadow, and a brightened glow so dark logos don't smudge.
+  --glass-card-bg: #{rgba($paper-0, 0.55)};
+  --glass-card-border: #{rgba($paper-900, 0.06)};
+  --glass-rim: #{rgba($color-white, 0.95)};
+  --glass-card-shadow:
+    0 10px 24px -14px #{rgba($paper-900, 0.25)}, inset 0 1px 0 #{rgba($color-white, 0.6)};
+  --avatar-glow-opacity: 0.45;
+  --avatar-glow-filter: blur(50px) saturate(1.8) brightness(1.7);
 }
 
 [data-theme='dark'] {
   // ==========================================
-  // DARK MODE
+  // DARK MODE: green-tinted charcoal
   // ==========================================
 
-  /* 1. Surfaces, Shadows, Dividers */
-  --bg-app: #{$charcoal-900};
+  /* 1. Screens */
+  --bg-screen: #{$charcoal-900};
+  --bg-splash: #{$charcoal-900};
+
+  /* 2. Surfaces */
   --bg-surface: #{$charcoal-800};
-  --bg-surface-elevated: #{$charcoal-700};
+  --bg-surface-raised: #{$charcoal-700};
+  --bg-surface-sunken: #{rgba($color-white, 0.06)};
+  --bg-surface-hover: #{$charcoal-800};
   --bg-surface-subtle: #{rgba($phthalo-400, 0.12)};
+
+  /* 3. Text */
+  --text-primary: #{$paper-0};
+  --text-secondary: #{$bone-300};
+  --text-muted: #{$bone-400};
+  --text-disabled: #{rgba($paper-0, 0.25)};
+  --text-accent: #{$champagne-300};
+  --text-on-brand: #{$color-white};
+
+  /* 4. Icons */
+  --icon-default: #{rgba($paper-0, 0.75)};
+  --icon-muted: #{rgba($paper-0, 0.35)};
+  --icon-active: #{$phthalo-300};
+
+  /* 5. Borders */
   --border-subtle: #{rgba($color-white, 0.08)};
+  --border-card: #{rgba($color-white, 0.06)};
   --border-strong: #{$charcoal-500};
   --border-input: #{$charcoal-300};
+  --border-focus: #{$phthalo-300};
   --border-featured: #{rgba($phthalo-400, 0.5)};
-  --focus-ring: #{$phthalo-300};
 
+  /* 6. Brand */
+  --brand: #{$phthalo-500};
+  --brand-hover: #{$phthalo-400};
+  --brand-subtle: #{rgba($phthalo-400, 0.15)};
+  --brand-on-subtle: #{$phthalo-300};
+  --brand-chip-bg: #{rgba($phthalo-400, 0.15)};
+  --brand-chip-border: #{rgba($phthalo-400, 0.5)};
+
+  /* 7. Status */
+  --success-fill: #{$success-400};
+  --success-on-fill: #{$phthalo-700};
+  --success-bg: #{rgba($success-400, 0.15)};
+  --success-border: #{$success-400};
+  --success-text: #{$success-400};
+
+  --warning-fill: #{$amber-400};
+  --warning-on-fill: #{$phthalo-700};
+  --warning-bg: #{rgba($amber-400, 0.15)};
+  --warning-border: #{$amber-400};
+  --warning-text: #{$amber-400};
+
+  --error-fill: #{$red-500};
+  --error-on-fill: #{$color-white}; // icons and large text only (3.8:1)
+  --error-bg: #{rgba($red-500, 0.15)};
+  --error-border: #{$red-500};
+  --error-text: #{$red-300};
+
+  --info-fill: #{$info-300};
+  --info-on-fill: #{$phthalo-700};
+  --info-bg: #{rgba($info-300, 0.14)};
+  --info-border: #{$info-300};
+  --info-text: #{$info-300};
+
+  /* 8. Overlay */
+  --overlay-scrim: #{rgba($color-black, 0.55)};
+  --overlay-hover: #{rgba($color-white, 0.06)};
+  --overlay-press: #{rgba($color-white, 0.12)};
+  --overlay-press-tint: #{$phthalo-200};
+
+  /* 9. Shadows */
   --shadow-sm: #{rgba($color-black, 0.4)};
   --shadow-md: #{rgba($color-black, 0.5)};
   --shadow-lg: #{rgba($color-black, 0.6)};
@@ -106,35 +225,7 @@
     0 20px 30px -10px #{rgba($phthalo-500, 0.35)},
     0 8px 10px -5px #{rgba($phthalo-500, 0.05)};
 
-  --overlay-hover: #{rgba($color-white, 0.06)};
-  --overlay-press: #{rgba($color-white, 0.12)};
-
-  /* 2. Text & Icons */
-  --text-primary: #{$paper-0};
-  --text-secondary: #{$bone-300};
-  --text-muted: #{$bone-400};
-  --text-disabled: #{rgba($paper-0, 0.25)};
-  --text-on-brand: #{$color-white};
-  --text-accent: #{$champagne-300};
-
-  --icon-default: #{rgba($paper-0, 0.75)};
-  --icon-hover: #{$phthalo-300};
-  --icon-muted: #{rgba($paper-0, 0.35)};
-
-  /* 3. Brand */
-  --brand-primary: #{$phthalo-500};
-  --brand-primary-hover: #{$phthalo-400};
-  --brand-subtle: #{rgba($phthalo-400, 0.15)};
-  --brand-on-subtle: #{$phthalo-300};
-
-  /* 4. Error */
-  --error-fill: #{$brick-300};
-  --text-on-error: #{$color-white};
-  --error-bg: #{rgba($brick-300, 0.14)};
-  --error-border: #{$brick-300};
-  --error-text: #{$brick-300};
-
-  /* 5. Gradients */
+  /* 10. Gradients */
   --gradient-hero: radial-gradient(
     120% 100% at 20% 0%,
     #{rgba($phthalo-400, 0.35)},
@@ -142,20 +233,36 @@
   );
   --gradient-sheen: linear-gradient(180deg, #{rgba($color-white, 0.06)}, transparent 40%);
   --gradient-edge-fade: linear-gradient(90deg, #{$charcoal-900}, transparent);
+  --gradient-aura:
+    radial-gradient(60% 40% at 10% 0%, #{rgba($phthalo-400, 0.35)}, transparent 70%),
+    radial-gradient(55% 35% at 95% 20%, #{rgba($champagne-500, 0.18)}, transparent 70%),
+    radial-gradient(70% 30% at 35% 60%, #{rgba($phthalo-500, 0.3)}, transparent 75%);
 
-  /* 6. Toasts */
-  --toast-success-bg: #{rgba($phthalo-300, 0.15)};
-  --toast-success-border: #{$phthalo-300};
-  --toast-success-text: #{$phthalo-100};
-  --toast-success-icon: #{$phthalo-300};
+  /* 11. Glass */
+  --glass-bg: #{rgba($charcoal-800, 0.55)};
+  --glass-border: #{rgba($color-white, 0.08)};
+  --glass-blur: 16px;
+  // Dark mode is lit from behind: clear card, the glow shines through, lighter top rim
+  --glass-card-bg: transparent;
+  --glass-card-border: #{rgba($color-white, 0.08)};
+  --glass-rim: #{$charcoal-500};
+  --glass-card-shadow: none;
+  --avatar-glow-opacity: 1;
+  --avatar-glow-filter: blur(50px) saturate(2);
+}
 
-  --toast-warning-bg: #{rgba($amber-400, 0.15)};
-  --toast-warning-border: #{$amber-400};
-  --toast-warning-text: #{$amber-100};
-  --toast-warning-icon: #{$amber-400};
+:root {
+  // ==========================================
+  // BOTH THEMES
+  // ==========================================
 
-  --toast-error-bg: #{rgba($brick-300, 0.14)};
-  --toast-error-border: #{$brick-300};
-  --toast-error-text: #{$brick-100};
-  --toast-error-icon: #{$brick-300};
+  /* 12. Card faces (identity, not brand: the same in light and dark, like a real card).
+     Gold, platinum and black join here as preset tiers; once users pick a face per
+     card, that choice is saved on the card as data, like category colors. */
+  --card-face-basic: linear-gradient(
+    to top right,
+    #{$card-basic-1},
+    #{$card-basic-2},
+    #{$card-basic-3}
+  );
 }

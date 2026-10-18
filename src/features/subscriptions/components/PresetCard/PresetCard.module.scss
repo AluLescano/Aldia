@@ -1,54 +1,27 @@
+// The press shrink and tint come from Button; this file only sets the card look.
 .container {
   position: relative;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background-color: var(--bg-surface-elevated);
-
-  justify-self: center;
   align-items: center;
   justify-content: center;
+  justify-self: center;
   gap: 0.25rem;
-
-  padding: 0.35rem 1rem;
-  border: 2px solid var(--border-subtle);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 0.35rem 0.5rem;
+  border: 2px solid var(--glass-border);
   border-radius: 1.5rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  // Fake glass: picks up the picker's aura as it scrolls over it
+  background-color: var(--glass-bg);
+  box-shadow: 0 1px 2px 0 var(--shadow-sm);
 
-  transition: transform 250ms ease-in-out;
-
-  &:hover,
-  &:active {
-    background-color: var(--bg-surface-elevated);
-    transform: scale(110%);
+  // Keep the card color on hover instead of Button's hover color
+  &:hover {
+    background-color: var(--glass-bg);
   }
 
-  img {
-    width: 2.5rem;
-    aspect-ratio: 1 / 1;
-    border-radius: 100%;
-    box-shadow: inset 0 -5px 15px 5px var(--shadow-sm);
-    transition: transform 350ms ease-in-out;
-  }
-
-  svg {
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0.5rem;
-    border-radius: 100%;
-    background-color: var(--bg-surface);
-    color: var(--text-secondary);
-    transition: transform 350ms ease-in-out;
-  }
-
-  &:hover img,
-  &:active img,
-  &:hover svg,
-  &:active svg {
-    transform: scale(125%);
-  }
-
+  // Light sheen from the top-left corner. The content is positioned, so it paints on top of it.
   &::before {
     content: '';
     position: absolute;
@@ -60,15 +33,47 @@
     );
     pointer-events: none;
     border-radius: inherit;
-    z-index: 0;
   }
+}
 
-  .text {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    height: 1.5rem;
-    text-align: center;
-    color: var(--text-primary);
+.logo {
+  position: relative;
+  width: 2.5rem;
+  aspect-ratio: 1 / 1;
+  border-radius: 100%;
+  box-shadow: inset 0 -5px 15px 5px var(--shadow-sm);
+  transition: transform 350ms ease-in-out;
+}
+
+.icon {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border-radius: 100%;
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  transition: transform 350ms ease-in-out;
+}
+
+// Only devices with a real mouse; on phones `:hover` sticks after a tap
+@media (hover: hover) {
+  .container:hover .logo,
+  .container:hover .icon {
+    transform: scale(1.1);
   }
+}
+
+.name {
+  position: relative;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; // max 2 lines, then "…"
+  line-clamp: 2;
+  overflow: hidden;
+  width: 100%;
+  height: 2.5rem;
+  align-content: center;
+  text-align: center;
+  color: var(--text-primary);
 }

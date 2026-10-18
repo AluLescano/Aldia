@@ -14,10 +14,10 @@ import { PRESET_SUBSCRIPTIONS } from '@/features/subscriptions/data/presets'
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import IconButton from '@/shared/ui/IconButton/IconButton'
+import PageHeader from '@/shared/ui/PageHeader/PageHeader'
 import PresetCard from '@/features/subscriptions/components/PresetCard/PresetCard'
 
 // ASSETS
-import { IconArrow } from '@/assets/icons/IconArrow'
 import { IconAdd } from '@/assets/icons/IconAdd'
 import { IconSearch } from '@/assets/icons/IconSearch'
 
@@ -29,7 +29,7 @@ import styles from './PresetPicker.module.scss'
  * Either way it pushes the `subscription-form` overlay on top.
  */
 export const PresetPicker = () => {
-  const { container, header, searchbar, listContainer, presetGrid } = styles
+  const { container, aura, searchbar, listContainer, presetGrid } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const pushOverlay = useUIStore((state) => state.pushOverlay)
 
@@ -44,22 +44,20 @@ export const PresetPicker = () => {
 
   return (
     <div className={container}>
-      <header className={header}>
-        <div>
-          <IconButton onClick={popOverlay} label="Volver">
-            <IconArrow />
-          </IconButton>
-          <Typography variant="title" size="small">
-            Agregar Subscripción
-          </Typography>
+      <div className={aura} aria-hidden="true" />
+      <PageHeader
+        glass
+        title="Agregar Subscripción"
+        onBack={popOverlay}
+        actions={
           <IconButton
             onClick={() => pushOverlay('subscription-form')}
             label="Crear subscripción personalizada"
           >
             <IconAdd />
           </IconButton>
-        </div>
-
+        }
+      >
         {/* Search Bar */}
         <div className={searchbar}>
           <input
@@ -72,11 +70,11 @@ export const PresetPicker = () => {
             <IconSearch />
           </div>
         </div>
-      </header>
+      </PageHeader>
 
       <div className={cn(listContainer, `no-scrollbar`)}>
         <div>
-          <Typography variant="label" size="small">
+          <Typography variant="label" size="sm">
             Subscripciones Populares
           </Typography>
         </div>

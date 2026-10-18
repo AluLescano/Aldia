@@ -36,17 +36,19 @@ const InputSelect = ({
   onClick,
   size,
   width,
+  minWidth,
   subText,
   errorMessage,
   ...rest
 }: Props) => {
   const { container } = styles
 
-  const { fieldProps, controlProps } = useFieldControl({
+  const { fieldProps, controlProps, buttonLabelledBy } = useFieldControl({
     id,
     label,
     size,
     width,
+    minWidth,
     subText,
     errorMessage,
     disabled: rest.disabled,
@@ -58,6 +60,7 @@ const InputSelect = ({
       <button
         {...rest}
         {...controlProps}
+        aria-labelledby={buttonLabelledBy ?? rest['aria-labelledby']}
         type="button"
         onClick={onClick}
         className={container}

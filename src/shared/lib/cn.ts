@@ -1,3 +1,4 @@
+/** What `cn` accepts: a class name, or the falsy result of `isOpen && styles.open`. */
 export type ClassValue = string | false | undefined | null
 
 /**

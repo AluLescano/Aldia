@@ -1,8 +1,12 @@
 // DEPENDENCIES
 import { useState } from 'react'
 
+// HOOKS
+import { useCountUp } from '@/shared/hooks/useCountUp'
+
 // STORES
 import { useSettingsStore } from '@/features/settings/store/settingsStore'
+import { useRatesStore } from '@/shared/store/ratesStore'
 
 // UTILS
 import { DEFAULT_CURRENCIES, getCurrencySymbol } from '@/shared/lib/currencies'
@@ -18,6 +22,7 @@ import Pill from '@/shared/ui/Pill/Pill'
 import styles from './MonthlyExpenses.module.scss'
 
 interface Props {
+  /** Small caps title over the amount. Defaults to "Gastos Mensuales". */
   title?: string
   /** Monthly cost, already converted to the selected currency. */
   monthlyAmount?: number
@@ -25,6 +30,7 @@ interface Props {
   subscriptionAmount?: number
   /** Optional small line under the count, e.g. when rates are old or missing. */
   note?: string
+  /** Shows the skeleton instead. The amount doesn't count up from it. */
   isLoading?: boolean
 }
 
@@ -43,12 +49,23 @@ const MonthlyExpenses = ({
     styles
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { selectedCurrency, setSelectedCurrency } = useSettingsStore()
+  const ratesDate = useRatesStore((state) => state.rates?.date)
+
+  // Rolls up or down when subscriptions change the total. Jumps instead when only the unit
+  // changes (another currency, new rates) and while loading (no counting from 0 on open)
+  const shownAmount = useCountUp(monthlyAmount, {
+    instant: isLoading,
+    jumpKey: `${selectedCurrency}|${ratesDate ?? ''}`,
+  })
 
   // Find the countryCode for the active currency (defaults to 'us')
   const currentCountryCode =
     DEFAULT_CURRENCIES.find((c) => c.code === selectedCurrency)?.countryCode ?? 'us'
 
-  const subAmount = `${String(subscriptionAmount)} subscripciones activas`
+  const subAmount =
+    subscriptionAmount === 1
+      ? '1 subscripción activa'
+      : `${String(subscriptionAmount)} subscripciones activas`
 
   if (isLoading) {
     return <MonthlyExpensesSkeleton />
@@ -58,11 +75,13 @@ const MonthlyExpenses = ({
     <>
       <div className={container}>
         <div className={header}>
-          <Typography variant="overline">{title}</Typography>
+          <Typography variant="overline" size="sm">
+            {title}
+          </Typography>
           <Pill onClick={() => setIsSheetOpen(true)} className={currencyPill}>
             <span className={flagWrapper}>
               <span className={`fi fi-${currentCountryCode} fi ${flag}`} />
-              <Typography variant="label" size="small">
+              <Typography variant="label" size="sm">
                 {selectedCurrency}
               </Typography>
             </span>
@@ -72,16 +91,16 @@ const MonthlyExpenses = ({
         <div className={amounts}>
           <Typography
             variant="currency"
-            size="large"
+            size="2xl"
             currencySymbol={getCurrencySymbol(selectedCurrency)}
           >
-            {monthlyAmount}
+            {shownAmount}
           </Typography>
-          <Typography variant="body" size="medium">
+          <Typography variant="body" size="sm">
             {subAmount}
           </Typography>
           {note && (
-            <Typography variant="body" size="small" className={currencyRate}>
+            <Typography variant="body" size="xs" className={currencyRate}>
               {note}
             </Typography>
           )}

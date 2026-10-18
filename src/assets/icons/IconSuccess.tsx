@@ -1,5 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
+/** Check in a circle: the icon of `success` toasts. */
 export const IconSuccess = (props: IconProps) => (
   <Icon {...props}>
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />

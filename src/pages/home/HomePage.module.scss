@@ -11,35 +11,10 @@
   width: 100%;
 }
 
-.toastContent {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  margin-right: 0.75rem; // mr-3
-}
-
-.undoButton {
-  color: var(--icon-muted);
-  transition: color 250ms ease-in-out;
-  background-color: transparent;
-  border: none;
-  aspect-ratio: 1 / 1;
-
-  &:hover {
-    background-color: transparent;
-    color: var(--icon-default);
-  }
-
-  svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-}
-
 .fabWrapper {
   position: fixed;
-  bottom: 5rem; // bottom-20 (20 * 0.25rem = 5rem)
+  // Just above the nav bar and the gesture area
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 1rem);
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -53,11 +28,12 @@
 
   .fabContainer {
     pointer-events: auto;
-  }
-}
 
-.fabButton {
-  border-radius: 9999px !important;
-  padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
+    // Nested so it outranks Button's own radius and size classes (no !important needed)
+    .fabButton {
+      border-radius: 9999px;
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+  }
 }

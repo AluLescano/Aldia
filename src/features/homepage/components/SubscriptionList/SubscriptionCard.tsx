@@ -36,6 +36,7 @@ const {
   deleteButton,
   deleteIcon,
   cardImg,
+  centered,
   opacity50,
   cardInfo,
   cardPrice,
@@ -46,6 +47,7 @@ const {
 const OPEN_X = -70
 
 interface Props {
+  /** Its logo, name, price and next charge are shown on the card. */
   subscription: Subscription
   /** Called from the delete button uncovered by swiping the card left. */
   onDelete: (subscription: Subscription) => void
@@ -153,23 +155,29 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
           <div className={cardInfo}>
             <Typography
               variant="label"
-              size="medium"
+              size="md"
               className={isPaused ? opacity50 : undefined}
             >
               {subscription.name}
             </Typography>
             {!isPaused && (
-              <Typography variant="label" size="small">
+              <Typography variant="label" size="sm">
                 {formatDate(nextCharge)}
               </Typography>
             )}
           </div>
-          <div className={cn(cardPrice, isPaused && opacity50)}>
-            <Typography variant="currency" size="medium" currencySymbol={shownSymbol}>
+          <div
+            className={cn(
+              cardPrice,
+              isPaused && opacity50,
+              converted !== null && centered,
+            )}
+          >
+            <Typography variant="currency" size="lg" currencySymbol={shownSymbol}>
               {shownAmount}
             </Typography>
             {converted !== null && (
-              <Typography variant="label" size="small" className={originalPrice}>
+              <Typography variant="label" size="sm" className={originalPrice}>
                 {`${getCurrencySymbol(subscription.currency)} ${formatAmount(subscription.price)}`}
               </Typography>
             )}

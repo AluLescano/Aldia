@@ -1,21 +1,93 @@
-:root {
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
-}
-
-* {
+/* Reset: browser defaults we never want */
+*,
+*::before,
+*::after {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
+  margin: 0;
 }
 
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+#root {
+  isolation: isolate;
+}
+
+/* App layout (sizes, not colors) */
+:root {
+  --nav-height: 5rem; /* BottomNavBar, without the phone's gesture area under it */
+}
+
+/* App base */
 html,
 body {
   height: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-app);
+  background-color: var(--bg-screen);
   color: var(--text-primary);
   font-family:
     'Red Hat Text',
@@ -37,15 +109,7 @@ textarea {
   -webkit-user-select: auto;
 }
 
-/* Custom utility classes for mobile layout */
-.safe-top {
-  padding-top: max(16px, env(safe-area-inset-top));
-}
-
-.safe-bottom {
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-}
-
+/* Utilities */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -54,6 +118,7 @@ textarea {
   scrollbar-width: none;
 }
 
+/* Global on purpose: Toast.tsx references it by name in an inline style */
 @keyframes shrink {
   from {
     width: 100%;

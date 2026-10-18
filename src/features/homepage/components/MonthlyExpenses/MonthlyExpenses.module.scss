@@ -9,7 +9,7 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
   .skeletonElement {
-    background-color: var(--bg-surface-elevated);
+    background-color: var(--bg-surface-raised);
   }
 
   .skeletonHeader {
@@ -50,7 +50,7 @@
   overflow: hidden;
   border: 1px solid var(--border-featured);
   border-radius: 1.5rem;
-  background-color: var(--bg-surface);
+  background-color: var(--bg-surface-raised);
   box-shadow: var(--shadow-glow-brand);
   width: 100%;
   padding: 1.5rem;
@@ -70,9 +70,10 @@
     z-index: 1;
   }
 
+  // Frosted cream in light mode, brand green in dark (see --brand-chip-* in _themes.scss)
   .currencyPill {
-    background-color: var(--brand-subtle);
-    border-color: var(--border-featured);
+    background-color: var(--brand-chip-bg);
+    border-color: var(--brand-chip-border);
   }
 
   .header {
@@ -98,7 +99,7 @@
     margin-top: 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   .currencyRate {
