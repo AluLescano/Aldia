@@ -22,7 +22,8 @@ interface Props extends Omit<ButtonProps, 'aria-label' | 'children'> {
 }
 
 /**
- * A `Button` that only shows an icon: a square, elevated, 1.25rem icon (header style).
+ * A `Button` that only shows an icon: a 48px square (Android's minimum touch target),
+ * elevated, with a 1.25rem icon (header style).
  * Defaults to `secondary`, `small` and `fit`. A `className` is added on top of the
  * base look, for the few places that need to adjust it.
  *

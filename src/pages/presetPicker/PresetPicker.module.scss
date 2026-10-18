@@ -5,51 +5,37 @@
 
   background-color: var(--bg-app);
 
-  .header {
+  .searchbar {
     display: flex;
-    flex-direction: column;
-    padding: 1rem 0.5rem;
-    border-radius: 0 0 1rem 1rem;
-    background-color: var(--bg-surface);
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 
-    & > div:first-child {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
+    input {
+      width: 100%;
+      border: 1px solid var(--border-subtle);
+      border-radius: 5rem;
+      padding: 0.75rem 3rem;
+      text-align: left;
+      box-shadow: var(--shadow-sm);
+      outline: none;
+      background-color: var(--bg-surface-elevated);
+
+      &::placeholder {
+        color: var(--text-muted);
+      }
     }
 
-    .searchbar {
-      display: flex;
-      position: relative;
-      align-items: center;
-      justify-content: center;
+    & > div {
+      position: absolute;
+      right: 5%;
+      color: var(--text-muted);
+      pointer-events: none;
 
-      input {
-        width: 100%;
-        border: 1px solid var(--border-subtle);
-        border-radius: 5rem;
-        padding: 0.75rem 3rem;
-        text-align: left;
-        box-shadow: var(--shadow-sm);
-        outline: none;
-        background-color: var(--bg-surface-elevated);
-
-        &::placeholder {
-          color: var(--text-muted);
-        }
-      }
-
-      & > div {
-        position: absolute;
-        right: 5%;
-        color: var(--text-muted);
-        pointer-events: none;
-
-        svg {
-          width: 1.25rem;
-          height: 1.25rem;
-        }
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
       }
     }
   }
