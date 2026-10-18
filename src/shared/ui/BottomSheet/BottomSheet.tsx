@@ -21,13 +21,16 @@ interface PanelProps {
   onClose: () => void
   /** Big title under the drag handle; also the dialog's accessible name. */
   title?: string
+  /** The scrolling content. */
   children: ReactNode
   /** Fixed buttons under the content (they don't scroll with it). */
   footer?: ReactNode
+  /** Extra classes on the sheet panel. */
   className?: string
 }
 
 interface BottomSheetProps extends PanelProps {
+  /** Shows the sheet. Setting it to false slides it out, then unmounts it. */
   isOpen: boolean
 }
 
@@ -82,7 +85,7 @@ const Panel = ({ onClose, title, children, footer, className }: PanelProps) => {
         >
           <div className={dragHandle} />
           {title && (
-            <Typography variant="title" size="large">
+            <Typography variant="title" size="lg">
               {title}
             </Typography>
           )}

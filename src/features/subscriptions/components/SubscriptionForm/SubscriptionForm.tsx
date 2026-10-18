@@ -1,5 +1,5 @@
 // DEPENDENCIES
-import { type SubmitEvent, useRef, useState } from 'react'
+import { type SubmitEvent, useId, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 
 // HOOKS
@@ -57,6 +57,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
   } = styles
 
   const form = useSubscriptionForm(initialValues)
+  // The notifications row holds a plain Button, so the row label needs its id by hand
+  const notificationsId = useId()
   const { values, isValid, hasEndDate, trialDays, setField, touch, touchAll, errorFor } =
     form
 
@@ -177,6 +179,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
             <InputAmount
               size="medium"
               width="fit"
+              minWidth="0" // hug "0.00" when empty, grow while typing
               value={values.price}
               // The symbol of the currency picked in this form; '$' if none is picked yet
               currencySymbol={values.currency ? getCurrencySymbol(values.currency) : '$'}
@@ -189,8 +192,8 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
 
         <div className={container}>
           {/* Reminders sheet comes with the notifications work */}
-          <FormRow label="Notificaciones">
-            <Button size="small" className={buttonNotification}>
+          <FormRow label="Notificaciones" controlId={notificationsId}>
+            <Button id={notificationsId} size="small" className={buttonNotification}>
               <IconArrow />
             </Button>
           </FormRow>
@@ -221,11 +224,18 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
         </div>
 
         {!readOnly && (
-          <div className={buttonContainer}>
+          // Wakes up with a small bump when the form becomes valid. `initial={false}`: a form
+          // that opens already valid (editing) doesn't bump
+          <motion.div
+            className={buttonContainer}
+            initial={false}
+            animate={{ scale: isValid ? [1, 1.03, 1] : 1 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+          >
             <Button width="full" size="large" type="submit" aria-disabled={!isValid}>
               {submitLabel}
             </Button>
-          </div>
+          </motion.div>
         )}
       </fieldset>
 

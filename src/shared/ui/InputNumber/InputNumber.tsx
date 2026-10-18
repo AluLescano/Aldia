@@ -36,6 +36,7 @@ const InputNumber = ({
   suffix,
   size,
   width,
+  minWidth,
   subText,
   errorMessage,
   ...rest
@@ -47,6 +48,7 @@ const InputNumber = ({
     label,
     size,
     width,
+    minWidth,
     subText,
     errorMessage,
     disabled: rest.disabled,

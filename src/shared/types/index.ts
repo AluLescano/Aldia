@@ -17,6 +17,7 @@ export type DefaultCurrencyCode = 'USD' | 'EUR' | 'ARS' | 'CLP' | 'GBP'
  */
 export type CurrencyCode = DefaultCurrencyCode | (string & {})
 
+/** A currency the user can pick, as shown in the currency sheet. */
 export interface Currency {
   code: CurrencyCode
   name: string
@@ -30,6 +31,7 @@ export interface Currency {
 // CATEGORIES
 // ==========================================
 
+/** A spending category ("Entretenimiento"...), the default ones and the user's own. */
 export interface Category {
   /** Slug for defaults ('entertainment'), `custom-<id>` for the user's own. */
   id: string
@@ -44,9 +46,12 @@ export interface Category {
 // PAYMENT METHODS / CARDS (Cards screen, not built yet)
 // ==========================================
 
+/** A credit card or a bank account. */
 export type PaymentMethodType = 'credit' | 'bank_account'
+/** The card network, for its logo. `generic` when unknown. */
 export type CardBrand = 'visa' | 'mastercard' | 'amex' | 'discover' | 'generic'
 
+/** A card or account the user pays subscriptions with. */
 export interface PaymentMethod {
   id: string
   name: string
@@ -63,6 +68,7 @@ export interface PaymentMethod {
 // NOTIFICATIONS / REMINDERS (not built yet)
 // ==========================================
 
+/** One notification before a charge or before a free trial ends. */
 export interface SubscriptionReminder {
   id: string
   /** 0 = the same day, 1 = the day before... */
@@ -78,6 +84,7 @@ export interface SubscriptionReminder {
 // SUBSCRIPTIONS
 // ==========================================
 
+/** The unit of an `every` billing cycle: every N days, weeks, months or years. */
 export type BillingUnit = 'day' | 'week' | 'month' | 'year'
 
 /**
@@ -90,6 +97,7 @@ export type BillingCycle =
 /** `trial`: in its free trial · `active`: paying · `inactive`: paused by the user. */
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
+/** A free trial: no charges between these two days. */
 export interface TrialConfig {
   /** `YYYY-MM-DD` */
   startDate: string
@@ -100,6 +108,7 @@ export interface TrialConfig {
 /** Built-in icons for bills without a logo (see `shared/lib/icons.tsx`). */
 export type IconKey = 'electricity' | 'water' | 'gas' | 'phone' | 'rent' | 'internet'
 
+/** A saved subscription or recurring bill. Persisted in the subscription store. */
 export interface Subscription {
   id: string
   name: string
@@ -139,6 +148,7 @@ export interface Subscription {
 // PRESETS (the ready-made subscriptions of the picker)
 // ==========================================
 
+/** A ready-made subscription in the picker; tapping it fills the form. */
 export interface Preset {
   id: string
   name: string

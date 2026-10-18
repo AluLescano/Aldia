@@ -1,5 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
+/** Trash can: delete buttons (subscription card swipe, detail screen, categories). */
 export const IconDelete = (props: IconProps) => (
   <Icon {...props}>
     <path d="M3 6h18" />

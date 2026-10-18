@@ -35,17 +35,19 @@ const InputDate = ({
   onClick,
   size,
   width,
+  minWidth,
   subText,
   errorMessage,
   ...rest
 }: Props) => {
   const { container, calendarIcon } = styles
 
-  const { fieldProps, controlProps } = useFieldControl({
+  const { fieldProps, controlProps, buttonLabelledBy } = useFieldControl({
     id,
     label,
     size,
     width,
+    minWidth,
     subText,
     errorMessage,
     disabled: rest.disabled,
@@ -57,6 +59,7 @@ const InputDate = ({
       <button
         {...rest}
         {...controlProps}
+        aria-labelledby={buttonLabelledBy ?? rest['aria-labelledby']}
         type="button"
         onClick={onClick}
         className={container}

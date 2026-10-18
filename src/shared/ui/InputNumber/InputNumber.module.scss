@@ -21,6 +21,11 @@
     cursor: not-allowed;
   }
 
+  // View mode (disabled fieldset): a value to read, not a greyed-out control
+  fieldset:disabled &:disabled {
+    color: var(--text-primary);
+  }
+
   &:focus-visible {
     outline: none;
   }

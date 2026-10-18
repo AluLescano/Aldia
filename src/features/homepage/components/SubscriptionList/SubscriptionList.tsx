@@ -28,7 +28,9 @@ import { IconAddEmpty } from '@/assets/icons/IconAddEmpty'
 import styles from './SubscriptionList.module.scss'
 
 interface Props {
+  /** All of them: the filter tabs pick which ones show, and the list sorts them. */
   subscriptions: Subscription[]
+  /** Shows the skeleton instead of the list. */
   isLoading?: boolean
   /** Called from a card's swipe-to-delete button. */
   onDelete: (subscription: Subscription) => void
@@ -80,10 +82,11 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
           <Pill
             key={filterKey(filter)}
             isActive={filterKey(filter) === filterKey(activeFilter)}
+            layoutId="homeFilter" // the green background slides to the tapped filter
             onClick={() => setChosenFilter(filter)}
             className={filterPill}
           >
-            <Typography variant="label" size="small">
+            <Typography variant="label" size="xs">
               {filterLabel(filter)}
             </Typography>
           </Pill>
@@ -101,10 +104,10 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
               <div className={emptyStateIcon}>
                 <IconAddEmpty />
               </div>
-              <Typography variant="body" size="medium">
+              <Typography variant="body" size="md">
                 Sin subscripciones aún
               </Typography>
-              <Typography variant="body">
+              <Typography variant="body" size="sm">
                 Agrega tus gastos mensuales para mantenerte al tanto de tus días de pago y
                 tu gasto total.
               </Typography>

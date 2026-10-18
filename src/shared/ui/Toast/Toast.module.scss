@@ -1,43 +1,37 @@
 .container {
-  background-color: var(--bg-surface-elevated);
-  z-index: 50;
+  background-color: var(--bg-surface-raised);
+  z-index: 80; // above overlays (50+) and sheets (60-70): a toast is always readable
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.875rem 1rem;
   border-radius: 0.75rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px var(--shadow-lg);
   overflow: hidden;
 }
 
 .iconAlert {
   width: 1.25rem;
   height: 1.25rem;
-  color: #b23333;
+  color: var(--error-fill);
 }
 
 .iconSuccess {
   width: 1.25rem;
   height: 1.25rem;
-  color: #7baa39;
+  color: var(--success-fill);
 }
 
 .iconInfo {
   width: 1.25rem;
   height: 1.25rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--info-fill);
 }
 
-.positionTop {
+.position {
   position: fixed;
-  top: calc(max(env(safe-area-inset-top), 20px) + 0.5rem);
-  right: 1rem;
-  max-width: calc(100% - 2rem);
-}
-
-.positionBottom {
-  position: fixed;
-  bottom: 9rem;
+  // 0.5rem above the nav bar, on any phone (the gesture area under the bar varies)
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 0.5rem);
   left: 0;
   right: 0;
   margin: 0 auto;
@@ -86,13 +80,22 @@
   width: 100%;
 }
 
-:global {
-  @keyframes shrink {
-    from {
-      width: 100%;
-    }
-    to {
-      width: 0%;
-    }
+// The optional action ("Deshacer"): icon or text, quiet until hovered
+.actionButton {
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  border: none;
+  background-color: transparent;
+  color: var(--icon-muted);
+  transition: color 250ms ease-in-out;
+
+  &:hover {
+    background-color: transparent;
+    color: var(--icon-default);
+  }
+
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 }

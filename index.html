@@ -7,7 +7,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
     />
-    <meta name="theme-color" content="#09090b" />
+    <!-- Browser/status bar color. Meta tags cannot read CSS variables: keep it equal to
+         --bg-screen of the theme above (light #f6f0e8, dark #0a0f0c). The theme toggle
+         will have to update it from JS. -->
+    <meta name="theme-color" content="#0a0f0c" />
     <meta name="color-scheme" content="dark light" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

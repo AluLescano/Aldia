@@ -1,16 +1,28 @@
-import type { ChangeEvent, CSSProperties, InputHTMLAttributes } from 'react'
+import type { ChangeEvent, InputHTMLAttributes } from 'react'
 
 // HOOKS
 import { useFieldControl, type FieldControlProps } from '@/shared/hooks/useFieldControl'
 
+// UTILS
+import { cn } from '@/shared/lib/cn'
+
 // COMPONENTS
 import Field from '../Field/Field'
+import Typography from '../Typography/Typography'
 
 // ASSETS
 import styles from './InputAmount.module.scss'
 
 // Digits with at most one "," or "." separator and two decimals
 const AMOUNT_TYPING_PATTERN = /^\d*[.,]?\d{0,2}$/
+
+// The typed text as a number for the pretty copy ("1299,5" -> 1299.5 -> "1.299,50").
+// Empty shows 0 (the placeholder look); a lone separator stays as typed.
+const toDisplayAmount = (value: string): number | string => {
+  if (value === '') return 0
+  const amount = Number(value.replace(',', '.'))
+  return Number.isNaN(amount) ? value : amount
+}
 
 interface Props
   extends
@@ -30,6 +42,10 @@ interface Props
 /**
  * Money field: decimal keyboard, currency symbol on the left. Keys that would break
  * the amount (letters, a second separator, a third decimal) are ignored silently.
+ *
+ * While the field isn't being edited it shows the amount in the `currency` Typography
+ * look (thousands dots, raised decimals), drawn over the real input. Once the user
+ * types, the plain input shows instead, so the caret always matches the text.
  */
 const InputAmount = ({
   id,
@@ -38,18 +54,20 @@ const InputAmount = ({
   onChange,
   size,
   width,
+  minWidth,
   subText,
   currencySymbol = '$',
   errorMessage,
   ...rest
 }: Props) => {
-  const { container } = styles
+  const { stack, input, display, empty } = styles
 
   const { fieldProps, controlProps } = useFieldControl({
     id,
     label,
     size,
     width,
+    minWidth,
     subText,
     errorMessage,
     disabled: rest.disabled,
@@ -62,20 +80,25 @@ const InputAmount = ({
 
   return (
     <Field {...fieldProps} startAdornment={currencySymbol}>
-      <input
-        {...rest}
-        {...controlProps}
-        type="text"
-        inputMode="decimal"
-        placeholder="0.00"
-        value={value}
-        onChange={handleChange}
-        className={container}
-        // A longer symbol ("U$S") needs more room on the left (see InputAmount.module.scss)
-        style={
-          { ...rest.style, '--symbol-chars': currencySymbol.length } as CSSProperties
-        }
-      />
+      {/* The input and its pretty copy share one grid cell, so the box fits the wider one */}
+      <div className={stack}>
+        <input
+          {...rest}
+          {...controlProps}
+          type="text"
+          inputMode="decimal"
+          placeholder="0.00"
+          value={value}
+          onChange={handleChange}
+          className={input}
+        />
+        {/* Hidden from screen readers: the input already holds the real value */}
+        <div className={cn(display, value === '' && empty)} aria-hidden="true">
+          <Typography variant="currency" size="md" currencySymbol="">
+            {toDisplayAmount(value)}
+          </Typography>
+        </div>
+      </div>
     </Field>
   )
 }

@@ -9,6 +9,9 @@ export type IconProps = SVGProps<SVGSVGElement>
  * `currentColor` (the text color around it), hidden from screen readers (the button
  * around it carries the label). Any of it can be overridden through props.
  *
+ * The drawings come from Lucide (https://lucide.dev), drawn for this exact grid and stroke,
+ * so new icons should come from there too. ISC license: see `LICENSE-lucide.txt`.
+ *
  * @example
  * export const IconArrow = (props: IconProps) => (
  *   <Icon {...props}>

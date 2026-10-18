@@ -32,13 +32,13 @@
       width: 10rem;
       padding: 0.6875rem;
       border-radius: 0.5rem;
-      background-color: var(--bg-surface-elevated);
+      background-color: var(--bg-surface-raised);
     }
 
     .skeletonCard {
       height: 3.75rem;
       border-radius: 1rem;
-      background-color: var(--bg-surface-elevated);
+      background-color: var(--bg-surface-raised);
     }
   }
 }
@@ -139,7 +139,7 @@
   height: max-content;
   border-radius: 1rem;
   touch-action: pan-y;
-  background-color: #ef4444;
+  background-color: var(--error-fill); // solid red behind the trash icon while swiping
 
   .deleteLayer {
     position: absolute;
@@ -163,7 +163,7 @@
       .deleteIcon {
         width: 1.5rem;
         aspect-ratio: 1 / 1;
-        color: var(--text-on-error);
+        color: var(--error-on-fill);
         z-index: 10;
       }
     }
@@ -179,7 +179,7 @@
   border-radius: 1rem;
   padding: 0.75rem;
   overflow: hidden;
-  background-color: var(--bg-surface-elevated);
+  background-color: var(--bg-surface-raised);
   transition:
     box-shadow 200ms ease-out,
     background-color 200ms ease-out;
@@ -213,7 +213,7 @@
   }
 
   &:hover {
-    background-color: var(--bg-surface);
+    background-color: var(--bg-surface-hover);
     box-shadow: var(--shadow-md);
   }
 
@@ -247,12 +247,16 @@
 // Grows with the amount (no fixed width: "$ 15.130,69" did not fit in 5rem) and right-aligns,
 // so prices still line up in a column
 .cardPrice {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  padding-left: 0.5rem;
+  flex-shrink: 0;
+  align-items: center;
   white-space: nowrap;
+  gap: 0.5rem;
+}
+
+.centered {
+  padding-top: 0.5rem;
 }
 
 // What the card is really charged, under the converted amount

@@ -43,7 +43,9 @@ const parsePositive = (text: string) => {
 }
 
 interface UnitWheelProps {
+  /** The unit in the middle row. */
   value: BillingUnit
+  /** Called with the unit of the tapped row. */
   onChange: (unit: BillingUnit) => void
 }
 
@@ -125,7 +127,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: Props
           onClick={() => (hasTrial ? onTrialChange(undefined) : changeTrial())}
         />
         <div className={content}>
-          <Typography variant="body" size="medium">
+          <Typography variant="body" size="md">
             Período de prueba
           </Typography>
           <div>
@@ -143,7 +145,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: Props
                 changeTrial(text)
               }}
             />
-            <Typography variant="body" size="medium">
+            <Typography variant="body" size="md">
               {trialText === '1' ? 'día' : 'días'}
             </Typography>
           </div>
@@ -159,7 +161,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: Props
           onClick={() => onChange({ type: 'one-time' })}
         />
         <div className={content}>
-          <Typography variant="body" size="medium">
+          <Typography variant="body" size="md">
             Pago único
           </Typography>
         </div>
@@ -174,7 +176,7 @@ const BillingCyclePicker = ({ cycle, trialDays, onChange, onTrialChange }: Props
           onClick={() => selectEvery()}
         />
         <div className={cn(content, centered)}>
-          <Typography variant="body" size="medium">
+          <Typography variant="body" size="md">
             Cada
           </Typography>
           <div>

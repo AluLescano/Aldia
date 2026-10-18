@@ -15,9 +15,11 @@ interface CurrencyPickerProps {
   currencies: Currency[]
   /** The highlighted row. */
   selectedCode?: string
+  /** Called with the tapped currency's code, e.g. "EUR". */
   onSelect?: (code: string) => void
   /** Planned: drag to reorder favorites in Settings. Not used yet. */
   onReorder?: (newOrder: Currency[]) => void
+  /** Extra classes on the list. */
   className?: string
 }
 
@@ -56,17 +58,17 @@ const CurrencyPicker = ({
               <div className={leftSection}>
                 <span className={cn(`fi fi-${currency.countryCode} fis`, flag)} />
                 <div className={currencyInfo}>
-                  <Typography variant="label" size="medium">
+                  <Typography variant="label" size="md">
                     {currency.code}
                   </Typography>
-                  <Typography variant="label" size="small" className={mutedText}>
+                  <Typography variant="label" size="sm" className={mutedText}>
                     {currency.name}
                   </Typography>
                 </div>
               </div>
               {/* Right: Symbol */}
               <div className={rightSection}>
-                <Typography variant="body" size="medium" className={mutedText}>
+                <Typography variant="body" size="md" className={mutedText}>
                   {currency.symbol}
                 </Typography>
               </div>

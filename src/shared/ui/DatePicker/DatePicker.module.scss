@@ -12,13 +12,13 @@
 
     .navGroup {
       display: flex;
-      background-color: var(--bg-surface-elevated);
+      background-color: var(--bg-surface-raised);
       border-radius: 1rem;
 
       .select {
         width: fit-content;
         border: none;
-        background-color: var(--bg-surface-elevated);
+        background-color: var(--bg-surface-raised);
         text-align: center;
         appearance: none;
         border-radius: 1rem;
@@ -59,15 +59,16 @@
       width: 2.75rem;
       border-radius: 50%;
       aspect-ratio: 1 / 1;
-      background-color: none;
     }
 
     .muted {
       color: var(--text-muted);
     }
 
+    // Sets its own text color: the secondary button's dark text would vanish on the green
     .selected {
-      background-color: var(--brand-primary);
+      background-color: var(--brand);
+      color: var(--text-on-brand);
     }
   }
 }

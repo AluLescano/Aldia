@@ -1,0 +1,50 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; // only shows when there are children under the bar
+  padding: 1rem 0.75rem;
+  border-radius: 0 0 1rem 1rem;
+  background-color: var(--bg-surface);
+
+  z-index: 5;
+}
+
+// Back button | title | actions. The side columns hug their content.
+.bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.titleSlot {
+  min-width: 0; // lets the title shrink below its text width, so the ellipsis can kick in
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Always rendered, at least as wide as the back button, so the title stays centered
+// on screen when there are no actions
+.actionSlot {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  min-width: 3rem;
+}
+
+.childrenSlot {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+// Fake glass: translucent over the page's aura, no backdrop-filter (the aura is already soft)
+.glassLook {
+  border: 1px solid var(--glass-border);
+  border-top: none;
+  background-color: var(--glass-bg);
+  background-image: var(--gradient-sheen);
+  box-shadow: 0 1px 2px var(--shadow-sm);
+}

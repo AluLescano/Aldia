@@ -1,5 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
+/** Magnifying glass: the preset picker search bar. */
 export const IconSearch = (props: IconProps) => (
   <Icon {...props}>
     <circle cx="11" cy="11" r="8" />
