@@ -1,3 +1,7 @@
+// DEPENDENCIES
+import { createPortal } from 'react-dom'
+import { AnimatePresence, motion } from 'motion/react'
+
 // STORES
 import { useUIStore } from '@/shared/store/uiStore'
 import { useRatesStore } from '@/shared/store/ratesStore'
@@ -55,19 +59,34 @@ export const HomePage = () => {
       </header>
 
       <SubscriptionList subscriptions={subs} onDelete={deleteWithUndo} />
-      <div className={fabWrapper}>
-        <div className={fabContainer}>
-          <Button
-            variant="primary"
-            size="large"
-            aria-label="Agregar Subscripción"
-            onClick={() => pushOverlay('preset-picker')}
-            className={fabButton}
+      {/* Portaled to <body>: the page slide moves this page with a transform, and a fixed
+          element inside a transformed parent is placed against that parent, not the screen
+          (it jumped 16px). `propagate`: it still fades out when Home slides away */}
+      {createPortal(
+        <AnimatePresence propagate>
+          <motion.div
+            key="fab"
+            className={fabWrapper}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
           >
-            <IconAdd />
-          </Button>
-        </div>
-      </div>
+            <div className={fabContainer}>
+              <Button
+                variant="primary"
+                size="large"
+                aria-label="Agregar Subscripción"
+                onClick={() => pushOverlay('preset-picker')}
+                className={fabButton}
+              >
+                <IconAdd />
+              </Button>
+            </div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body,
+      )}
     </div>
   )
 }

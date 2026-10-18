@@ -27,14 +27,37 @@ import { SubscriptionFormPage } from '@/pages/subscriptionForm/SubscriptionFormP
 // ASSETS
 import styles from './App.module.scss'
 
+// Same order as the nav bar: picking a tab to the right slides the new page in from the right
+const TAB_ORDER: TabType[] = ['home', 'calendar', 'statistics', 'cards', 'settings']
+const PAGE_SHIFT = 32 // px
+const PAGE_MOVE = { duration: 0.25, ease: 'easeOut' } as const
+
+// Material's "shared axis": both pages slide together, but the old one is gone (fast fade)
+// before the new one fades in, so their text never shows on top of each other.
+// `direction`: 1 when moving right in the nav bar, -1 when moving left
+const pageVariants = {
+  enter: (direction: number) => ({ x: direction * PAGE_SHIFT, opacity: 0 }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { x: PAGE_MOVE, opacity: { duration: 0.15, delay: 0.08 } },
+  },
+  exit: (direction: number) => ({
+    x: direction * -PAGE_SHIFT,
+    opacity: 0,
+    transition: { x: PAGE_MOVE, opacity: { duration: 0.08 } },
+  }),
+}
+
 /**
  * The app shell: the active tab with the bottom nav, the top overlay of the
  * `uiStore` stack (preset picker, subscription screen), and the app-wide toast.
  * Also keeps the exchange rates fresh.
  */
 function App() {
-  const { appContainer, appWrapper, mainContent, overlayContainer } = styles
+  const { appContainer, appWrapper, mainContent, page, overlayContainer } = styles
   const [activeTab, setActiveTab] = useState<TabType>('home')
+  const [direction, setDirection] = useState(1)
   const overlays = useUIStore((state) => state.overlays)
 
   const toast = useToastStore((state) => state.toast)
@@ -51,6 +74,11 @@ function App() {
     document.addEventListener('visibilitychange', refresh)
     return () => document.removeEventListener('visibilitychange', refresh)
   }, [])
+
+  const selectTab = (tab: TabType) => {
+    setDirection(TAB_ORDER.indexOf(tab) > TAB_ORDER.indexOf(activeTab) ? 1 : -1)
+    setActiveTab(tab)
+  }
 
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -72,10 +100,26 @@ function App() {
   return (
     <div className={appContainer}>
       <div className={appWrapper}>
-        <main className={mainContent}>{renderActiveScreen()}</main>
+        {/* The old page slides out one way while the new one slides in from the other.
+            `custom` on AnimatePresence: the leaving page uses the new direction too */}
+        <main className={mainContent}>
+          <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+            <motion.div
+              key={activeTab}
+              className={page}
+              custom={direction}
+              variants={pageVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+            >
+              {renderActiveScreen()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
         {/* Fixed Mobile Bottom Navigation */}
-        <BottomNavBar activeTab={activeTab} onSelectTab={setActiveTab} />
+        <BottomNavBar activeTab={activeTab} onSelectTab={selectTab} />
 
         {/* Overlay stack: every open screen stays mounted (it keeps its state), each new one
             slides in from the right over the previous, and going back slides it out again */}
