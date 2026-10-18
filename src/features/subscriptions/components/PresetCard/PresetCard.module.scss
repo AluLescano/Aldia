@@ -10,14 +10,15 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   padding: 0.35rem 0.5rem;
-  border: 2px solid var(--border-subtle);
+  border: 2px solid var(--glass-border);
   border-radius: 1.5rem;
-  background-color: var(--bg-surface-raised);
+  // Fake glass: picks up the picker's aura as it scrolls over it
+  background-color: var(--glass-bg);
   box-shadow: 0 1px 2px 0 var(--shadow-sm);
 
   // Keep the card color on hover instead of Button's hover color
   &:hover {
-    background-color: var(--bg-surface-raised);
+    background-color: var(--glass-bg);
   }
 
   // Light sheen from the top-left corner. The content is positioned, so it paints on top of it.

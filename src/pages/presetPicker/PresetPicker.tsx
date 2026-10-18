@@ -29,7 +29,7 @@ import styles from './PresetPicker.module.scss'
  * Either way it pushes the `subscription-form` overlay on top.
  */
 export const PresetPicker = () => {
-  const { container, searchbar, listContainer, presetGrid } = styles
+  const { container, aura, searchbar, listContainer, presetGrid } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const pushOverlay = useUIStore((state) => state.pushOverlay)
 
@@ -44,7 +44,9 @@ export const PresetPicker = () => {
 
   return (
     <div className={container}>
+      <div className={aura} aria-hidden="true" />
       <PageHeader
+        glass
         title="Agregar Subscripción"
         onBack={popOverlay}
         actions={

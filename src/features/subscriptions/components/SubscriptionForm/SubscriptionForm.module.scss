@@ -1,8 +1,11 @@
 form {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   padding: 0 1rem;
+
+  isolation: isolate;
 
   .fieldSet {
     display: flex;
@@ -17,14 +20,20 @@ form {
       display: flex;
       justify-content: center;
       margin: 0.75rem 0 2.5rem;
+
+      z-index: 0;
     }
 
     .container {
       display: flex;
       flex: 1;
       flex-direction: column;
-      background-color: var(--bg-surface);
+      // Glass card lit by the logo glow (see --glass-card-* in _themes.scss)
+      background-color: var(--glass-card-bg);
       margin-bottom: 1rem;
+      border: 1px solid var(--glass-card-border);
+      border-top: 2px solid var(--glass-rim);
+      box-shadow: var(--glass-card-shadow);
       border-radius: 1.5rem;
 
       // FormRow: label and control on one line; the message slot wraps to its own line below

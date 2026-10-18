@@ -11,7 +11,9 @@
     z-index: -1;
     border-radius: 50%;
     background: var(--avatar) center / cover;
-    filter: blur(50px) saturate(2);
+    // Brightened in light mode, so dark logos glow instead of smudging (see _themes.scss)
+    opacity: var(--avatar-glow-opacity);
+    filter: var(--avatar-glow-filter);
     scale: 1.2;
   }
 }

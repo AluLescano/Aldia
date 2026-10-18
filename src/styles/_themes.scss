@@ -119,11 +119,26 @@
     #{$paper-100},
     transparent
   ); // scrollable tab edges
+  // Soft brand light behind glass surfaces (the "fake glass" backdrop: gradients are
+  // already blurry, so no blur filter is needed). Keep muted text off it: glass only.
+  --gradient-aura:
+    radial-gradient(60% 40% at 10% 0%, #{rgba($phthalo-200, 0.55)}, transparent 70%),
+    radial-gradient(55% 35% at 95% 20%, #{rgba($champagne-200, 0.6)}, transparent 70%),
+    radial-gradient(70% 30% at 35% 60%, #{rgba($phthalo-100, 0.5)}, transparent 75%);
 
   /* 11. Glass */
   --glass-bg: #{rgba($paper-0, 0.6)};
   --glass-border: #{rgba($color-white, 0.7)};
   --glass-blur: 16px;
+  // Glass cards lit by a logo (the form). Light mode is lit from the front: frosted white,
+  // white top rim, soft drop shadow, and a brightened glow so dark logos don't smudge.
+  --glass-card-bg: #{rgba($paper-0, 0.55)};
+  --glass-card-border: #{rgba($paper-900, 0.06)};
+  --glass-rim: #{rgba($color-white, 0.95)};
+  --glass-card-shadow:
+    0 10px 24px -14px #{rgba($paper-900, 0.25)}, inset 0 1px 0 #{rgba($color-white, 0.6)};
+  --avatar-glow-opacity: 0.45;
+  --avatar-glow-filter: blur(50px) saturate(1.8) brightness(1.7);
 }
 
 [data-theme='dark'] {
@@ -218,11 +233,22 @@
   );
   --gradient-sheen: linear-gradient(180deg, #{rgba($color-white, 0.06)}, transparent 40%);
   --gradient-edge-fade: linear-gradient(90deg, #{$charcoal-900}, transparent);
+  --gradient-aura:
+    radial-gradient(60% 40% at 10% 0%, #{rgba($phthalo-400, 0.35)}, transparent 70%),
+    radial-gradient(55% 35% at 95% 20%, #{rgba($champagne-500, 0.18)}, transparent 70%),
+    radial-gradient(70% 30% at 35% 60%, #{rgba($phthalo-500, 0.3)}, transparent 75%);
 
   /* 11. Glass */
   --glass-bg: #{rgba($charcoal-800, 0.55)};
   --glass-border: #{rgba($color-white, 0.08)};
   --glass-blur: 16px;
+  // Dark mode is lit from behind: clear card, the glow shines through, lighter top rim
+  --glass-card-bg: transparent;
+  --glass-card-border: #{rgba($color-white, 0.08)};
+  --glass-rim: #{$charcoal-500};
+  --glass-card-shadow: none;
+  --avatar-glow-opacity: 1;
+  --avatar-glow-filter: blur(50px) saturate(2);
 }
 
 :root {

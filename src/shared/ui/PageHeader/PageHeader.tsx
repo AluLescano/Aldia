@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
 
+// UTILS
+import { cn } from '@/shared/lib/cn'
+
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 
@@ -20,6 +23,11 @@ interface Props {
   actions?: ReactNode
   /** Extra rows under the bar, e.g. a search field. */
   children?: ReactNode
+  /**
+   * Frosted look: translucent, with a light edge and a sheen, for pages that put
+   * `--gradient-aura` behind it. Defaults to the solid surface.
+   */
+  glass?: boolean
 }
 
 /**
@@ -38,10 +46,11 @@ const PageHeader = ({
   backLabel = 'Volver',
   actions,
   children,
+  glass = false,
 }: Props) => {
-  const { container, bar, titleSlot, actionSlot, childrenSlot } = styles
+  const { container, glassLook, bar, titleSlot, actionSlot, childrenSlot } = styles
   return (
-    <header className={container}>
+    <header className={cn(container, glass && glassLook)}>
       <div className={bar}>
         <IconButton onClick={onBack} label={backLabel}>
           <IconArrow />
@@ -49,7 +58,7 @@ const PageHeader = ({
         <Typography variant="title" size="md" className={titleSlot}>
           {title}
         </Typography>
-        {<div className={actionSlot}>{actions}</div>}
+        <div className={actionSlot}>{actions}</div>
       </div>
       {children && <div className={childrenSlot}>{children}</div>}
     </header>

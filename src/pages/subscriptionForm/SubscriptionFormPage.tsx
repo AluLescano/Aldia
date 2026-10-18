@@ -103,6 +103,7 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
   return (
     <div className={container}>
       <PageHeader
+        glass
         title={existing?.name ?? 'Nueva Subscripción'}
         onBack={handleBack}
         backLabel={isEditing ? 'Descartar cambios' : 'Volver'}
