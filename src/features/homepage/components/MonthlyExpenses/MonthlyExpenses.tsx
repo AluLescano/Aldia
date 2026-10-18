@@ -1,8 +1,12 @@
 // DEPENDENCIES
 import { useState } from 'react'
 
+// HOOKS
+import { useCountUp } from '@/shared/hooks/useCountUp'
+
 // STORES
 import { useSettingsStore } from '@/features/settings/store/settingsStore'
+import { useRatesStore } from '@/shared/store/ratesStore'
 
 // UTILS
 import { DEFAULT_CURRENCIES, getCurrencySymbol } from '@/shared/lib/currencies'
@@ -43,6 +47,14 @@ const MonthlyExpenses = ({
     styles
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { selectedCurrency, setSelectedCurrency } = useSettingsStore()
+  const ratesDate = useRatesStore((state) => state.rates?.date)
+
+  // Rolls up or down when subscriptions change the total. Jumps instead when only the unit
+  // changes (another currency, new rates) and while loading (no counting from 0 on open)
+  const shownAmount = useCountUp(monthlyAmount, {
+    instant: isLoading,
+    jumpKey: `${selectedCurrency}|${ratesDate ?? ''}`,
+  })
 
   // Find the countryCode for the active currency (defaults to 'us')
   const currentCountryCode =
@@ -77,7 +89,7 @@ const MonthlyExpenses = ({
             size="2xl"
             currencySymbol={getCurrencySymbol(selectedCurrency)}
           >
-            {monthlyAmount}
+            {shownAmount}
           </Typography>
           <Typography variant="body" size="sm">
             {subAmount}
