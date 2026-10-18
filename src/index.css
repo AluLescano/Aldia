@@ -78,6 +78,11 @@ h6 {
   isolation: isolate;
 }
 
+/* App layout (sizes, not colors) */
+:root {
+  --nav-height: 5rem; /* BottomNavBar, without the phone's gesture area under it */
+}
+
 /* App base */
 html,
 body {

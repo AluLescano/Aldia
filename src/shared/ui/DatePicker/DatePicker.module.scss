@@ -59,15 +59,16 @@
       width: 2.75rem;
       border-radius: 50%;
       aspect-ratio: 1 / 1;
-      background-color: none;
     }
 
     .muted {
       color: var(--text-muted);
     }
 
+    // Sets its own text color: the secondary button's dark text would vanish on the green
     .selected {
       background-color: var(--brand);
+      color: var(--text-on-brand);
     }
   }
 }

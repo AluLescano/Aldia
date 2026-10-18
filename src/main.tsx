@@ -1,6 +1,7 @@
 // DEPENDENCIES
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { MotionConfig } from 'motion/react'
 
 // COMPONENTS
 import App from './App.tsx'
@@ -16,6 +17,9 @@ import './index.css'
  */
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {/* Motion follows the phone's "reduce motion" setting, like the CSS reset does */}
+    <MotionConfig reducedMotion="user">
+      <App />
+    </MotionConfig>
   </StrictMode>,
 )

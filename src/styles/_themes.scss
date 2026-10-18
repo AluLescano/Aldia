@@ -37,7 +37,7 @@
   --bg-surface-raised: #{$paper-0}; // rows, chips, sheets, anything on top of a card
   --bg-surface-sunken: #{$paper-200}; // pressed / selected
   --bg-surface-hover: #{$paper-150}; // a raised row under the cursor or finger
-  --bg-surface-subtle: #{$phthalo-100}; // brand-tinted wash
+  --bg-surface-subtle: #{rgba($phthalo-500, 0.15)}; // brand-tinted wash
 
   /* 3. Text */
   --text-primary: #{$phthalo-700};
