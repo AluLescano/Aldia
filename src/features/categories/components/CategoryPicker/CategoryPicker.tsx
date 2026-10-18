@@ -32,6 +32,7 @@ const rowMotion = {
 }
 
 interface NameInputProps {
+  /** From `useCategoryEditor`: the name being typed and its error. */
   editor: CategoryEditor
 }
 
@@ -67,6 +68,7 @@ const NameInput = ({ editor }: NameInputProps) => {
 interface Props {
   /** The selected category id. */
   value: string
+  /** Called with the tapped row's category id. */
   onSelect: (categoryId: string) => void
   /** From `useCategoryEditor`, shared with `CategoryFooter`. */
   editor: CategoryEditor

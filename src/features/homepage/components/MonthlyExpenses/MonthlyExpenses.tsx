@@ -22,6 +22,7 @@ import Pill from '@/shared/ui/Pill/Pill'
 import styles from './MonthlyExpenses.module.scss'
 
 interface Props {
+  /** Small caps title over the amount. Defaults to "Gastos Mensuales". */
   title?: string
   /** Monthly cost, already converted to the selected currency. */
   monthlyAmount?: number
@@ -29,6 +30,7 @@ interface Props {
   subscriptionAmount?: number
   /** Optional small line under the count, e.g. when rates are old or missing. */
   note?: string
+  /** Shows the skeleton instead. The amount doesn't count up from it. */
   isLoading?: boolean
 }
 

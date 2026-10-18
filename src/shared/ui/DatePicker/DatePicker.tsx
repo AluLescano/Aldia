@@ -59,9 +59,13 @@ interface SelectorProps {
   label: string
   /** The value on screen: a month index (0 = January) or a year. */
   value: number
+  /** The `<select>` options; `label` is the text shown, e.g. "Octubre". */
   options: { value: number; label: string }[]
+  /** Called with the picked option's value. */
   onChange: (value: number) => void
+  /** The left arrow: one month or year back. */
   onPrevious: () => void
+  /** The right arrow: one month or year forward. */
   onNext: () => void
 }
 

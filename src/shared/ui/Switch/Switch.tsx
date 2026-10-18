@@ -6,11 +6,13 @@ import { useFieldRow } from '../Field/FieldRowContext'
 import styles from './Switch.module.scss'
 
 interface Props {
+  /** On or off. The parent keeps it and updates it in `onChange`. */
   checked: boolean
   /** Called with the new value on every tap. */
   onChange: (checked: boolean) => void
   /** Read by screen readers: the switch has no visible text (e.g. "Tiene fecha de fin"). */
   label: string
+  /** Dims it and ignores taps. */
   disabled?: boolean
 }
 

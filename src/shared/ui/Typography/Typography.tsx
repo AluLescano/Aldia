@@ -22,6 +22,7 @@ interface TypographyProps {
   children: string | number
   /** Only for `currency`. Defaults to `$`; pass `''` to show the amount alone. */
   currencySymbol?: string
+  /** Extra classes on the text element, e.g. a color. */
   className?: string
 }
 

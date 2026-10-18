@@ -9,7 +9,9 @@ import { cn } from '@/shared/lib/cn'
 import styles from './Pill.module.scss'
 
 interface PillProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** The pill's text. */
   children: ReactNode
+  /** Extra classes on the pill. */
   className?: string
   /** Highlighted look, e.g. the selected filter tab. */
   isActive?: boolean

@@ -43,7 +43,9 @@ const parsePositive = (text: string) => {
 }
 
 interface UnitWheelProps {
+  /** The unit in the middle row. */
   value: BillingUnit
+  /** Called with the unit of the tapped row. */
   onChange: (unit: BillingUnit) => void
 }
 

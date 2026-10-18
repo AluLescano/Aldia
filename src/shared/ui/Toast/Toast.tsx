@@ -30,6 +30,7 @@ interface Props {
   duration?: number
   /** Called by the close button and when the time runs out. */
   onDismiss: () => void
+  /** Extra classes on the toast. */
   className?: string
 }
 

@@ -15,6 +15,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'large' | 'medium' | 'small'
   /** `full` stretches to the container, `fit` hugs the content. Defaults to `fit`. */
   width?: 'full' | 'fit'
+  /** Extra classes on top of the variant, size and width. */
   className?: string
 }
 

@@ -28,7 +28,9 @@ import { IconAddEmpty } from '@/assets/icons/IconAddEmpty'
 import styles from './SubscriptionList.module.scss'
 
 interface Props {
+  /** All of them: the filter tabs pick which ones show, and the list sorts them. */
   subscriptions: Subscription[]
+  /** Shows the skeleton instead of the list. */
   isLoading?: boolean
   /** Called from a card's swipe-to-delete button. */
   onDelete: (subscription: Subscription) => void

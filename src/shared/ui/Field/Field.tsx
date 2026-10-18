@@ -34,7 +34,15 @@ const {
 interface Props {
   /** Id of the control inside, so the label can point at it with `htmlFor`. */
   id: string
+  /**
+   * `large`: 3.5rem, with the floating label. `medium`: 2.625rem, no label.
+   * Defaults to `large`.
+   */
   size?: FieldSize
+  /**
+   * `full` fills the row, `fit` hugs the value (at least `minWidth`), `auto` hugs it with
+   * no minimum. Defaults to `full`.
+   */
   width?: FieldWidth
   /** Smallest width with `width="fit"`, as a CSS length. Defaults to 9rem (in the SCSS). */
   minWidth?: string
@@ -54,9 +62,11 @@ interface Props {
   children: ReactNode
   /** Dims the box and blocks clicks. The control itself still needs `disabled`. */
   disabled?: boolean
+  /** Extra classes on the box. */
   className?: string
   /** Id for the hint/error element. The control points at it with `aria-describedby`. */
   descriptionId?: string
+  /** Inline style on the box. `minWidth` is added to it. */
   style?: CSSProperties
 }
 

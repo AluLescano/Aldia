@@ -47,6 +47,7 @@ const {
 const OPEN_X = -70
 
 interface Props {
+  /** Its logo, name, price and next charge are shown on the card. */
   subscription: Subscription
   /** Called from the delete button uncovered by swiping the card left. */
   onDelete: (subscription: Subscription) => void

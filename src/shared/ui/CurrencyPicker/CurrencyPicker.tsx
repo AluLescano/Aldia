@@ -15,9 +15,11 @@ interface CurrencyPickerProps {
   currencies: Currency[]
   /** The highlighted row. */
   selectedCode?: string
+  /** Called with the tapped currency's code, e.g. "EUR". */
   onSelect?: (code: string) => void
   /** Planned: drag to reorder favorites in Settings. Not used yet. */
   onReorder?: (newOrder: Currency[]) => void
+  /** Extra classes on the list. */
   className?: string
 }
 

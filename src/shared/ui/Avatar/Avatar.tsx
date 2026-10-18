@@ -24,6 +24,7 @@ interface Props {
   name: string
   /** `medium` 2.5rem (lists), `large` 6rem (form header). */
   size?: 'medium' | 'large'
+  /** Extra classes on the circle. */
   className?: string
 }
 
