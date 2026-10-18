@@ -224,11 +224,18 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
         </div>
 
         {!readOnly && (
-          <div className={buttonContainer}>
+          // Wakes up with a small bump when the form becomes valid. `initial={false}`: a form
+          // that opens already valid (editing) doesn't bump
+          <motion.div
+            className={buttonContainer}
+            initial={false}
+            animate={{ scale: isValid ? [1, 1.03, 1] : 1 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+          >
             <Button width="full" size="large" type="submit" aria-disabled={!isValid}>
               {submitLabel}
             </Button>
-          </div>
+          </motion.div>
         )}
       </fieldset>
 
