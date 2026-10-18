@@ -7,15 +7,13 @@ import type { Subscription } from '@/shared/types'
 
 interface SubscriptionState {
   subscriptions: Subscription[]
-  /** The last deleted subscription, kept (not saved) so Home can offer to undo it. */
-  lastDeleted: Subscription | null
   addSubscription: (sub: Subscription) => void
-  /** Removes a subscription and remembers it as `lastDeleted`. */
   deleteSubscription: (id: string) => void
-  /** Puts `lastDeleted` back in the list. Does nothing if there is none. */
-  undoDelete: () => void
-  /** Forgets `lastDeleted` (when the undo toast closes). */
-  clearLastDeleted: () => void
+  /**
+   * Puts a deleted subscription back (the toast's "Deshacer"). Does nothing if one with
+   * the same id is already in the list, so a double undo can't duplicate it.
+   */
+  restoreSubscription: (sub: Subscription) => void
   /** Merges the given fields into one subscription. A field set to `undefined` is cleared. */
   updateSubscription: (id: string, updatedSub: Partial<Subscription>) => void
   /** Moves every subscription of one category to another (used when a category is deleted). */
@@ -27,7 +25,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
   persist(
     (set) => ({
       subscriptions: [],
-      lastDeleted: null,
 
       addSubscription: (newSub) =>
         set((state) => ({ subscriptions: [...state.subscriptions, newSub] })),
@@ -35,20 +32,14 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       deleteSubscription: (id) =>
         set((state) => ({
           subscriptions: state.subscriptions.filter((sub) => sub.id !== id),
-          lastDeleted: state.subscriptions.find((sub) => sub.id === id) ?? null,
         })),
 
-      undoDelete: () =>
+      restoreSubscription: (deleted) =>
         set((state) =>
-          state.lastDeleted
-            ? {
-                subscriptions: [...state.subscriptions, state.lastDeleted],
-                lastDeleted: null,
-              }
-            : state,
+          state.subscriptions.some((sub) => sub.id === deleted.id)
+            ? state
+            : { subscriptions: [...state.subscriptions, deleted] },
         ),
-
-      clearLastDeleted: () => set({ lastDeleted: null }),
 
       updateSubscription: (id, updatedSub) =>
         set((state) => ({
@@ -66,7 +57,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
     }),
     {
       name: 'aldia_subscriptions_v1',
-      partialize: (state) => ({ subscriptions: state.subscriptions }), // lastDeleted is not saved
+      partialize: (state) => ({ subscriptions: state.subscriptions }),
     },
   ),
 )

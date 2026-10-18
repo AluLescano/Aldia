@@ -73,16 +73,10 @@
   justify-content: center;
 }
 
-.chip {
-  justify-content: center;
-  gap: 0.25rem;
-  padding: 0 1rem;
-}
-
 .wheel {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem !important;
+  gap: 0.5rem;
   width: 5.5rem;
 }
 

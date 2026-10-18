@@ -59,9 +59,11 @@ export const HomePage = () => {
       </header>
 
       <SubscriptionList subscriptions={subs} onDelete={deleteWithUndo} />
-      {/* Portaled to <body>: the page slide moves this page with a transform, and a fixed
+      {/* Portaled out of the page: the page slide moves it with a transform, and a fixed
           element inside a transformed parent is placed against that parent, not the screen
-          (it jumped 16px). `propagate`: it still fades out when Home slides away */}
+          (it jumped 16px). Into #root, not <body>: #root is isolated, so only inside it does
+          z-index 30 keep the FAB under the overlays and the toast.
+          `propagate`: it still fades out when Home slides away */}
       {createPortal(
         <AnimatePresence propagate>
           <motion.div
@@ -85,7 +87,7 @@ export const HomePage = () => {
             </div>
           </motion.div>
         </AnimatePresence>,
-        document.body,
+        document.getElementById('root') ?? document.body,
       )}
     </div>
   )

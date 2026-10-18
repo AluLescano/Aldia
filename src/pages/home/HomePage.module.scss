@@ -28,11 +28,12 @@
 
   .fabContainer {
     pointer-events: auto;
-  }
-}
 
-.fabButton {
-  border-radius: 9999px !important;
-  padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
+    // Nested so it outranks Button's own radius and size classes (no !important needed)
+    .fabButton {
+      border-radius: 9999px;
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+  }
 }

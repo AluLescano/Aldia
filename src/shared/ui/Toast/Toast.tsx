@@ -1,6 +1,6 @@
 // DEPENDENCIES
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { motion, type PanInfo } from 'motion/react'
+import { motion, useIsPresent, type PanInfo } from 'motion/react'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
@@ -76,6 +76,9 @@ const Toast = ({
   const isDismissSwipe = ({ offset, velocity }: PanInfo) =>
     offset.x > 80 || velocity.x > 500
 
+  // False while it animates out (replaced by a new toast or closed)
+  const isPresent = useIsPresent()
+
   const onDismissRef = useRef(onDismiss)
   useEffect(() => {
     onDismissRef.current = onDismiss
@@ -87,7 +90,8 @@ const Toast = ({
   const timerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    if (!isPaused) {
+    // A leaving toast stops counting: running out now would close the toast that replaced it
+    if (!isPaused && isPresent) {
       // START TIMER
       startTimeRef.current = Date.now()
       timerIdRef.current = setTimeout(() => {
@@ -110,10 +114,13 @@ const Toast = ({
         clearTimeout(timerIdRef.current)
       }
     }
-  }, [isPaused])
+  }, [isPaused, isPresent])
 
   return (
     <motion.div
+      // A leaving toast can't be tapped: its "Deshacer" would undo the wrong delete and
+      // its close button would close the new toast
+      inert={!isPresent}
       initial={{ y: 20, opacity: 0 }}
       animate={{ x: 0, y: 0, opacity: 1 }}
       exit={{ x: '120%', opacity: 0 }} // leaves to the right, like the swipe

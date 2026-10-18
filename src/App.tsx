@@ -55,7 +55,7 @@ const pageVariants = {
  * Also keeps the exchange rates fresh.
  */
 function App() {
-  const { appContainer, appWrapper, mainContent, page, overlayContainer } = styles
+  const { appContainer, appWrapper, mainContent, page, overlayContainer, srOnly } = styles
   const [activeTab, setActiveTab] = useState<TabType>('home')
   const [direction, setDirection] = useState(1)
   const overlays = useUIStore((state) => state.overlays)
@@ -146,6 +146,13 @@ function App() {
             </motion.div>
           ))}
         </AnimatePresence>
+
+        {/* Screen readers: always on the page and only its text changes, so every toast is
+            announced (a live region that mounts together with its text is often missed) */}
+        <div role="status" className={srOnly}>
+          {toast &&
+            (toast.action ? `${toast.message}, ${toast.action.label}` : toast.message)}
+        </div>
 
         <AnimatePresence>
           {toast && (

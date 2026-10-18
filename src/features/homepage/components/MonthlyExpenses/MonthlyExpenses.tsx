@@ -62,7 +62,10 @@ const MonthlyExpenses = ({
   const currentCountryCode =
     DEFAULT_CURRENCIES.find((c) => c.code === selectedCurrency)?.countryCode ?? 'us'
 
-  const subAmount = `${String(subscriptionAmount)} subscripciones activas`
+  const subAmount =
+    subscriptionAmount === 1
+      ? '1 subscripción activa'
+      : `${String(subscriptionAmount)} subscripciones activas`
 
   if (isLoading) {
     return <MonthlyExpensesSkeleton />

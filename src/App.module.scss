@@ -33,6 +33,16 @@
   min-height: 0;
 }
 
+// Read by screen readers, invisible on screen
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .overlayContainer {
   position: fixed;
   inset: 0;
