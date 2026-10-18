@@ -1,5 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
+/** Wi-Fi waves: the internet bill icon (`ICONS.internet`). */
 export const IconWifi = (props: IconProps) => (
   <Icon {...props}>
     <path d="M5 12.55a11 11 0 0 1 14.08 0" />

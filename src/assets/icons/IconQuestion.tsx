@@ -1,5 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
+/** Question mark in a circle: the Avatar fallback when there is no logo or icon. */
 export const IconQuestion = (props: IconProps) => (
   <Icon {...props}>
     <circle cx="12" cy="12" r="10" />

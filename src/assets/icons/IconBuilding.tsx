@@ -1,5 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
+/** Building: the rent bill icon (`ICONS.rent`). */
 export const IconBuilding = (props: IconProps) => (
   <Icon {...props}>
     <rect x="4" y="3" width="16" height="18" rx="2" />

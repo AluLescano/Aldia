@@ -1,6 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
-// Lucide "chart-pie"
+/** Lucide "chart-pie": the Resumen tab and its page. */
 export const IconChartPie = (props: IconProps) => (
   <Icon {...props}>
     <path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z" />

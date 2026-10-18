@@ -1,5 +1,6 @@
 import Icon, { type IconProps } from './Icon'
 
+/** Letter i in a circle: the icon of `info` toasts. */
 export const IconInfo = (props: IconProps) => (
   <Icon {...props}>
     <circle cx="12" cy="12" r="10" />

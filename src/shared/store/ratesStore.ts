@@ -19,6 +19,14 @@ interface RatesState {
 // Opening the app and coming back to it can both ask at once: only one download runs
 let pending: Promise<void> | null = null
 
+/**
+ * Exchange rates for converting totals to the selected currency. Saved in localStorage
+ * (`aldia_rates`), so it works offline with the last rates. `App.tsx` calls
+ * `refreshIfStale` on open and whenever the app comes back to the screen.
+ *
+ * @example
+ * const rates = useRatesStore((state) => state.rates)
+ */
 export const useRatesStore = create<RatesState>()(
   persist(
     (set, get) => ({
