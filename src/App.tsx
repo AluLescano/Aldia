@@ -1,6 +1,8 @@
 // DEPENDENCIES
-import { useEffect, useState } from 'react'
+import { App as CapApp } from '@capacitor/app'
+import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { runTopBackHandler } from './shared/hooks/useBackHandler'
 
 // STORES
 import { useUIStore } from '@/shared/store/uiStore'
@@ -75,10 +77,34 @@ function App() {
     return () => document.removeEventListener('visibilitychange', refresh)
   }, [])
 
-  const selectTab = (tab: TabType) => {
-    setDirection(TAB_ORDER.indexOf(tab) > TAB_ORDER.indexOf(activeTab) ? 1 : -1)
-    setActiveTab(tab)
-  }
+  const selectTab = useCallback(
+    (tab: TabType) => {
+      setDirection(TAB_ORDER.indexOf(tab) > TAB_ORDER.indexOf(activeTab) ? 1 : -1)
+      setActiveTab(tab)
+    },
+    [activeTab],
+  )
+
+  // Android back button: close the screen on top, change the user to home if in a different tab, or leave the app when there's nothing open
+  useEffect(() => {
+    const handleBack = () => {
+      const { overlays, popOverlay } = useUIStore.getState()
+
+      if (runTopBackHandler()) return
+      if (overlays.length > 0) {
+        popOverlay()
+      } else if (activeTab !== 'home') {
+        selectTab('home')
+      } else {
+        CapApp.exitApp()
+      }
+    }
+
+    const listener = CapApp.addListener('backButton', handleBack)
+    return () => {
+      listener.then((handle) => handle.remove())
+    }
+  }, [activeTab, selectTab])
 
   const renderActiveScreen = () => {
     switch (activeTab) {

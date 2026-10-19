@@ -31,7 +31,7 @@
 .position {
   position: fixed;
   // 0.5rem above the nav bar, on any phone (the gesture area under the bar varies)
-  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 0.5rem);
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 0.5rem);
   left: 0;
   right: 0;
   margin: 0 auto;

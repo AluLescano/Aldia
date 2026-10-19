@@ -81,6 +81,9 @@ h6 {
 /* App layout (sizes, not colors) */
 :root {
   --nav-height: 5rem; /* BottomNavBar, without the phone's gesture area under it */
+  /* Height of the status bar / gesture bar. Capacitor’s variable on old WebViews, env() on new ones, 0 in the browser. */
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 }
 
 /* App base */

@@ -77,7 +77,7 @@ form {
 
     .buttonContainer {
       position: sticky;
-      bottom: 1rem;
+      bottom: calc(var(--safe-bottom) + 1rem);
       margin-top: auto;
     }
   }

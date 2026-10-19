@@ -12,6 +12,7 @@ import BackdropFilter from '../BackdropFilter/BackdropFilter'
 
 // ASSETS
 import styles from './BottomSheet.module.scss'
+import { useBackHandler } from '@/shared/hooks/useBackHandler'
 
 const { container, collapsed, expanded, dragArea, dragHandle, content, footerContainer } =
   styles
@@ -48,6 +49,8 @@ const Panel = ({ onClose, title, children, footer, className }: PanelProps) => {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  useBackHandler(onClose, true)
 
   const handleTouchStart = (event: TouchEvent) => {
     startYRef.current = event.touches[0].clientY
