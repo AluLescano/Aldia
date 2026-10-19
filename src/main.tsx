@@ -2,6 +2,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { MotionConfig } from 'motion/react'
+import { SystemBars, SystemBarsStyle } from '@capacitor/core'
 
 // COMPONENTS
 import App from './App.tsx'
@@ -10,6 +11,11 @@ import App from './App.tsx'
 import './styles/_themes.scss'
 import 'flag-icons/css/flag-icons.min.css'
 import './index.css'
+
+/* Android colors the system bar icons by the phone’s dark mode, not the app’s theme, so we tell it which one we’re using. */
+const theme = document.documentElement.dataset.theme
+const style = theme === 'light' ? SystemBarsStyle.Light : SystemBarsStyle.Dark
+SystemBars.setStyle({ style })
 
 /**
  * Entry point: mounts the app in `#root` (index.html). `StrictMode` runs some checks
