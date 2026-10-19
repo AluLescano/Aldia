@@ -15,6 +15,7 @@ import PauseToggleIcon from '@/features/subscriptions/components/PauseToggleIcon
 
 // HOOKS
 import { useSubscriptionActions } from '@/features/subscriptions/hooks/useSubscriptionActions'
+import { useBackHandler } from '@/shared/hooks/useBackHandler'
 
 // UTILS
 import { todayISO } from '@/shared/lib/isoDate'
@@ -73,6 +74,8 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
   // The changes are dropped by the form's `key` below: a new key mounts a fresh form
   // that reads the saved values again (no reset code needed).
   const handleBack = isEditing ? () => setIsEditing(false) : popOverlay
+
+  useBackHandler(() => setIsEditing(false), isEditing)
 
   const handleSubmit = (values: SubscriptionFormValues) => {
     const data = formValuesToSubscriptionData(values)
