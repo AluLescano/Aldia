@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 1.5rem;
   padding-bottom: calc(
-    var(--nav-height) + env(safe-area-inset-bottom) + 1rem
+    var(--nav-height) + var(--safe-bottom) + 1rem
   ); // room for the nav bar
 }
 

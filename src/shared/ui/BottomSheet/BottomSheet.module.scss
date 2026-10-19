@@ -5,6 +5,7 @@
   right: 0;
   max-width: 28rem;
   margin: 0 auto;
+  padding-bottom: var(--safe-bottom);
   background-color: var(--bg-surface);
   display: flex;
   flex-direction: column;
@@ -26,6 +27,7 @@
 
 // Expanded state: covers 100% of viewport, flush with top
 .expanded {
+  padding-top: var(--safe-top);
   height: 100dvh;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
