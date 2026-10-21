@@ -24,6 +24,7 @@
     "@capacitor/android": "^8.5.1",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.1",
+    "@capacitor/filesystem": "^8.1.5",
     "colorthief": "^3.5.0",
     "flag-icons": "^7.5.0",
     "motion": "^14.0.0",
