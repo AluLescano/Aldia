@@ -1,6 +1,6 @@
 // DEPENDENCIES
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 // STORES
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
@@ -8,6 +8,7 @@ import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptio
 // UTILS
 import { createId } from '@/shared/lib/id'
 import { validateCategoryName } from '../utils/validateCategoryName'
+import { fileStorage } from '@/shared/lib/fileStorage'
 
 // TYPES
 import type { Category } from '@/shared/types'
@@ -53,7 +54,7 @@ interface CategoryStore {
   deleteCategory: (id: string) => void
 }
 
-/** The user's categories, saved on the device (`aldia_categories_v1`). */
+/** All the user's categories, saved on the device as `aldia/categories.json`. */
 export const useCategoryStore = create<CategoryStore>()(
   persist(
     (set, get) => ({
@@ -91,6 +92,11 @@ export const useCategoryStore = create<CategoryStore>()(
         }))
       },
     }),
-    { name: 'aldia_categories_v1' },
+    {
+      name: 'categories',
+      storage: createJSONStorage(() => fileStorage),
+      // main.tsx loads it before the first render
+      skipHydration: true,
+    },
   ),
 )

@@ -1,8 +1,9 @@
 // DEPENDENCIES
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 // UTILS
+import { fileStorage } from '@/shared/lib/fileStorage'
 import { DEFAULT_CURRENCIES } from '@/shared/lib/currencies'
 
 interface SettingsState {
@@ -14,7 +15,7 @@ interface SettingsState {
   setFavoriteCurrencies: (codes: string[]) => void
 }
 
-/** User preferences, saved on the device (`aldia_settings`), like the other stores. */
+/** User preferences, saved on the device as `aldia/settings.json`. */
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -24,6 +25,11 @@ export const useSettingsStore = create<SettingsState>()(
       setFavoriteCurrencies: (codes) => set({ favoriteCurrencies: codes }),
     }),
     // Same key as before; the old hand-saved format is not read, so settings reset once
-    { name: 'aldia_settings' },
+    {
+      name: 'settings',
+      storage: createJSONStorage(() => fileStorage),
+      // main.tsx loads it before the first render (see there)
+      skipHydration: true,
+    },
   ),
 )

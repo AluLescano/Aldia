@@ -7,6 +7,11 @@ import { SystemBars, SystemBarsStyle } from '@capacitor/core'
 // COMPONENTS
 import App from './App.tsx'
 
+// STORES
+import { useCategoryStore } from './features/categories/store/categoryStore'
+import { useSettingsStore } from './features/settings/store/settingsStore'
+import { useSubscriptionStore } from './features/subscriptions/store/subscriptionStore'
+
 // ASSETS: global styles, loaded once for the whole app
 import './styles/_themes.scss'
 import 'flag-icons/css/flag-icons.min.css'
@@ -16,6 +21,17 @@ import './index.css'
 const theme = document.documentElement.dataset.theme
 const style = theme === 'light' ? SystemBarsStyle.Light : SystemBarsStyle.Dark
 SystemBars.setStyle({ style })
+
+/*
+ * Load the saved data from the files before anything renders. The stores skip their own
+ * automatic load (`skipHydration`): if a save happened before this finished, it would write
+ * the empty defaults over the user's files.
+ */
+await Promise.all([
+  useSubscriptionStore.persist.rehydrate(),
+  useCategoryStore.persist.rehydrate(),
+  useSettingsStore.persist.rehydrate(),
+])
 
 /**
  * Entry point: mounts the app in `#root` (index.html). `StrictMode` runs some checks

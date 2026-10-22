@@ -1,6 +1,9 @@
 // DEPENDENCIES
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
+
+// UTILS
+import { fileStorage } from '@/shared/lib/fileStorage'
 
 // TYPES
 import type { Subscription } from '@/shared/types'
@@ -20,7 +23,7 @@ interface SubscriptionState {
   reassignCategory: (fromId: string, toId: string) => void
 }
 
-/** All the user's subscriptions, saved on the device (`aldia_subscriptions_v1`). */
+/** All the user's subscriptions, saved on the device as `aldia/subscriptions.json`. */
 export const useSubscriptionStore = create<SubscriptionState>()(
   persist(
     (set) => ({
@@ -56,8 +59,11 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         })),
     }),
     {
-      name: 'aldia_subscriptions_v1',
+      name: 'subscriptions',
+      storage: createJSONStorage(() => fileStorage),
       partialize: (state) => ({ subscriptions: state.subscriptions }),
+      // main.tsx loads it before the first render
+      skipHydration: true,
     },
   ),
 )
