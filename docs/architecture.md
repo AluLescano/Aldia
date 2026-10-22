@@ -207,6 +207,8 @@ Every file holds Zustand's format, `{ "state": { ... }, "version": 0 }`. A file 
 
 The exchange rates are the exception: `useRatesStore` stays in `localStorage` (`aldia_rates`). It's a download cache, so losing it only costs one download.
 
+An older build kept the stores in `localStorage` (`aldia_subscriptions_v1`, `aldia_categories_v1`, `aldia_settings`). That data is not imported: `clearLegacyStorage()` (`shared/lib/legacyStorage.ts`) deletes those keys on every start, before the stores load, and leaves `aldia_rates` alone.
+
 **How `fileStorage` keeps the data safe:**
 
 - **No half-written files:** a save writes `<name>.json.tmp` first, then renames it over `<name>.json`. If the app dies in between, the next load reads the `.tmp`.
