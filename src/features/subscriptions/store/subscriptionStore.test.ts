@@ -1,8 +1,25 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useSubscriptionStore } from './subscriptionStore'
 import { useToastStore } from '@/shared/store/toastStore'
 import type { Subscription } from '@/shared/types'
+
+// The real fileStorage needs the Capacitor plugin, which only works in a browser or on the
+// phone. Tests run in plain Node, so the store saves into this Map instead (`vi.hoisted`
+// creates it before `vi.mock` runs, which Vitest moves to the top of the file)
+const savedFiles = vi.hoisted(() => new Map<string, string>())
+
+vi.mock('@/shared/lib/fileStorage', () => ({
+  fileStorage: {
+    getItem: async (name: string) => savedFiles.get(name) ?? null,
+    setItem: async (name: string, value: string) => {
+      savedFiles.set(name, value)
+    },
+    removeItem: async (name: string) => {
+      savedFiles.delete(name)
+    },
+  },
+}))
 
 const subscription = (id: string, name: string): Subscription => ({
   id,
@@ -35,8 +52,17 @@ const deleteWithUndo = (sub: Subscription) => {
 }
 
 beforeEach(() => {
+  savedFiles.clear()
   useSubscriptionStore.setState({ subscriptions: [netflix, spotify] })
   useToastStore.setState({ toast: null })
+})
+
+describe('saving', () => {
+  it('saves the list through fileStorage after every change', () => {
+    useSubscriptionStore.getState().deleteSubscription('1')
+    const saved = JSON.parse(savedFiles.get('subscriptions') ?? 'null')
+    expect(saved).toEqual({ state: { subscriptions: [spotify] }, version: 0 })
+  })
 })
 
 describe('restoreSubscription', () => {

@@ -40,7 +40,7 @@ src/
 │   ├── categories/
 │   │   ├── components/       # CategoryPicker, CategoryFooter
 │   │   ├── hooks/            # useCategoryEditor (add / rename / delete state)
-│   │   ├── store/            # categoryStore.ts (Zustand + persist, aldia_categories_v1), OTHERS_ID
+│   │   ├── store/            # categoryStore.ts (Zustand + persist, aldia/categories.json), OTHERS_ID
 │   │   └── utils/            # validateCategoryName
 │   ├── homepage/
 │   │   └── components/       # MonthlyExpenses, SubscriptionList, SubscriptionCard, skeletons
@@ -48,11 +48,11 @@ src/
 │   │   ├── components/       # SubscriptionForm (+ FormRow, SubscriptionFormSheets), BillingCyclePicker, PresetCard, PauseToggleIcon
 │   │   ├── data/             # presets.ts (the preset picker list)
 │   │   ├── hooks/            # useSubscriptionForm (form state), useSubscriptionActions (pause, delete)
-│   │   ├── store/            # subscriptionStore.ts (Zustand + persist)
+│   │   ├── store/            # subscriptionStore.ts (Zustand + persist, aldia/subscriptions.json)
 │   │   ├── utils/            # billingCycle, validation, form <-> subscription mapping, status, monthlyTotal, subscriptionList
 │   │   └── types.ts          # SubscriptionFormValues, FormErrors
 │   ├── settings/
-│   │   └── store/            # settingsStore.ts (selected + favorite currencies, persist)
+│   │   └── store/            # settingsStore.ts (selected + favorite currencies, persist, aldia/settings.json)
 │   └── navigation/
 │       └── components/       # BottomNavBar
 │   (planned: cards/, calendar/, statistics/)
@@ -68,8 +68,8 @@ src/
 │
 ├── shared/                   # Used by 2+ features; never imports from features/
 │   ├── ui/                   # Button, IconButton, Field, Input*, Switch, BottomSheet, DatePicker, CurrencyPicker, Avatar, Toast, Typography...
-│   ├── hooks/                # useFieldControl (field ids, aria links, shake), useShake
-│   ├── lib/                  # cn, isoDate, calendar, currencies, exchangeRates, formatDate, id, icons, normalizeText
+│   ├── hooks/                # useFieldControl (field ids, aria links, shake), useShake, useBackHandler (Android back), useCountUp
+│   ├── lib/                  # cn, isoDate, calendar, currencies, exchangeRates, fileStorage, formatDate, id, icons, normalizeText
 │   ├── store/                # uiStore.ts (overlay stack), toastStore.ts (app toast), ratesStore.ts (exchange rates)
 │   └── types/                # index.ts (all domain types)
 │
@@ -180,9 +180,9 @@ User preferences currently live in `useSettingsStore` (`selectedCurrency`, `favo
 
 State lives in **Zustand** stores:
 
-- `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription` (keeps `lastDeleted` for the undo toast), `undoDelete`, `updateSubscription`, `reassignCategory`. Uses the `persist` middleware, so it saves itself to `localStorage` under `aldia_subscriptions_v1`.
-- `useSettingsStore` (`features/settings/store/settingsStore.ts`): selected and favorite currencies. Uses `persist` like the others, under `aldia_settings`.
-- `useCategoryStore` (`features/categories/store/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Persisted under `aldia_categories_v1`.
+- `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription`, `restoreSubscription` (the toast's "Deshacer"; each toast keeps its own deleted subscription), `updateSubscription`, `reassignCategory`. Saved as `aldia/subscriptions.json` (see section 5).
+- `useSettingsStore` (`features/settings/store/settingsStore.ts`): selected and favorite currencies. Saved as `aldia/settings.json`.
+- `useCategoryStore` (`features/categories/store/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Saved as `aldia/categories.json`.
 - `useToastStore` (`shared/store/toastStore.ts`): the one app-wide toast, rendered by `App.tsx`.
 - `useUIStore` (`shared/store/uiStore.ts`): a stack of overlays (`preset-picker`, `subscription-form`) with `pushOverlay`, `popOverlay` and `closeAllOverlays`. `App.tsx` renders the top of the stack.
 
@@ -192,17 +192,33 @@ Why Zustand: no Redux boilerplate (`actions`, `reducers`, `dispatch`), an out-of
 
 ## 5. Storage & Google Drive Backup Strategy
 
-### Local Storage Schema
+### On-device storage
 
-Data is saved under versioned keys:
+Each persisted store is one JSON file in the app's private folder (Capacitor Filesystem, `Directory.Data`), written through `shared/lib/fileStorage.ts`, a custom storage for Zustand's `persist`:
 
-- `aldia_subscriptions_v1` (in use)
-- `aldia_settings` (in use)
-- `aldia_categories_v1` (in use)
-- `aldia_cards_v1` (planned)
-- `aldia_rates` (in use): the last downloaded exchange rates and the day they were downloaded
+| Store                  | File                       |
+| ---------------------- | -------------------------- |
+| `useSubscriptionStore` | `aldia/subscriptions.json` |
+| `useCategoryStore`     | `aldia/categories.json`    |
+| `useSettingsStore`     | `aldia/settings.json`      |
+| cards (planned)        | `aldia/cards.json`         |
 
-**Durability:** these keys live in the WebView's `localStorage`, which Android can clear (low storage, WebView reset). Before testers rely on the app, the stores move to Capacitor Preferences through a custom `persist` storage, and JSON export ships as the backup.
+Every file holds Zustand's format, `{ "state": { ... }, "version": 0 }`. A file appears the first time its store changes; until then the store uses its defaults. A change to the shape of stored data bumps `version` and comes with a `migrate` (section 7).
+
+The exchange rates are the exception: `useRatesStore` stays in `localStorage` (`aldia_rates`). It's a download cache, so losing it only costs one download.
+
+**How `fileStorage` keeps the data safe:**
+
+- **No half-written files:** a save writes `<name>.json.tmp` first, then renames it over `<name>.json`. If the app dies in between, the next load reads the `.tmp`.
+- **One save at a time per file:** saves wait in a queue (a promise chain), so two quick changes can't interleave and leave the older one on disk. A failed save is logged and doesn't block the ones after it.
+- **Broken JSON:** the file is copied to `<name>.corrupt.json` and the store starts clean.
+- **A file that can't be read:** saving over it is refused, so data we couldn't see is never overwritten.
+
+**Startup:** the three stores use `skipHydration`, and `main.tsx` waits for all of them to load (`persist.rehydrate()`) before the first render. If the app rendered first, a save during loading would write the empty defaults over the user's files.
+
+**Durability:** the private folder is invisible to other apps, survives app updates, is deleted on uninstall, and is included in Android Auto Backup (`allowBackup="true"`). JSON export (below) is still the backup the user controls.
+
+**Looking at the files:** in the browser (`npm run dev`), the plugin stores them in IndexedDB (DevTools > Application > IndexedDB > Disc). On a phone with a debug build: `adb shell run-as com.katyadesign.aldia ls files/aldia` (and `cat files/aldia/<name>.json`).
 
 ### Backup JSON Format (planned)
 
@@ -243,7 +259,8 @@ Each of these comes from a real bug in this codebase.
 - **Never store what you can calculate.** A stored `nextBillDate` goes stale as soon as the date passes. Store the inputs (`firstBillDate`, `billingCycle`) and calculate the next charge when showing it. The same goes for converted prices: store the price in its own currency, convert on screen.
 - **Dates are `YYYY-MM-DD` strings in local time.** Use `shared/lib/isoDate.ts` (`parseISODate`, `toISODate`, `todayISO`); never `toISOString()`, which works in UTC and can move a date to the day before in Argentina.
 - **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update.
-- **One way out with the Android back button.** Back closes the top-most layer first (bottom sheet, then overlay), and only leaves the app from a main tab (Capacitor App plugin `backButton` listener, once Android is set up).
+- **Load the data before rendering.** A store that saves before it has loaded writes its empty defaults over the user's file. Persisted stores use `skipHydration`, and `main.tsx` awaits them before `createRoot`.
+- **One way out with the Android back button.** Back closes the top-most layer first (bottom sheet, edit mode, overlay), then goes back to Home, and only leaves the app from Home (`useBackHandler` + the Capacitor App plugin's `backButton` listener in `App.tsx`).
 - **A control inside `Field` is a plain `<input>` or `<button>`.** `Field` owns the look; the `Button` component is for actions and brings its own styles and ripple.
 - **Class names go through `cn()`**, never through template strings with `? x : ''`.
 - **Exported helpers, hooks and component props get JSDoc** (`/** ... */`), so hovering explains them.
@@ -260,6 +277,10 @@ Each of these comes from a real bug in this codebase.
 
 ---
 
-## 9. Testing (planned)
+## 9. Testing
 
-Vitest for the pure functions first: billing cycles and next charge dates, validation, monthly totals, currency conversion, the calendar grid. They hold most of the logic and need no browser.
+Vitest (`npm test`, also run by CI on every pull request), in plain Node, test files next to their sources (`*.test.ts`).
+
+- **Pure functions first:** billing cycles and next charge dates, validation, monthly totals, currency conversion, the calendar grid, category names. They hold most of the logic and need no browser.
+- **Stores:** tested through their actions. Capacitor plugins don't work in Node, so a store test replaces `fileStorage` with an in-memory `Map` (`vi.mock`, see `subscriptionStore.test.ts`).
+- **`fileStorage`:** tested against a fake `@capacitor/filesystem` (`fileStorage.test.ts`) that behaves like the real plugin where it matters: missing files throw, rename deletes the destination first (like Android), and writes take a moment, so concurrent saves really interleave.
