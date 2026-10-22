@@ -102,7 +102,6 @@ export interface Subscription {
   billingCycle: BillingCycle
 
   firstBillDate: string // YYYY-MM-DD
-  nextBillDate: string // YYYY-MM-DD
   endDate?: string // YYYY-MM-DD
   trial?: TrialConfig // { startDate, endDate }
 

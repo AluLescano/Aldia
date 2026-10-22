@@ -1,6 +1,3 @@
-// UTILS
-import { todayISO } from '@/shared/lib/isoDate'
-import { nextBillDate } from './billingCycle'
 import { parsePrice } from './validateSubscriptionForm'
 
 // TYPES
@@ -28,7 +25,6 @@ export const formValuesToSubscriptionData = (
     currency: values.currency,
     billingCycle: values.billingCycle,
     firstBillDate: values.firstBillDate,
-    nextBillDate: nextBillDate(values.firstBillDate, values.billingCycle, todayISO()),
     // Keys that stay `undefined` (not missing) so that updating really clears them
     endDate: values.endDate || undefined,
     paymentMethodId: values.paymentMethodId || undefined,

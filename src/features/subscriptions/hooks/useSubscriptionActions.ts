@@ -8,7 +8,6 @@ import { useDeleteSubscription } from './useDeleteSubscription'
 
 // UTILS
 import { todayISO } from '@/shared/lib/isoDate'
-import { nextBillDate } from '../utils/billingCycle'
 import { statusFor } from '../utils/subscriptionStatus'
 
 // TYPES
@@ -31,14 +30,8 @@ export const useSubscriptionActions = (subscription: Subscription | undefined) =
     if (!subscription) return
 
     if (isPaused) {
-      // The old next charge may be in the past by now, so it is calculated again from today
       updateSubscription(subscription.id, {
         status: statusFor(subscription.trial, todayISO()),
-        nextBillDate: nextBillDate(
-          subscription.firstBillDate,
-          subscription.billingCycle,
-          todayISO(),
-        ),
       })
       showToast('Subscripción reanudada', 'success')
     } else {

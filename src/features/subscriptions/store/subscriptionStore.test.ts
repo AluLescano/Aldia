@@ -28,7 +28,6 @@ const subscription = (id: string, name: string): Subscription => ({
   currency: 'USD',
   billingCycle: { type: 'every', interval: 1, unit: 'month' },
   firstBillDate: '2026-10-01',
-  nextBillDate: '2026-11-01',
   categoryId: 'entertainment',
   reminders: [],
   status: 'active',

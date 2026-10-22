@@ -73,8 +73,6 @@ export interface SubscriptionReminder {
   id: string
   /** 0 = the same day, 1 = the day before... */
   daysBefore: number
-  /** Time of day to notify, `HH:MM`. */
-  time: string
   /** Remind about the charge, or about the end of the free trial. */
   target: 'billing' | 'trial_end'
   isEnabled: boolean
@@ -119,11 +117,6 @@ export interface Subscription {
 
   /** `YYYY-MM-DD`. Every charge is counted from this one. */
   firstBillDate: string
-  /**
-   * `YYYY-MM-DD`, saved when the subscription is saved, so it goes stale.
-   * For display, calculate it: `nextBillDate(firstBillDate, billingCycle, todayISO())`.
-   */
-  nextBillDate: string
   /** `YYYY-MM-DD`. No charges after this day. */
   endDate?: string
 
