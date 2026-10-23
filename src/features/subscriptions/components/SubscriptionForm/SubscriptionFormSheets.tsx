@@ -47,7 +47,16 @@ interface Props {
  * Closing a sheet marks its field as touched, so a missing value shows its error.
  */
 const SubscriptionFormSheets = ({ form, openSheet, onClose }: Props) => {
-  const { values, setField, touch, setBillingCycle, setTrialDays, trialDays } = form
+  const {
+    values,
+    setField,
+    touch,
+    setBillingCycle,
+    setTrialDays,
+    setStartDate,
+    trialDays,
+    allowOneTime,
+  } = form
 
   const close = () => {
     if (openSheet) touch(openSheet)
@@ -76,6 +85,7 @@ const SubscriptionFormSheets = ({ form, openSheet, onClose }: Props) => {
         <BillingCyclePicker
           cycle={values.billingCycle}
           trialDays={trialDays}
+          allowOneTime={allowOneTime}
           onChange={setBillingCycle}
           onTrialChange={setTrialDays}
         />
@@ -83,9 +93,13 @@ const SubscriptionFormSheets = ({ form, openSheet, onClose }: Props) => {
     },
     firstBillDate: {
       content: (
+        // With a trial this picks the day it starts (see `setStartDate`)
         <DatePicker
-          value={values.firstBillDate}
-          onSelect={(iso) => pick('firstBillDate', iso)}
+          value={values.trial?.startDate ?? values.firstBillDate}
+          onSelect={(iso) => {
+            setStartDate(iso)
+            close()
+          }}
         />
       ),
     },

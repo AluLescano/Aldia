@@ -10,13 +10,17 @@ const every = (interval: number, unit: BillingUnit): BillingCycle => ({
   unit,
 })
 
+const TODAY = '2026-10-23'
+
 // Only the fields the total reads; the rest does not matter here
 const sub = (
   price: number,
   currency: string,
   billingCycle: BillingCycle,
-  status: Subscription['status'] = 'active',
-) => ({ price, currency, billingCycle, status }) as Subscription
+  extra: Partial<Subscription> = {},
+) => ({ price, currency, billingCycle, isPaused: false, ...extra }) as Subscription
+
+const trialEnding = (endDate: string) => ({ trial: { startDate: '2026-10-01', endDate } })
 
 const rates: ExchangeRates = {
   date: '2026-10-16',
@@ -39,30 +43,35 @@ describe('getMonthlyTotal', () => {
   const list = [
     sub(120, 'USD', every(1, 'year')), // 10 USD a month
     sub(3000, 'ARS', every(1, 'month')), // 2 USD a month at 1500
-    sub(99, 'USD', every(1, 'month'), 'inactive'), // paused: not counted
-    sub(10, 'USD', every(1, 'month'), 'trial'), // still free: not counted
+    sub(99, 'USD', every(1, 'month'), { isPaused: true }), // paused: not counted
+    sub(10, 'USD', every(1, 'month'), trialEnding('2026-11-01')), // still free: not counted
     sub(5, 'XXX', every(1, 'month')), // unknown currency: left out, and counted as such
   ]
 
   it('adds the active ones in the chosen currency', () => {
-    const result = getMonthlyTotal(list, 'USD', rates)
+    const result = getMonthlyTotal(list, 'USD', rates, TODAY)
     expect(result.total).toBeCloseTo(12)
     expect(result).toMatchObject({ converted: 1, unconverted: 1 })
   })
 
   it('converts into another currency', () => {
-    expect(getMonthlyTotal(list, 'ARS', rates).total).toBeCloseTo(18000)
+    expect(getMonthlyTotal(list, 'ARS', rates, TODAY).total).toBeCloseTo(18000)
   })
 
   it('still adds the same currency without rates', () => {
-    expect(getMonthlyTotal(list, 'USD', null)).toEqual({
+    expect(getMonthlyTotal(list, 'USD', null, TODAY)).toEqual({
       total: 10,
       converted: 0,
       unconverted: 2,
     })
   })
 
+  it('counts a subscription once its trial has ended', () => {
+    const ended = [sub(10, 'USD', every(1, 'month'), trialEnding('2026-10-20'))]
+    expect(getMonthlyTotal(ended, 'USD', rates, TODAY).total).toBe(10)
+  })
+
   it('is 0 for an empty list', () => {
-    expect(getMonthlyTotal([], 'USD', rates).total).toBe(0)
+    expect(getMonthlyTotal([], 'USD', rates, TODAY).total).toBe(0)
   })
 })

@@ -92,6 +92,8 @@ All domain types are strictly typed in `src/shared/types/index.ts`. That file is
 export type BillingUnit = 'day' | 'week' | 'month' | 'year'
 export type BillingCycle =
   { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
+// 'one-time' is hidden in the form (kept for the income and expenses book); only a
+// subscription already saved that way still offers it.
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
 export interface Subscription {
@@ -102,7 +104,6 @@ export interface Subscription {
   billingCycle: BillingCycle
 
   firstBillDate: string // YYYY-MM-DD
-  nextBillDate: string // YYYY-MM-DD
   endDate?: string // YYYY-MM-DD
   trial?: TrialConfig // { startDate, endDate }
 
@@ -112,7 +113,7 @@ export interface Subscription {
 
   iconUrl?: string
   iconKey?: IconKey // built-in icon for bills (electricity, water, gas, phone, rent, internet)
-  status: SubscriptionStatus
+  isPaused: boolean // the status (trial / active / inactive) is calculated: statusFor(sub, today)
   createdAt: string
 }
 ```
@@ -203,7 +204,7 @@ Each persisted store is one JSON file in the app's private folder (Capacitor Fil
 | `useSettingsStore`     | `aldia/settings.json`      |
 | cards (planned)        | `aldia/cards.json`         |
 
-Every file holds Zustand's format, `{ "state": { ... }, "version": 0 }`. A file appears the first time its store changes; until then the store uses its defaults. A change to the shape of stored data bumps `version` and comes with a `migrate` (section 7).
+Every file holds Zustand's format, `{ "state": { ... }, "version": N }` (subscriptions are at 1, the others at 0). A file appears the first time its store changes; until then the store uses its defaults. A change to the shape of stored data bumps `version` and comes with a `migrate` (section 7).
 
 The exchange rates are the exception: `useRatesStore` stays in `localStorage` (`aldia_rates`). It's a download cache, so losing it only costs one download.
 
@@ -258,9 +259,9 @@ When you want to build a new screen or component:
 
 Each of these comes from a real bug in this codebase.
 
-- **Never store what you can calculate.** A stored `nextBillDate` goes stale as soon as the date passes. Store the inputs (`firstBillDate`, `billingCycle`) and calculate the next charge when showing it. The same goes for converted prices: store the price in its own currency, convert on screen.
+- **Never store what you can calculate.** A stored `nextBillDate` goes stale as soon as the date passes. Store the inputs (`firstBillDate`, `billingCycle`) and calculate the next charge when showing it. The same goes for converted prices: store the price in its own currency, convert on screen. And the status: a stored `'trial'` stayed `'trial'` after the trial ended, so the subscription dropped out of the monthly total. Only the user's choice (`isPaused`) is stored; trial or active comes from the dates.
 - **Dates are `YYYY-MM-DD` strings in local time.** Use `shared/lib/isoDate.ts` (`parseISODate`, `toISODate`, `todayISO`); never `toISOString()`, which works in UTC and can move a date to the day before in Argentina.
-- **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update.
+- **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update. Example: `migrateSubscriptions` in `subscriptionStore.ts` (version 1 turned `status` into `isPaused`); add one step per version there.
 - **Load the data before rendering.** A store that saves before it has loaded writes its empty defaults over the user's file. Persisted stores use `skipHydration`, and `main.tsx` awaits them before `createRoot`.
 - **One way out with the Android back button.** Back closes the top-most layer first (bottom sheet, edit mode, overlay), then goes back to Home, and only leaves the app from Home (`useBackHandler` + the Capacitor App plugin's `backButton` listener in `App.tsx`).
 - **A control inside `Field` is a plain `<input>` or `<button>`.** `Field` owns the look; the `Button` component is for actions and brings its own styles and ripple.

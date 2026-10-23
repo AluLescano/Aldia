@@ -9,11 +9,12 @@ import { useSettingsStore } from '@/features/settings/store/settingsStore'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
-import { formatDate } from '@/shared/lib/formatDate'
+import { formatNextCharge, formatTrial } from '@/shared/lib/formatDate'
 import { todayISO } from '@/shared/lib/isoDate'
 import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
 import { convert } from '@/shared/lib/exchangeRates'
 import { nextBillDate } from '@/features/subscriptions/utils/billingCycle'
+import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -83,13 +84,14 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     pushOverlay('subscription-form', { subscriptionId: subscription.id })
   }
 
-  const isPaused = subscription.status === 'inactive'
+  const isPaused = subscription.isPaused
 
-  // Calculated, not read from the stored field, so it never shows a date that already passed
+  // Calculated from today, so it never shows a date that already passed
+  const today = todayISO()
   const nextCharge = nextBillDate(
     subscription.firstBillDate,
     subscription.billingCycle,
-    todayISO(),
+    today,
   )
 
   // In another currency: show it converted to the one picked on Home, and keep the
@@ -162,7 +164,10 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
             </Typography>
             {!isPaused && (
               <Typography variant="label" size="sm">
-                {formatDate(nextCharge)}
+                {/* In a trial, say so: "En 7 días" alone reads like a charge */}
+                {subscription.trial && statusFor(subscription, today) === 'trial'
+                  ? formatTrial(subscription.trial, today)
+                  : formatNextCharge(nextCharge, today)}
               </Typography>
             )}
           </div>

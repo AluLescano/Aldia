@@ -73,8 +73,6 @@ export interface SubscriptionReminder {
   id: string
   /** 0 = the same day, 1 = the day before... */
   daysBefore: number
-  /** Time of day to notify, `HH:MM`. */
-  time: string
   /** Remind about the charge, or about the end of the free trial. */
   target: 'billing' | 'trial_end'
   isEnabled: boolean
@@ -94,7 +92,10 @@ export type BillingUnit = 'day' | 'week' | 'month' | 'year'
 export type BillingCycle =
   { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
 
-/** `trial`: in its free trial · `active`: paying · `inactive`: paused by the user. */
+/**
+ * `trial`: in its free trial · `active`: paying · `inactive`: paused by the user.
+ * Never stored (a trial ends on its own): calculate it with `statusFor(sub, todayISO())`.
+ */
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
 /** A free trial: no charges between these two days. */
@@ -119,11 +120,6 @@ export interface Subscription {
 
   /** `YYYY-MM-DD`. Every charge is counted from this one. */
   firstBillDate: string
-  /**
-   * `YYYY-MM-DD`, saved when the subscription is saved, so it goes stale.
-   * For display, calculate it: `nextBillDate(firstBillDate, billingCycle, todayISO())`.
-   */
-  nextBillDate: string
   /** `YYYY-MM-DD`. No charges after this day. */
   endDate?: string
 
@@ -139,7 +135,8 @@ export interface Subscription {
   /** A built-in icon, for bills without a logo. */
   iconKey?: IconKey
 
-  status: SubscriptionStatus
+  /** Paused by the user. The only part of the status that is stored (see `SubscriptionStatus`). */
+  isPaused: boolean
   /** ISO date and time of creation. */
   createdAt: string
 }

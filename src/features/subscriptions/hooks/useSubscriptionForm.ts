@@ -2,7 +2,7 @@
 import { useState } from 'react'
 
 // UTILS
-import { addDays, daysBetween, todayISO } from '@/shared/lib/isoDate'
+import { addDays, daysBetween } from '@/shared/lib/isoDate'
 import { addCycles } from '../utils/billingCycle'
 import { validateSubscriptionForm } from '../utils/validateSubscriptionForm'
 
@@ -12,6 +12,16 @@ import type { SubscriptionFormValues } from '../types'
 
 type Field = keyof SubscriptionFormValues
 type Touched = Partial<Record<Field, boolean>>
+
+/** A trial of `days` starting on `startDate`; the first charge is the day it ends. */
+const withTrial = (
+  values: SubscriptionFormValues,
+  startDate: string,
+  days: number,
+): SubscriptionFormValues => {
+  const endDate = addDays(startDate, days)
+  return { ...values, trial: { startDate, endDate }, firstBillDate: endDate }
+}
 
 /**
  * State and rules of the subscription form, without any markup.
@@ -32,6 +42,9 @@ export function useSubscriptionForm(initialValues: SubscriptionFormValues) {
 
   // Derived, not stored: the end date row is open exactly when there is an end date
   const hasEndDate = values.endDate !== undefined
+
+  // "Pago único" is hidden for new subscriptions, but one saved that way can still keep it
+  const allowOneTime = initialValues.billingCycle.type === 'one-time'
 
   const trialDays = values.trial
     ? daysBetween(values.trial.startDate, values.trial.endDate)
@@ -62,22 +75,34 @@ export function useSubscriptionForm(initialValues: SubscriptionFormValues) {
 
   /**
    * Turns the free trial on with a length in days, or off with `undefined`.
-   * The trial starts today and the first charge moves to the day it ends.
+   * It starts on the date already in the field (so the field doesn't jump), or keeps its
+   * start when only the length changes. The first charge moves to the day it ends.
    */
   const setTrialDays = (days: number | undefined) =>
     setValues((current) => {
       if (days === undefined) {
-        // Trial off: the first charge goes back to when the trial started (today)
+        // Trial off: the first charge goes back to when the trial started
         return {
           ...current,
           trial: undefined,
           firstBillDate: current.trial?.startDate ?? current.firstBillDate,
         }
       }
-      const startDate = todayISO()
-      const endDate = addDays(startDate, days)
-      return { ...current, trial: { startDate, endDate }, firstBillDate: endDate }
+      return withTrial(current, current.trial?.startDate ?? current.firstBillDate, days)
     })
+
+  /**
+   * The date field: with a trial it's the day the trial starts (past or future), and the
+   * trial keeps its length; without one it's the first charge.
+   */
+  const setStartDate = (date: string) => {
+    if (trialDays === undefined) {
+      setField('firstBillDate', date)
+      return
+    }
+    setValues((current) => withTrial(current, date, trialDays))
+    setTouched((current) => ({ ...current, firstBillDate: false }))
+  }
 
   /** Switches the end date on (one cycle after the first charge) or off. */
   const toggleEndDate = (on: boolean) => {
@@ -94,12 +119,14 @@ export function useSubscriptionForm(initialValues: SubscriptionFormValues) {
     isValid,
     hasEndDate,
     trialDays,
+    allowOneTime,
     setField,
     touch,
     touchAll,
     errorFor,
     setBillingCycle,
     setTrialDays,
+    setStartDate,
     toggleEndDate,
   }
 }

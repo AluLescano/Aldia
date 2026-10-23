@@ -11,6 +11,7 @@ import { useCategoryStore } from '@/features/categories/store/categoryStore'
 // UTILS
 import { formatBillingCycle } from '../../utils/billingCycle'
 import { getCurrencySymbol } from '@/shared/lib/currencies'
+import { formatDate } from '@/shared/lib/formatDate'
 
 // COMPONENTS
 import Avatar from '@/shared/ui/Avatar/Avatar'
@@ -123,14 +124,20 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               errorMessage={errorFor('billingCycle')}
             />
           </FormRow>
-          <FormRow label="Inicio del Cobro">
+          {/* With a trial, the date is when it starts; the first charge is the day it ends */}
+          <FormRow label={values.trial ? 'Inicio de la prueba' : 'Inicio del Cobro'}>
             <InputDate
               size="medium"
               width="fit"
-              value={values.firstBillDate}
+              value={values.trial?.startDate ?? values.firstBillDate}
+              // So nobody has to add the trial days in their head
+              subText={
+                values.trial
+                  ? `Primer cobro: ${formatDate(values.firstBillDate)}`
+                  : undefined
+              }
               onClick={() => setOpenSheet('firstBillDate')}
               errorMessage={errorFor('firstBillDate')}
-              disabled={values.trial !== undefined} // the trial end decides the first charge
             />
           </FormRow>
           <FormRow label="Fin del Cobro">
