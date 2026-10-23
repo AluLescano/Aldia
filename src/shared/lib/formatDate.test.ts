@@ -42,22 +42,22 @@ describe('formatTrial', () => {
   const trial = (startDate: string, endDate: string) => ({ startDate, endDate })
 
   it.each([
-    [trial('2026-10-20', '2026-10-26'), 'Prueba: termina en 3 días'],
-    [trial('2026-10-20', '2026-10-24'), 'Prueba: termina mañana'],
-    [trial('2026-10-23', '2026-10-30'), 'Prueba: termina en 7 días'],
+    [trial('2026-10-20', '2026-10-26'), 'Tu prueba termina en 3 días'],
+    [trial('2026-10-20', '2026-10-24'), 'Tu prueba termina mañana'],
+    [trial('2026-10-23', '2026-10-30'), 'Tu prueba termina en 7 días'],
   ])('counts down to the end of a running trial: %o', (value, expected) => {
     expect(formatTrial(value, TODAY)).toBe(expected)
   })
 
   it('counts down to the start of a trial that has not started', () => {
     expect(formatTrial(trial('2026-11-01', '2026-11-08'), TODAY)).toBe(
-      'Prueba: empieza en 9 días',
+      'Tu prueba empieza en 9 días',
     )
   })
 
   it('shows the date when it is more than 30 days away', () => {
     expect(formatTrial(trial('2026-10-01', '2026-12-30'), TODAY)).toBe(
-      'Prueba: termina el 30 Dic 26',
+      'Tu prueba termina el 30 Dic 26',
     )
   })
 })

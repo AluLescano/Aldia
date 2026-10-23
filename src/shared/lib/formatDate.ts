@@ -55,8 +55,8 @@ export function formatNextCharge(date: string, today: string) {
  * hasn't yet, otherwise when it ends. Same 30-day rule as `formatNextCharge`.
  *
  * @example
- * formatTrial({ startDate: '2026-10-20', endDate: '2026-10-26' }, '2026-10-23') // 'Prueba termina en 3 días'
- * formatTrial({ startDate: '2026-11-01', endDate: '2026-11-08' }, '2026-10-23') // 'Prueba empieza en 9 días'
+ * formatTrial({ startDate: '2026-10-20', endDate: '2026-10-26' }, '2026-10-23') // 'Tu prueba termina en 3 días'
+ * formatTrial({ startDate: '2026-11-01', endDate: '2026-11-08' }, '2026-10-23') // 'Tu prueba empieza en 9 días'
  */
 export function formatTrial(trial: TrialConfig, today: string) {
   const [verb, date] =
