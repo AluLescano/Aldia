@@ -3,6 +3,11 @@ import { describe, expect, it } from 'vitest'
 import {
   getReminderTriggers,
   groupTriggersByDay,
+  canAddReminder,
+  formatDaysBefore,
+  maxDaysBefore,
+  nextFreeDaysBefore,
+  nextReminderDate,
   type ReminderTrigger,
 } from './reminders'
 import type { Subscription, SubscriptionReminder } from '@/shared/types'
@@ -183,5 +188,98 @@ describe('groupTriggersByDay', () => {
       ['2026-11-12', ['netflix', 'spotify']],
       ['2026-12-12', ['netflix', 'spotify']],
     ])
+  })
+})
+
+describe('maxDaysBefore', () => {
+  const every = (interval: number, unit: 'day' | 'week' | 'month' | 'year') =>
+    ({ type: 'every', interval, unit }) as const
+
+  it.each([
+    ['daily: only the same day', every(1, 'day'), 0],
+    ['every 3 days', every(3, 'day'), 2],
+    ['weekly', every(1, 'week'), 6],
+    ['every 2 weeks', every(2, 'week'), 13],
+    ['monthly, under the shortest month', every(1, 'month'), 27],
+    ['every 2 months, capped at 30', every(2, 'month'), 30],
+    ['yearly, capped at 30', every(1, 'year'), 30],
+  ])('%s', (_, cycle, expected) => {
+    expect(maxDaysBefore(cycle)).toBe(expected)
+  })
+})
+
+describe('canAddReminder', () => {
+  const monthly = { type: 'every', interval: 1, unit: 'month' } as const
+  const daily = { type: 'every', interval: 1, unit: 'day' } as const
+
+  it('allows up to 3 reminders', () => {
+    expect(canAddReminder([reminder(1), reminder(2)], monthly)).toBe(true)
+    expect(canAddReminder([reminder(1), reminder(2), reminder(3)], monthly)).toBe(false)
+  })
+
+  it('fits only one on a daily charge (the same day is the only day)', () => {
+    expect(canAddReminder([], daily)).toBe(true)
+    expect(canAddReminder([reminder(0)], daily)).toBe(false)
+  })
+})
+
+describe('formatDaysBefore', () => {
+  it.each([
+    [0, 'El mismo día'],
+    [1, '1 día antes'],
+    [3, '3 días antes'],
+  ])('%d -> %s', (days, expected) => {
+    expect(formatDaysBefore(days)).toBe(expected)
+  })
+})
+
+describe('nextFreeDaysBefore', () => {
+  const monthly = { type: 'every', interval: 1, unit: 'month' } as const
+  const daily = { type: 'every', interval: 1, unit: 'day' } as const
+
+  it.each([
+    ['1 for the first one', [], 1],
+    ['the first gap', [reminder(1), reminder(3)], 2],
+    ['the next one up', [reminder(1), reminder(2)], 3],
+  ])('takes %s', (_, reminders, expected) => {
+    expect(nextFreeDaysBefore(reminders, monthly)).toBe(expected)
+  })
+
+  it('uses the same day on a daily charge, then nothing', () => {
+    expect(nextFreeDaysBefore([], daily)).toBe(0)
+    expect(nextFreeDaysBefore([reminder(0)], daily)).toBeUndefined()
+  })
+})
+
+describe('nextReminderDate', () => {
+  it('is the next day the reminder rings', () => {
+    expect(nextReminderDate(sub(), reminder(3), TODAY)).toBe('2026-11-12')
+  })
+
+  it('skips to the next charge when this one is too close', () => {
+    // Charge on Oct 24: 3 days before was yesterday
+    expect(
+      nextReminderDate(sub({ firstBillDate: '2026-10-24' }), reminder(3), TODAY),
+    ).toBe('2026-11-21')
+  })
+
+  it('finds it for a yearly charge, far away', () => {
+    expect(
+      nextReminderDate(
+        sub({ billingCycle: { type: 'every', interval: 1, unit: 'year' } }),
+        reminder(3),
+        TODAY,
+      ),
+    ).toBe('2027-01-12')
+  })
+
+  it('works on a disabled reminder too (the sheet shows when it would ring)', () => {
+    expect(nextReminderDate(sub(), reminder(3, false), TODAY)).toBe('2026-11-12')
+  })
+
+  it('is null once the subscription has ended', () => {
+    expect(
+      nextReminderDate(sub({ endDate: '2026-10-01' }), reminder(3), TODAY),
+    ).toBeNull()
   })
 })

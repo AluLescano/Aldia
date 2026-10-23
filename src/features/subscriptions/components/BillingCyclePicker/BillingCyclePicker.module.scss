@@ -96,7 +96,8 @@ button.row {
   color: var(--text-secondary);
 }
 
-.stepper {
+// The stepper and its unit word ("días")
+.stepperGroup {
   display: flex;
   align-items: center;
   gap: 0.5rem;

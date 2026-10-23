@@ -1,11 +1,100 @@
 // UTILS
-import { nextBillDate } from './billingCycle'
+import { addCycles, nextBillDate } from './billingCycle'
 import { addDays } from '@/shared/lib/isoDate'
 
 // TYPES
-import type { Subscription } from '@/shared/types'
+import type { BillingCycle, Subscription, SubscriptionReminder } from '@/shared/types'
+
+/** Never more than this many days before a charge, even for long cycles. */
+const MAX_DAYS_BEFORE = 30
+
+/** How many reminders one subscription can have. */
+export const MAX_REMINDERS = 3
+
+// The shortest a cycle can be, in days (a month can be 28, a year 365)
+const UNIT_DAYS = { day: 1, week: 7, month: 28, year: 365 }
+
+/**
+ * The most days before a charge a reminder can be set to: under one full cycle (or it would
+ * land before the previous charge) and never more than 30. A daily charge only allows the
+ * same day; a one-time payment gets no reminders, so it has no limit of its own.
+ *
+ * @example
+ * maxDaysBefore({ type: 'every', interval: 1, unit: 'week' }) // 6
+ * maxDaysBefore({ type: 'every', interval: 1, unit: 'year' }) // 30
+ */
+export function maxDaysBefore(cycle: BillingCycle) {
+  if (cycle.type === 'one-time') return MAX_DAYS_BEFORE
+  return Math.min(MAX_DAYS_BEFORE, cycle.interval * UNIT_DAYS[cycle.unit] - 1)
+}
+
+/**
+ * Whether one more reminder fits: under `MAX_REMINDERS`, and with a free day left (each
+ * reminder takes its own day from 0 to `maxDaysBefore`, so a daily charge fits only one).
+ */
+export function canAddReminder(reminders: SubscriptionReminder[], cycle: BillingCycle) {
+  return reminders.length < Math.min(MAX_REMINDERS, maxDaysBefore(cycle) + 1)
+}
+
+/**
+ * The day a new reminder takes: the first free one of 1, 2, 3… before the charge, and the
+ * same day (0) last. Two reminders on one day would just ring twice. `undefined` if none is
+ * free (check `canAddReminder` first).
+ */
+export function nextFreeDaysBefore(
+  reminders: SubscriptionReminder[],
+  cycle: BillingCycle,
+) {
+  const taken = reminders.map((reminder) => reminder.daysBefore)
+  const candidates = [...Array.from({ length: maxDaysBefore(cycle) }, (_, i) => i + 1), 0]
+  return candidates.find((days) => !taken.includes(days))
+}
+
+/** The parts of a subscription that decide when its charges, and so its reminders, fall. */
+export type ChargeSchedule = Pick<
+  Subscription,
+  'billingCycle' | 'firstBillDate' | 'endDate' | 'trial'
+>
+
+/**
+ * `YYYY-MM-DD`, the next day this reminder rings, or null if it never will again (the
+ * subscription ended). Looks as far as the charge after next, so the answer is never cut off.
+ * For the "Próxima" line of the Notificaciones sheet; the time comes from the settings.
+ *
+ * @example
+ * // Monthly on the 15th, reminder 3 days before, today Oct 22
+ * nextReminderDate(netflix, reminder3, '2026-10-22') // '2026-11-12'
+ */
+export function nextReminderDate(
+  schedule: ChargeSchedule,
+  reminder: SubscriptionReminder,
+  today: string,
+) {
+  const nextCharge = nextBillDate(schedule.firstBillDate, schedule.billingCycle, today)
+  const until = addCycles(nextCharge, schedule.billingCycle, 1)
+  // Enabled on purpose: the question is when it would ring, even while it's switched off
+  const source = {
+    ...schedule,
+    id: '',
+    isPaused: false,
+    reminders: [{ ...reminder, isEnabled: true }],
+  }
+  return getReminderTriggers(source, today, until)[0]?.date ?? null
+}
+
+/**
+ * A reminder in words, for lists: "El mismo día", "1 día antes", "3 días antes".
+ */
+export function formatDaysBefore(days: number) {
+  if (days === 0) return 'El mismo día'
+  return `${days} ${days === 1 ? 'día' : 'días'} antes`
+}
 
 /** One notification to schedule: on which day, for which reminder, about which event. */
+/** What `getReminderTriggers` reads: the charge schedule plus the reminders. A `Subscription` fits. */
+export type ReminderSource = ChargeSchedule &
+  Pick<Subscription, 'id' | 'isPaused' | 'reminders'>
+
 export interface ReminderTrigger {
   subscriptionId: string
   reminderId: string
@@ -39,7 +128,7 @@ export interface ReminderTrigger {
  * // → notify Nov 12 (charge Nov 15) and Dec 12 (charge Dec 15)
  */
 export function getReminderTriggers(
-  sub: Subscription,
+  sub: ReminderSource,
   today: string,
   until: string,
 ): ReminderTrigger[] {

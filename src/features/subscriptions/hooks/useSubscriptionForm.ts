@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { addDays, daysBetween } from '@/shared/lib/isoDate'
 import { addCycles } from '../utils/billingCycle'
 import { validateSubscriptionForm } from '../utils/validateSubscriptionForm'
+import { createId } from '@/shared/lib/id'
+import { MAX_REMINDERS, nextFreeDaysBefore } from '../utils/reminders'
 
 // TYPES
 import type { BillingCycle } from '@/shared/types'
@@ -113,6 +115,39 @@ export function useSubscriptionForm(initialValues: SubscriptionFormValues) {
     setTouched((current) => ({ ...current, endDate: false }))
   }
 
+  /** Adds a reminder on the first free day: 1, 2, 3… before the charge, the same day last. */
+  const addReminder = () =>
+    setValues((current) => {
+      if (current.reminders.length >= MAX_REMINDERS) return current
+
+      const daysBefore = nextFreeDaysBefore(current.reminders, current.billingCycle)
+      if (daysBefore === undefined) return current
+
+      return {
+        ...current,
+        reminders: [
+          ...current.reminders,
+          { id: createId(), daysBefore, isEnabled: true },
+        ],
+      }
+    })
+
+  /** Changes how many days before the charge one reminder rings. */
+  const setReminderDays = (id: string, daysBefore: number) =>
+    setValues((current) => ({
+      ...current,
+      reminders: current.reminders.map((reminder) =>
+        reminder.id === id ? { ...reminder, daysBefore } : reminder,
+      ),
+    }))
+
+  /** Deletes one reminder. */
+  const removeReminder = (id: string) =>
+    setValues((current) => ({
+      ...current,
+      reminders: current.reminders.filter((reminder) => reminder.id !== id),
+    }))
+
   return {
     values,
     errors,
@@ -128,6 +163,9 @@ export function useSubscriptionForm(initialValues: SubscriptionFormValues) {
     setTrialDays,
     setStartDate,
     toggleEndDate,
+    addReminder,
+    setReminderDays,
+    removeReminder,
   }
 }
 

@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
+import { parseInRange } from '@/shared/lib/parseInRange'
 
 // TYPES
 import type { BillingCycle, BillingUnit } from '@/shared/types'
@@ -11,13 +12,11 @@ import type { BillingCycle, BillingUnit } from '@/shared/types'
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import InputNumber from '@/shared/ui/InputNumber/InputNumber'
-import IconButton from '@/shared/ui/IconButton/IconButton'
+import InputStepper from '@/shared/ui/InputStepper/InputStepper'
 import Pill from '@/shared/ui/Pill/Pill'
 import Switch from '@/shared/ui/Switch/Switch'
 
 // ASSETS
-import { IconAdd } from '@/assets/icons/IconAdd'
-import { IconMinus } from '@/assets/icons/IconMinus'
 import styles from './BillingCyclePicker.module.scss'
 
 const {
@@ -29,7 +28,7 @@ const {
   rowButton,
   collapse,
   subRow,
-  stepper,
+  stepperGroup,
   selected,
   units,
 } = styles
@@ -44,10 +43,7 @@ const UNITS: { value: BillingUnit; label: string }[] = [
 const DEFAULT_TRIAL_DAYS = 7
 
 // A whole number of 1 or more, or null while the text is empty or invalid
-const parsePositive = (text: string) => {
-  const value = Number(text)
-  return Number.isInteger(value) && value >= 1 ? value : null
-}
+const parsePositive = (text: string) => parseInRange(text, 1)
 
 interface Props {
   /** The cycle currently saved in the form. */
@@ -99,12 +95,6 @@ const BillingCyclePicker = ({
 
   const toggleTrial = (on: boolean) => (on ? changeTrial() : onTrialChange(undefined))
 
-  // The − / + buttons: never below 1, and a half-typed value counts as the default
-  const stepTrial = (by: number) =>
-    changeTrial(
-      String(Math.max(1, (parsePositive(trialText) ?? DEFAULT_TRIAL_DAYS) + by)),
-    )
-
   const selectEvery = (text = intervalText, nextUnit = unit) => {
     const interval = parsePositive(text)
     if (interval !== null) onChange({ type: 'every', interval, unit: nextUnit })
@@ -145,24 +135,17 @@ const BillingCyclePicker = ({
                   <Typography variant="body" size="md">
                     Duración
                   </Typography>
-                  <div className={stepper}>
-                    <IconButton label="Un día menos" onClick={() => stepTrial(-1)}>
-                      <IconMinus />
-                    </IconButton>
-                    <InputNumber
-                      size="medium"
-                      width="auto"
-                      maxLength={3}
-                      aria-label="Días de prueba"
+                  <div className={stepperGroup}>
+                    {/* A half-typed value steps from the default length */}
+                    <InputStepper
                       value={trialText}
-                      errorMessage={
-                        parsePositive(trialText) === null ? 'Mínimo 1' : undefined
-                      }
-                      onChange={(event) => changeTrial(event.currentTarget.value)}
+                      onChange={changeTrial}
+                      min={1}
+                      fallback={DEFAULT_TRIAL_DAYS}
+                      label="Días de prueba"
+                      decreaseLabel="Un día menos"
+                      increaseLabel="Un día más"
                     />
-                    <IconButton label="Un día más" onClick={() => stepTrial(1)}>
-                      <IconAdd />
-                    </IconButton>
                     <Typography variant="body" size="md">
                       {trialText === '1' ? 'día' : 'días'}
                     </Typography>

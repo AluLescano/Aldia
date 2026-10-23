@@ -72,3 +72,16 @@ function countdown(date: string, today: string) {
   if (days > 1 && days <= COUNTDOWN_DAYS) return `en ${days} días`
   return null
 }
+
+/**
+ * Day and month only, for dates that are always close (a notification in the next weeks):
+ * "12 Nov". Use `formatDate` when the year matters. Returns `''` for a malformed date.
+ *
+ * @example
+ * formatDayMonth('2026-11-12') // '12 Nov'
+ */
+export function formatDayMonth(date: string) {
+  const [, month, day] = date.split('-')
+  if (!month || !day) return ''
+  return `${day} ${MONTHS[parseInt(month, 10) - 1]}`
+}

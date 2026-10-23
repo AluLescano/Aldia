@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDate, formatNextCharge, formatTrial } from './formatDate'
+import { formatDate, formatDayMonth, formatNextCharge, formatTrial } from './formatDate'
 
 const TODAY = '2026-10-23'
 
@@ -59,5 +59,15 @@ describe('formatTrial', () => {
     expect(formatTrial(trial('2026-10-01', '2026-12-30'), TODAY)).toBe(
       'Tu prueba termina el 30 Dic 26',
     )
+  })
+})
+
+describe('formatDayMonth', () => {
+  it('shows only day and month', () => {
+    expect(formatDayMonth('2026-11-12')).toBe('12 Nov')
+  })
+
+  it('is empty for a broken date', () => {
+    expect(formatDayMonth('')).toBe('')
   })
 })

@@ -157,11 +157,12 @@ export interface Currency {
 
 export interface SubscriptionReminder {
   id: string
-  daysBefore: number // 0 = same day
-  time: string // HH:MM AM/PM
-  target: 'billing' | 'trial_end'
+  daysBefore: number // 0 = same day; never a full cycle or more, max 30 (maxDaysBefore)
   isEnabled: boolean
 }
+// Up to MAX_REMINDERS (3) per subscription, each on its own day. No time and no target:
+// the time is one setting for all (reminderTime), and whether a notification is about the
+// trial end is worked out per charge (getReminderTriggers). One-time payments get none.
 
 export interface Preset {
   id: string
@@ -173,7 +174,9 @@ export interface Preset {
 }
 ```
 
-User preferences currently live in `useSettingsStore` (`selectedCurrency`, `favoriteCurrencies`). Theme and reminder settings are planned.
+User preferences live in `useSettingsStore` (`selectedCurrency`, `favoriteCurrencies`, `reminderTime`, `09:00` until Ajustes can change it). The theme setting is planned.
+
+**Reminders** (`features/subscriptions/utils/reminders.ts`, all pure and tested): `getReminderTriggers(sub, today, until)` lists the days a subscription notifies inside a planning window; `groupTriggersByDay` bundles them so several on one day become one summary; `nextReminderDate` gives the "Próxima" date of the Notificaciones sheet. Scheduling them on the phone (Capacitor Local Notifications) is the next feature.
 
 ---
 
