@@ -13,13 +13,13 @@ It is a portfolio and learning project first: for now it is shared with family a
 
 - **Home:** monthly total, subscription list filtered by category, swipe to delete with undo.
 - **Add a subscription:** 51 presets (streaming, AI, gaming, utility bills searchable by company, e.g. "Edenor") or a custom one.
-- **The form:** name, price, currency, billing cycle (every N days / weeks / months / years), free trial (from any start date), start and end dates, category.
+- **The form:** name, price, currency, billing cycle (every N days / weeks / months / years), free trial (from any start date), start and end dates, category, and up to 3 notifications (N days before each charge).
 - **Categories:** 12 defaults plus your own (create, rename, delete; deleted ones fall back to "Otros").
 - **Detail screen:** view, edit, pause/resume and delete a subscription.
 
 - **Android:** runs on the phone (Capacitor), with safe areas, the back button and system bar colors handled. Data is saved as files in the app's private folder.
 
-Not built yet: Calendar, Statistics, Cards and Settings screens (placeholders), reminders, JSON export/import.
+Not built yet: Calendar, Statistics, Cards and Settings screens (placeholders), the notifications actually ringing on the phone (they're set up in the form, not scheduled yet), JSON export/import.
 
 ---
 

@@ -73,8 +73,6 @@ export interface SubscriptionReminder {
   id: string
   /** 0 = the same day, 1 = the day before... */
   daysBefore: number
-  /** Remind about the charge, or about the end of the free trial. */
-  target: 'billing' | 'trial_end'
   isEnabled: boolean
 }
 

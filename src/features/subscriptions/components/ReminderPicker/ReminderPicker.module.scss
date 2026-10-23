@@ -1,0 +1,78 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+
+  // Browsers give paragraphs a 1em margin by default
+  p {
+    margin: 0;
+  }
+}
+
+// One reminder, in edit and in view mode
+.card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 3.5rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.75rem;
+  background-color: var(--bg-surface-raised);
+}
+
+// A round badge with the icon in the middle. A span doesn't center what's inside it,
+// so flexbox does: `align-items` centers up and down, `justify-content` left and right
+.bellIcon,
+.emptyIcon {
+  display: flex;
+  flex: none; // never squeezed by long text next to it
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.bellIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: var(--bg-surface-subtle);
+  color: var(--icon-active);
+}
+
+// The two lines next to the bell, stacked
+.texts {
+  display: flex;
+  flex-direction: column;
+}
+
+// No reminders yet: icon, title and hint, centered
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 1.5rem;
+}
+
+.emptyIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 0.5rem;
+  background-color: var(--bg-surface-raised);
+  color: var(--text-muted);
+}
+
+.note {
+  max-width: 35ch;
+  text-align: center;
+}
+
+// "días antes" fills the space between the stepper and the delete button
+.unit {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.secondary {
+  color: var(--text-secondary);
+}
