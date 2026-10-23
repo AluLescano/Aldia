@@ -61,9 +61,18 @@ describe('buildNotifications', () => {
     const [first, second] = buildNotifications([crunchyroll], NOW, '09:00')
     expect(first).toMatchObject({
       title: 'Tu prueba de Crunchyroll termina en 2 días',
-      body: 'Después se cobran U$S 5,00. Si no la quieres, cancélala antes.',
+      body: 'Después se cobran U$S 5,00.',
     })
     expect(second.title).toBe('Crunchyroll se cobra en 2 días')
+  })
+
+  it('says when in the summary if they all charge the same day', () => {
+    const spotify = sub({ id: 'spotify', name: 'Spotify', firstBillDate: '2026-02-15' })
+    const [day] = buildNotifications([sub(), spotify], NOW, '09:00')
+    expect(day).toMatchObject({
+      title: '2 subscripciones se cobran en 3 días',
+      body: 'Netflix (en 3 días), Spotify (en 3 días)',
+    })
   })
 
   it('turns several subscriptions on one day into one summary', () => {

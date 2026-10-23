@@ -38,7 +38,7 @@ function singleText(trigger: ReminderTrigger, sub: Subscription) {
   if (trigger.target === 'trial_end') {
     return {
       title: `Tu prueba de ${sub.name} termina ${when}`,
-      body: `Después se cobran ${amountText(sub)}. Si no la quieres, cancélala antes.`,
+      body: `Después se cobran ${amountText(sub)}.`,
     }
   }
   return {
@@ -47,16 +47,20 @@ function singleText(trigger: ReminderTrigger, sub: Subscription) {
   }
 }
 
-// The text of a day with several subscriptions: one summary, the names in the body
+// The text of a day with several subscriptions: one summary, the names in the body.
+// The title says when if they all charge the same day, "pronto" if the days differ.
 function summaryText(day: ReminderDay, byId: Map<string, Subscription>) {
-  const lines = day.triggers.flatMap((trigger) => {
+  const charges = day.triggers.flatMap((trigger) => {
     const sub = byId.get(trigger.subscriptionId)
     if (!sub) return []
-    return [`${sub.name} (${whenText(daysBetween(trigger.date, trigger.eventDate))})`]
+    return [
+      { name: sub.name, when: whenText(daysBetween(trigger.date, trigger.eventDate)) },
+    ]
   })
+  const sameDay = charges.every((charge) => charge.when === charges[0].when)
   return {
-    title: `${lines.length} subscripciones se cobran pronto`,
-    body: lines.join(', '),
+    title: `${charges.length} subscripciones se cobran ${sameDay ? charges[0].when : 'pronto'}`,
+    body: charges.map(({ name, when }) => `${name} (${when})`).join(', '),
   }
 }
 
