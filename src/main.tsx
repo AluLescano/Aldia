@@ -17,6 +17,8 @@ import { clearLegacyStorage } from './shared/lib/legacyStorage'
 import { startNotificationSync } from './features/notifications/notificationSync.ts'
 
 // ASSETS: global styles, loaded once for the whole app
+// The app's font, bundled: works offline and never calls Google Fonts
+import '@fontsource-variable/red-hat-text'
 import './styles/_themes.scss'
 import 'flag-icons/css/flag-icons.min.css'
 import './index.css'
