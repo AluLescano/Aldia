@@ -1,13 +1,17 @@
 // TYPES
-import type { SubscriptionStatus, TrialConfig } from '@/shared/types'
+import type { Subscription, SubscriptionStatus } from '@/shared/types'
 
 /**
- * The status of a subscription that is not paused: `trial` while its trial has not
- * ended yet, `active` otherwise. (Pausing is the user's choice, so it's never decided here.)
+ * The status of a subscription today: `inactive` when the user paused it, otherwise `trial`
+ * while its trial has not ended yet and `active` after. Calculated every time, never stored,
+ * so a trial that ends turns `active` on its own.
  *
  * @param today `YYYY-MM-DD`; ISO dates compare correctly as text.
  */
 export const statusFor = (
-  trial: TrialConfig | undefined,
+  sub: Pick<Subscription, 'isPaused' | 'trial'>,
   today: string,
-): SubscriptionStatus => (trial && trial.endDate > today ? 'trial' : 'active')
+): SubscriptionStatus => {
+  if (sub.isPaused) return 'inactive'
+  return sub.trial && sub.trial.endDate > today ? 'trial' : 'active'
+}

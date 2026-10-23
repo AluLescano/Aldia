@@ -45,7 +45,7 @@ The app language is **Spanish** (UI copy: "Agregar Subscripción", "Formato del 
 ### v1 capabilities
 
 - Subscriptions: add from presets or custom, view, edit, pause/resume, delete with undo.
-- Billing cycles: one-time, or every N days / weeks / months / years. Free trials with their own length.
+- Billing cycles: every N days / weeks / months / years. Free trials with their own length, starting on any date. One-time payments are hidden in the form (kept in the data model for the future income and expenses book; a subscription already saved as one-time can keep it).
 - Categories: 12 defaults; the user can create, rename and delete (deleted ones fall back to "Otros").
 - Multi-currency: price stored in its own currency, converted for the total with daily exchange rates (cached; the last saved rates are used offline).
 - Notifications: reminders N days before a charge or a trial end, at a chosen time (local notifications, no server).
@@ -59,7 +59,7 @@ The app language is **Spanish** (UI copy: "Agregar Subscripción", "Formato del 
 - No backend, no user accounts (except optional Google sign-in for Drive backup, later).
 - No real payment processing: cards and accounts are visual only.
 - Spanish UI, no i18n framework yet.
-- **Storage durability:** today the data lives in the WebView's `localStorage`, which the phone can clear. Before testers depend on it, move the stores to Capacitor Preferences (Zustand `persist` accepts a custom storage) and ship JSON export.
+- **Storage durability:** the data lives as JSON files in the app's private folder (not in the WebView's `localStorage`, which the phone can clear), with crash-safe writes, and is included in Android's automatic backup. It is deleted if the app is uninstalled, so JSON export is still needed as the backup the user controls.
 
 ### Monetization (undecided)
 
@@ -81,7 +81,7 @@ No paywall in v1: everything is unlocked. If a freemium tier comes later, the ru
 ## Evidence on Hand
 
 - Figma file "Financial Tracker" with screens for Home, Add Subscription (preset picker, form, every bottom sheet), Calendar and Statistics.
-- Working codebase: React 19 + Vite 8 + Zustand 5 + SCSS Modules, Capacitor 8 installed (Android platform not set up yet).
+- Working codebase: React 19 + Vite 8 + Zustand 5 + SCSS Modules, running on Android through Capacitor 8.
 - 51 presets, 12 default categories, 5 default currencies (USD, EUR, ARS, CLP, GBP).
 - Shared UI: Button, Field with Input Text / Amount / Number / Select / Date, Switch, BottomSheet, DatePicker, CurrencyPicker, Avatar, Pill, Toast, Typography.
 - No real user testimonials or external content yet.

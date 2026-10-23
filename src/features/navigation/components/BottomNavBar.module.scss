@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   z-index: 40;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: var(--safe-bottom);
   border-top: 1px solid var(--border-subtle);
   background-color: var(--bg-surface-raised);
 }

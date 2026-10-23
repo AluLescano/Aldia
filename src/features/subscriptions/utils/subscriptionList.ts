@@ -14,7 +14,7 @@ export const filterKey = (filter: ListFilter) =>
  */
 export function listFilters(subscriptions: Subscription[]): ListFilter[] {
   const categoryIds = [...new Set(subscriptions.map((sub) => sub.categoryId))]
-  const hasPaused = subscriptions.some((sub) => sub.status === 'inactive')
+  const hasPaused = subscriptions.some((sub) => sub.isPaused)
   return [
     { type: 'all' },
     ...categoryIds.map((categoryId) => ({ type: 'category' as const, categoryId })),
@@ -31,7 +31,7 @@ export function filterSubscriptions(
     case 'all':
       return subscriptions
     case 'inactive':
-      return subscriptions.filter((sub) => sub.status === 'inactive')
+      return subscriptions.filter((sub) => sub.isPaused)
     case 'category':
       return subscriptions.filter((sub) => sub.categoryId === filter.categoryId)
   }
@@ -40,9 +40,7 @@ export function filterSubscriptions(
 /** Paused subscriptions go last; inside each group, alphabetical. Returns a new array. */
 export function sortSubscriptions(subscriptions: Subscription[]): Subscription[] {
   return [...subscriptions].sort((a, b) => {
-    const aPaused = a.status === 'inactive'
-    const bPaused = b.status === 'inactive'
-    if (aPaused !== bPaused) return aPaused ? 1 : -1
+    if (a.isPaused !== b.isPaused) return a.isPaused ? 1 : -1
     return a.name.localeCompare(b.name)
   })
 }

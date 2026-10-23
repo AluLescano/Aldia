@@ -13,7 +13,7 @@
   flex-direction: column;
   padding-left: 1rem;
   padding-right: 1rem;
-  padding-top: max(env(safe-area-inset-top), 20px);
+  padding-top: max(var(--safe-top), 20px);
   position: relative;
 }
 
@@ -46,9 +46,10 @@
 .overlayContainer {
   position: fixed;
   inset: 0;
-  z-index: 50;
   max-width: 28rem;
   margin: 0 auto;
   overflow-y: auto;
   overscroll-behavior: contain;
+
+  z-index: 50;
 }

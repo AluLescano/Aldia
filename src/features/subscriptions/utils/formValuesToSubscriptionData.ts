@@ -1,14 +1,11 @@
-// UTILS
-import { todayISO } from '@/shared/lib/isoDate'
-import { nextBillDate } from './billingCycle'
 import { parsePrice } from './validateSubscriptionForm'
 
 // TYPES
 import type { Subscription } from '@/shared/types'
 import type { SubscriptionFormValues } from '../types'
 
-/** Everything a form can produce. The id, the status and the creation date are not form fields. */
-export type SubscriptionData = Omit<Subscription, 'id' | 'status' | 'createdAt'>
+/** Everything a form can produce. The id, the pause and the creation date are not form fields. */
+export type SubscriptionData = Omit<Subscription, 'id' | 'isPaused' | 'createdAt'>
 
 /**
  * Turns the form's values (price as text) into the stored shape (price as a number).
@@ -28,7 +25,6 @@ export const formValuesToSubscriptionData = (
     currency: values.currency,
     billingCycle: values.billingCycle,
     firstBillDate: values.firstBillDate,
-    nextBillDate: nextBillDate(values.firstBillDate, values.billingCycle, todayISO()),
     // Keys that stay `undefined` (not missing) so that updating really clears them
     endDate: values.endDate || undefined,
     paymentMethodId: values.paymentMethodId || undefined,

@@ -14,7 +14,7 @@
 .fabWrapper {
   position: fixed;
   // Just above the nav bar and the gesture area
-  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 1rem);
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 1rem);
   left: 50%;
   transform: translateX(-50%);
   width: 100%;

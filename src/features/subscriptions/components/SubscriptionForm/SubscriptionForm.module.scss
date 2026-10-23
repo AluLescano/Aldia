@@ -77,8 +77,13 @@ form {
 
     .buttonContainer {
       position: sticky;
-      bottom: 1rem;
+      bottom: calc(var(--safe-bottom) + 1rem);
       margin-top: auto;
     }
+  }
+
+  // Locks its controls in view mode without adding a box of its own
+  .fieldGroup {
+    display: contents;
   }
 }

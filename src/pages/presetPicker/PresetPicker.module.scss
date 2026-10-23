@@ -1,6 +1,8 @@
 .container {
   position: relative;
   isolation: isolate; // keeps the aura (z-index -1) above the background, under the content
+  padding-bottom: var(--safe-bottom);
+  padding-top: max(var(--safe-top), 20px);
   display: flex;
   flex-direction: column;
   height: 100%;

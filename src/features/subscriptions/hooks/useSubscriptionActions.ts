@@ -6,11 +6,6 @@ import { useSubscriptionStore } from '../store/subscriptionStore'
 // HOOKS
 import { useDeleteSubscription } from './useDeleteSubscription'
 
-// UTILS
-import { todayISO } from '@/shared/lib/isoDate'
-import { nextBillDate } from '../utils/billingCycle'
-import { statusFor } from '../utils/subscriptionStatus'
-
 // TYPES
 import type { Subscription } from '@/shared/types'
 
@@ -25,26 +20,15 @@ export const useSubscriptionActions = (subscription: Subscription | undefined) =
   const popOverlay = useUIStore((state) => state.popOverlay)
   const showToast = useToastStore((state) => state.showToast)
 
-  const isPaused = subscription?.status === 'inactive'
+  const isPaused = subscription?.isPaused ?? false
 
+  // Only the pause is stored; trial or active is worked out from the dates when it's needed
   const togglePause = () => {
     if (!subscription) return
 
-    if (isPaused) {
-      // The old next charge may be in the past by now, so it is calculated again from today
-      updateSubscription(subscription.id, {
-        status: statusFor(subscription.trial, todayISO()),
-        nextBillDate: nextBillDate(
-          subscription.firstBillDate,
-          subscription.billingCycle,
-          todayISO(),
-        ),
-      })
-      showToast('Subscripción reanudada', 'success')
-    } else {
-      updateSubscription(subscription.id, { status: 'inactive' })
-      showToast('Subscripción pausada', 'info')
-    }
+    updateSubscription(subscription.id, { isPaused: !isPaused })
+    if (isPaused) showToast('Subscripción reanudada', 'success')
+    else showToast('Subscripción pausada', 'info')
   }
 
   // Closes the detail screen; the toast with "Deshacer" shows over Home

@@ -125,6 +125,16 @@
     radial-gradient(60% 40% at 10% 0%, #{rgba($phthalo-200, 0.55)}, transparent 70%),
     radial-gradient(55% 35% at 95% 20%, #{rgba($champagne-200, 0.6)}, transparent 70%),
     radial-gradient(70% 30% at 35% 60%, #{rgba($phthalo-100, 0.5)}, transparent 75%);
+  // The onboarding's backdrop: a mint glow behind the picture, with faint rays coming out of it
+  --gradient-onboarding:
+    radial-gradient(90% 55% at 50% 28%, #{rgba($phthalo-100, 0.9)}, transparent 70%),
+    repeating-conic-gradient(
+      from 0deg at 50% 30%,
+      #{rgba($paper-900, 0.06)} 0deg 0.35deg,
+      transparent 0.35deg 22.5deg
+    );
+  // The big picture on each onboarding step (a tile, a stack of notifications)
+  --shadow-onboarding-art: 0 18px 30px -14px #{rgba($paper-900, 0.35)};
 
   /* 11. Glass */
   --glass-bg: #{rgba($paper-0, 0.6)};
@@ -237,6 +247,16 @@
     radial-gradient(60% 40% at 10% 0%, #{rgba($phthalo-400, 0.35)}, transparent 70%),
     radial-gradient(55% 35% at 95% 20%, #{rgba($champagne-500, 0.18)}, transparent 70%),
     radial-gradient(70% 30% at 35% 60%, #{rgba($phthalo-500, 0.3)}, transparent 75%);
+  --gradient-onboarding:
+    radial-gradient(90% 55% at 50% 28%, #{rgba($phthalo-400, 0.3)}, transparent 70%),
+    repeating-conic-gradient(
+      from 0deg at 50% 30%,
+      #{rgba($color-white, 0.045)} 0deg 0.35deg,
+      transparent 0.35deg 22.5deg
+    );
+  // Lit from behind, like the glass: a green glow plus a deep drop shadow
+  --shadow-onboarding-art:
+    0 0 80px #{rgba($phthalo-400, 0.3)}, 0 24px 40px -12px #{rgba($color-black, 0.7)};
 
   /* 11. Glass */
   --glass-bg: #{rgba($charcoal-800, 0.55)};

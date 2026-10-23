@@ -11,6 +11,7 @@ import { useCategoryStore } from '@/features/categories/store/categoryStore'
 // UTILS
 import { formatBillingCycle } from '../../utils/billingCycle'
 import { getCurrencySymbol } from '@/shared/lib/currencies'
+import { formatDate } from '@/shared/lib/formatDate'
 
 // COMPONENTS
 import Avatar from '@/shared/ui/Avatar/Avatar'
@@ -49,6 +50,7 @@ interface Props {
 const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Props) => {
   const {
     fieldSet,
+    fieldGroup,
     logoWrapper,
     container,
     collapse,
@@ -92,157 +94,175 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
 
   return (
     <form ref={formRef} onSubmit={handleSubmit}>
-      <fieldset disabled={readOnly} className={fieldSet}>
-        <div className={logoWrapper}>
-          <Avatar
-            src={values.iconUrl}
-            iconKey={values.iconKey}
-            name={values.name}
-            size="large"
-          />
-        </div>
+      <div className={fieldSet}>
+        <fieldset disabled={readOnly} className={fieldGroup}>
+          <div className={logoWrapper}>
+            <Avatar
+              src={values.iconUrl}
+              iconKey={values.iconKey}
+              name={values.name}
+              size="large"
+            />
+          </div>
 
-        <div className={container}>
-          <FormRow label="Nombre">
-            <InputText
-              size="medium"
-              width="fit"
-              value={values.name}
-              onChange={(event) => setField('name', event.currentTarget.value)}
-              onBlur={() => touch('name')}
-              errorMessage={errorFor('name')}
-            />
-          </FormRow>
-          <FormRow label="Formato del Cobro">
-            <InputSelect
-              size="medium"
-              width="auto"
-              placeholder="Formato del Cobro"
-              value={billingLabel}
-              onClick={() => setOpenSheet('billingCycle')}
-              errorMessage={errorFor('billingCycle')}
-            />
-          </FormRow>
-          <FormRow label="Inicio del Cobro">
-            <InputDate
-              size="medium"
-              width="fit"
-              value={values.firstBillDate}
-              onClick={() => setOpenSheet('firstBillDate')}
-              errorMessage={errorFor('firstBillDate')}
-              disabled={values.trial !== undefined} // the trial end decides the first charge
-            />
-          </FormRow>
-          <FormRow label="Fin del Cobro">
-            <Switch
-              checked={hasEndDate}
-              onChange={form.toggleEndDate}
-              label="Tiene fecha de fin"
-            />
-          </FormRow>
-          <AnimatePresence initial={false}>
-            {hasEndDate && (
-              <motion.div
-                key="end-date"
-                className={collapse}
-                initial={{ height: 0 }}
-                animate={{ height: 'auto' }}
-                exit={{ height: 0 }}
-                transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeInOut' }}
+          <div className={container}>
+            <FormRow label="Nombre">
+              <InputText
+                size="medium"
+                width="fit"
+                value={values.name}
+                onChange={(event) => setField('name', event.currentTarget.value)}
+                onBlur={() => touch('name')}
+                errorMessage={errorFor('name')}
+              />
+            </FormRow>
+            <FormRow label="Formato del Cobro">
+              <InputSelect
+                size="medium"
+                width="auto"
+                placeholder="Formato del Cobro"
+                value={billingLabel}
+                onClick={() => setOpenSheet('billingCycle')}
+                errorMessage={errorFor('billingCycle')}
+              />
+            </FormRow>
+            {/* With a trial, the date is when it starts; the first charge is the day it ends */}
+            <FormRow label={values.trial ? 'Inicio de la prueba' : 'Inicio del Cobro'}>
+              <InputDate
+                size="medium"
+                width="fit"
+                value={values.trial?.startDate ?? values.firstBillDate}
+                // So nobody has to add the trial days in their head
+                subText={
+                  values.trial
+                    ? `Primer cobro: ${formatDate(values.firstBillDate)}`
+                    : undefined
+                }
+                onClick={() => setOpenSheet('firstBillDate')}
+                errorMessage={errorFor('firstBillDate')}
+              />
+            </FormRow>
+            <FormRow label="Fin del Cobro">
+              <Switch
+                checked={hasEndDate}
+                onChange={form.toggleEndDate}
+                label="Tiene fecha de fin"
+              />
+            </FormRow>
+            <AnimatePresence initial={false}>
+              {hasEndDate && (
+                <motion.div
+                  key="end-date"
+                  className={collapse}
+                  initial={{ height: 0 }}
+                  animate={{ height: 'auto' }}
+                  exit={{ height: 0 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.25, ease: 'easeInOut' }}
+                >
+                  <FormRow label="Fecha de fin del cobro">
+                    <InputDate
+                      size="medium"
+                      width="fit"
+                      value={values.endDate ?? ''}
+                      onClick={() => setOpenSheet('endDate')}
+                      errorMessage={errorFor('endDate')}
+                    />
+                  </FormRow>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className={container}>
+            <FormRow label="Tipo de Moneda">
+              <InputSelect
+                size="medium"
+                width="auto"
+                placeholder="Moneda"
+                value={values.currency}
+                onClick={() => setOpenSheet('currency')}
+                errorMessage={errorFor('currency')}
+              />
+            </FormRow>
+            <FormRow label="Monto">
+              <InputAmount
+                size="medium"
+                width="fit"
+                minWidth="0" // hug "0.00" when empty, grow while typing
+                value={values.price}
+                // The symbol of the currency picked in this form; '$' if none is picked yet
+                currencySymbol={
+                  values.currency ? getCurrencySymbol(values.currency) : '$'
+                }
+                onChange={(event) => setField('price', event.currentTarget.value)}
+                onBlur={() => touch('price')}
+                errorMessage={errorFor('price')}
+              />
+            </FormRow>
+          </div>
+        </fieldset>
+        {/* Outside the locked parts: in view mode it still opens, to see the notifications */}
+        {values.billingCycle.type !== 'one-time' && (
+          <div className={container}>
+            <FormRow label="Notificaciones" controlId={notificationsId}>
+              <Button
+                id={notificationsId}
+                size="small"
+                className={buttonNotification}
+                onClick={() => setOpenSheet('reminders')}
               >
-                <FormRow label="Fecha de fin del cobro">
-                  <InputDate
-                    size="medium"
-                    width="fit"
-                    value={values.endDate ?? ''}
-                    onClick={() => setOpenSheet('endDate')}
-                    errorMessage={errorFor('endDate')}
-                  />
-                </FormRow>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className={container}>
-          <FormRow label="Tipo de Moneda">
-            <InputSelect
-              size="medium"
-              width="auto"
-              placeholder="Moneda"
-              value={values.currency}
-              onClick={() => setOpenSheet('currency')}
-              errorMessage={errorFor('currency')}
-            />
-          </FormRow>
-          <FormRow label="Monto">
-            <InputAmount
-              size="medium"
-              width="fit"
-              minWidth="0" // hug "0.00" when empty, grow while typing
-              value={values.price}
-              // The symbol of the currency picked in this form; '$' if none is picked yet
-              currencySymbol={values.currency ? getCurrencySymbol(values.currency) : '$'}
-              onChange={(event) => setField('price', event.currentTarget.value)}
-              onBlur={() => touch('price')}
-              errorMessage={errorFor('price')}
-            />
-          </FormRow>
-        </div>
-
-        <div className={container}>
-          {/* Reminders sheet comes with the notifications work */}
-          <FormRow label="Notificaciones" controlId={notificationsId}>
-            <Button id={notificationsId} size="small" className={buttonNotification}>
-              <IconArrow />
-            </Button>
-          </FormRow>
-        </div>
-
-        <div className={container}>
-          <FormRow label="Categoría">
-            <InputSelect
-              size="medium"
-              width="auto"
-              placeholder="Categoría"
-              value={categoryName}
-              onClick={() => setOpenSheet('categoryId')}
-              errorMessage={errorFor('categoryId')}
-            />
-          </FormRow>
-          {/* Payment methods come with the Cards screen */}
-          <FormRow label="Cobrado en">
-            <InputSelect
-              size="medium"
-              width="fit"
-              placeholder="Cobrado en"
-              value={values.paymentMethodId ?? ''}
-              onClick={() => {}}
-              disabled
-            />
-          </FormRow>
-        </div>
-
-        {!readOnly && (
-          // Wakes up with a small bump when the form becomes valid. `initial={false}`: a form
-          // that opens already valid (editing) doesn't bump
-          <motion.div
-            className={buttonContainer}
-            initial={false}
-            animate={{ scale: isValid ? [1, 1.03, 1] : 1 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
-          >
-            <Button width="full" size="large" type="submit" aria-disabled={!isValid}>
-              {submitLabel}
-            </Button>
-          </motion.div>
+                <IconArrow />
+              </Button>
+            </FormRow>
+          </div>
         )}
-      </fieldset>
+        <fieldset disabled={readOnly} className={fieldGroup}>
+          <div className={container}>
+            <FormRow label="Categoría">
+              <InputSelect
+                size="medium"
+                width="auto"
+                placeholder="Categoría"
+                value={categoryName}
+                onClick={() => setOpenSheet('categoryId')}
+                errorMessage={errorFor('categoryId')}
+              />
+            </FormRow>
+            {/* Payment methods come with the Cards screen */}
+            <FormRow label="Cobrado en">
+              <InputSelect
+                size="medium"
+                width="fit"
+                placeholder="Cobrado en"
+                value={values.paymentMethodId ?? ''}
+                onClick={() => {}}
+                disabled
+              />
+            </FormRow>
+          </div>
+
+          {!readOnly && (
+            // Wakes up with a small bump when the form becomes valid. `initial={false}`: a form
+            // that opens already valid (editing) doesn't bump
+            <motion.div
+              className={buttonContainer}
+              initial={false}
+              animate={{ scale: isValid ? [1, 1.03, 1] : 1 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+            >
+              <Button width="full" size="large" type="submit" aria-disabled={!isValid}>
+                {submitLabel}
+              </Button>
+            </motion.div>
+          )}
+        </fieldset>
+      </div>
 
       <SubscriptionFormSheets
         form={form}
         openSheet={openSheet}
         onClose={() => setOpenSheet(null)}
+        readOnly={readOnly}
       />
     </form>
   )
