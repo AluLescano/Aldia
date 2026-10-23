@@ -92,6 +92,8 @@ All domain types are strictly typed in `src/shared/types/index.ts`. That file is
 export type BillingUnit = 'day' | 'week' | 'month' | 'year'
 export type BillingCycle =
   { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
+// 'one-time' is hidden in the form (kept for the income and expenses book); only a
+// subscription already saved that way still offers it.
 export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
 
 export interface Subscription {

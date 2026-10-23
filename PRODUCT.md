@@ -45,7 +45,7 @@ The app language is **Spanish** (UI copy: "Agregar Subscripción", "Formato del 
 ### v1 capabilities
 
 - Subscriptions: add from presets or custom, view, edit, pause/resume, delete with undo.
-- Billing cycles: one-time, or every N days / weeks / months / years. Free trials with their own length.
+- Billing cycles: every N days / weeks / months / years. Free trials with their own length, starting on any date. One-time payments are hidden in the form (kept in the data model for the future income and expenses book; a subscription already saved as one-time can keep it).
 - Categories: 12 defaults; the user can create, rename and delete (deleted ones fall back to "Otros").
 - Multi-currency: price stored in its own currency, converted for the total with daily exchange rates (cached; the last saved rates are used offline).
 - Notifications: reminders N days before a charge or a trial end, at a chosen time (local notifications, no server).

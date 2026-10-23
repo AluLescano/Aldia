@@ -13,7 +13,7 @@ It is a portfolio and learning project first: for now it is shared with family a
 
 - **Home:** monthly total, subscription list filtered by category, swipe to delete with undo.
 - **Add a subscription:** 51 presets (streaming, AI, gaming, utility bills searchable by company, e.g. "Edenor") or a custom one.
-- **The form:** name, price, currency, billing cycle (one-time, or every N days / weeks / months / years), free trial, start and end dates, category.
+- **The form:** name, price, currency, billing cycle (every N days / weeks / months / years), free trial (from any start date), start and end dates, category.
 - **Categories:** 12 defaults plus your own (create, rename, delete; deleted ones fall back to "Otros").
 - **Detail screen:** view, edit, pause/resume and delete a subscription.
 
