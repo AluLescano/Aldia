@@ -61,7 +61,7 @@ export function formatNextCharge(date: string, today: string) {
 export function formatTrial(trial: TrialConfig, today: string) {
   const [verb, date] =
     trial.startDate > today ? ['empieza', trial.startDate] : ['termina', trial.endDate]
-  return `¡Prueba ${verb} ${countdown(date, today) ?? `el ${formatDate(date)}`}!`
+  return `Tu prueba ${verb} ${countdown(date, today) ?? `el ${formatDate(date)}`}`
 }
 
 // "hoy", "mañana" or "en N días" up to 30 days away; null further away or in the past
