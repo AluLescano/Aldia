@@ -51,8 +51,13 @@ src/
 │   │   ├── store/            # subscriptionStore.ts (Zustand + persist, aldia/subscriptions.json)
 │   │   ├── utils/            # billingCycle, validation, form <-> subscription mapping, status, monthlyTotal, subscriptionList
 │   │   └── types.ts          # SubscriptionFormValues, FormErrors
+│   ├── notifications/
+│   │   ├── notificationSync.ts # keeps the phone's scheduled notifications in sync; permission check and request
+│   │   └── utils/            # buildNotifications (texts, one per day, pure)
+│   ├── onboarding/
+│   │   └── components/       # OnboardingFlow (first-open welcome, notifications permission, privacy)
 │   ├── settings/
-│   │   └── store/            # settingsStore.ts (selected + favorite currencies, persist, aldia/settings.json)
+│   │   └── store/            # settingsStore.ts (currencies, reminderTime, onboarding flags, persist, aldia/settings.json)
 │   └── navigation/
 │       └── components/       # BottomNavBar
 │   (planned: cards/, calendar/, statistics/)
@@ -174,9 +179,11 @@ export interface Preset {
 }
 ```
 
-User preferences live in `useSettingsStore` (`selectedCurrency`, `favoriteCurrencies`, `reminderTime`, `09:00` until Ajustes can change it). The theme setting is planned.
+User preferences live in `useSettingsStore` (`selectedCurrency`, `favoriteCurrencies`, `reminderTime`, `09:00` until Ajustes can change it; `hasSeenOnboarding` and `hasAskedForNotificationsAgain`, which only go false → true). The theme setting is planned.
 
-**Reminders** (`features/subscriptions/utils/reminders.ts`, all pure and tested): `getReminderTriggers(sub, today, until)` lists the days a subscription notifies inside a planning window; `groupTriggersByDay` bundles them so several on one day become one summary; `nextReminderDate` gives the "Próxima" date of the Notificaciones sheet. Scheduling them on the phone (Capacitor Local Notifications) is the next feature.
+**Reminders** (`features/subscriptions/utils/reminders.ts`, all pure and tested): `getReminderTriggers(sub, today, until)` lists the days a subscription notifies inside a planning window; `groupTriggersByDay` bundles them so several on one day become one summary; `nextReminderDate` gives the "Próxima" date of the Notificaciones sheet. `features/notifications` schedules them on the phone (Capacitor Local Notifications, inexact): `startNotificationSync` re-plans 60 days ahead whenever the data or the reminder time changes and when the app comes back; nothing is scheduled until notifications are allowed.
+
+**Onboarding** (`features/onboarding`): on first open `App.tsx` shows `OnboardingFlow` instead of the app (the app mounts only after it, so nothing underneath is reachable). Three steps: welcome, notifications (skipped if already allowed; "Permitir" calls `requestNotificationPermission`, which syncs right away on a yes; "Ahora no" never reaches Android, so its prompt stays unspent) and privacy. "Empezar" calls `finishOnboarding`.
 
 ---
 
@@ -185,7 +192,7 @@ User preferences live in `useSettingsStore` (`selectedCurrency`, `favoriteCurren
 State lives in **Zustand** stores:
 
 - `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription`, `restoreSubscription` (the toast's "Deshacer"; each toast keeps its own deleted subscription), `updateSubscription`, `reassignCategory`. Saved as `aldia/subscriptions.json` (see section 5).
-- `useSettingsStore` (`features/settings/store/settingsStore.ts`): selected and favorite currencies. Saved as `aldia/settings.json`.
+- `useSettingsStore` (`features/settings/store/settingsStore.ts`): selected and favorite currencies, the reminder time and the onboarding flags. Saved as `aldia/settings.json`.
 - `useCategoryStore` (`features/categories/store/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Saved as `aldia/categories.json`.
 - `useToastStore` (`shared/store/toastStore.ts`): the one app-wide toast, rendered by `App.tsx`.
 - `useUIStore` (`shared/store/uiStore.ts`): a stack of overlays (`preset-picker`, `subscription-form`) with `pushOverlay`, `popOverlay` and `closeAllOverlays`. `App.tsx` renders the top of the stack.
