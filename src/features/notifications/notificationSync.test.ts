@@ -34,6 +34,11 @@ vi.mock('@capacitor/local-notifications', () => ({
       phone.calls.push('checkPermissions')
       return { display: phone.permission }
     },
+    // The user's answer to the pop-up is whatever `phone.permission` says
+    requestPermissions: async () => {
+      phone.calls.push('requestPermissions')
+      return { display: phone.permission }
+    },
     createChannel: async () => {
       phone.calls.push('createChannel')
     },
@@ -208,4 +213,35 @@ describe('startNotificationSync', () => {
     expect(errorLog).toHaveBeenCalled()
     errorLog.mockRestore()
   })
+})
+
+describe('requestNotificationPermission', () => {
+  const settle = () => vi.advanceTimersByTimeAsync(0)
+
+  it('says no in the browser, without asking', async () => {
+    phone.native = false
+    expect(await sync.requestNotificationPermission()).toBe(false)
+    expect(phone.calls).toEqual([])
+  })
+
+  it('schedules right away when the user says yes', async () => {
+    const { useSubscriptionStore } =
+      await import('@/features/subscriptions/store/subscriptionStore')
+    useSubscriptionStore.setState({ subscriptions: [netflix] })
+
+    expect(await sync.requestNotificationPermission()).toBe(true)
+    await settle() // no 1-second wait: the sync is already queued
+    expect(phone.calls[0]).toBe('requestPermissions')
+    expect(phone.calls.at(-1)).toBe('schedule 2')
+  })
+
+  it.each(['denied', 'prompt-with-rationale'])(
+    'schedules nothing when the answer is %s',
+    async (answer) => {
+      phone.permission = answer
+      expect(await sync.requestNotificationPermission()).toBe(false)
+      await vi.advanceTimersByTimeAsync(1000)
+      expect(phone.calls).toEqual(['requestPermissions'])
+    },
+  )
 })
