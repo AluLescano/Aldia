@@ -15,6 +15,7 @@ import { useDeleteSubscription } from '@/features/subscriptions/hooks/useDeleteS
 import { getMonthlyTotal } from '@/features/subscriptions/utils/monthlyTotal'
 import { formatDate } from '@/shared/lib/formatDate'
 import { todayISO } from '@/shared/lib/isoDate'
+import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 
 // COMPONENTS
 import Button from '@/shared/ui/Button/Button'
@@ -36,14 +37,20 @@ export const HomePage = () => {
   const selectedCurrency = useSettingsStore((state) => state.selectedCurrency)
   const rates = useRatesStore((state) => state.rates)
 
-  const activeCount = subs.filter((sub) => sub.status === 'active').length
-  const { total, converted, unconverted } = getMonthlyTotal(subs, selectedCurrency, rates)
+  const today = todayISO()
+  const activeCount = subs.filter((sub) => statusFor(sub, today) === 'active').length
+  const { total, converted, unconverted } = getMonthlyTotal(
+    subs,
+    selectedCurrency,
+    rates,
+    today,
+  )
 
   // Honest numbers: say when part of the total is missing or uses old rates
   const totalNote =
     unconverted > 0
       ? `${unconverted} sin sumar: faltan tasas de cambio`
-      : converted > 0 && rates && rates.date < todayISO()
+      : converted > 0 && rates && rates.date < today
         ? `Tasas del ${formatDate(rates.date)}`
         : undefined
 

@@ -8,13 +8,13 @@ import {
 } from './subscriptionList'
 import type { Subscription } from '@/shared/types'
 
-const sub = (name: string, status: Subscription['status'], categoryId: string) =>
-  ({ name, status, categoryId }) as Subscription
+const sub = (name: string, isPaused: boolean, categoryId: string) =>
+  ({ name, isPaused, categoryId }) as Subscription
 
 const list = [
-  sub('Zeta', 'active', 'ai'),
-  sub('alfa', 'inactive', 'ai'),
-  sub('Beta', 'trial', 'gaming'),
+  sub('Zeta', false, 'ai'),
+  sub('alfa', true, 'ai'),
+  sub('Beta', false, 'gaming'),
 ]
 
 describe('listFilters', () => {
@@ -28,7 +28,7 @@ describe('listFilters', () => {
   })
 
   it('hides "inactive" when nothing is paused', () => {
-    const noPaused = list.filter((s) => s.status !== 'inactive')
+    const noPaused = list.filter((s) => !s.isPaused)
     expect(listFilters(noPaused).map(filterKey)).not.toContain('inactive')
   })
 })

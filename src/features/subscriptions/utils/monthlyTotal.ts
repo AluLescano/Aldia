@@ -1,5 +1,6 @@
 // UTILS
 import { convert, type ExchangeRates } from '@/shared/lib/exchangeRates'
+import { statusFor } from './subscriptionStatus'
 
 // TYPES
 import type {
@@ -43,17 +44,18 @@ export interface MonthlyTotal {
 
 /**
  * Monthly cost of the ACTIVE subscriptions (paused and trial ones are not paying),
- * converted to one currency. Pure: give it the rates, it never fetches them.
+ * converted to one currency. Pure: give it the rates and `todayISO()`, it never fetches them.
  */
 export function getMonthlyTotal(
   subscriptions: Subscription[],
   currency: CurrencyCode,
   rates: ExchangeRates | null,
+  today: string,
 ): MonthlyTotal {
   const result: MonthlyTotal = { total: 0, converted: 0, unconverted: 0 }
 
   for (const sub of subscriptions) {
-    if (sub.status !== 'active') continue
+    if (statusFor(sub, today) !== 'active') continue
     const monthly = monthlyEquivalent(sub.price, sub.billingCycle)
     const amount = convert(monthly, sub.currency, currency, rates)
     if (amount === null) {

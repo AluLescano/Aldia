@@ -18,12 +18,10 @@ import { useSubscriptionActions } from '@/features/subscriptions/hooks/useSubscr
 import { useBackHandler } from '@/shared/hooks/useBackHandler'
 
 // UTILS
-import { todayISO } from '@/shared/lib/isoDate'
 import { createId } from '@/shared/lib/id'
 import { subscriptionToFormValues } from '@/features/subscriptions/utils/subscriptionToFormValues'
 import { newSubscriptionValues } from '@/features/subscriptions/utils/newSubscriptionValues'
 import { formValuesToSubscriptionData } from '@/features/subscriptions/utils/formValuesToSubscriptionData'
-import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 
 // TYPES
 import type { SubscriptionFormValues } from '@/features/subscriptions/types'
@@ -80,14 +78,10 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
   const handleSubmit = (values: SubscriptionFormValues) => {
     const data = formValuesToSubscriptionData(values)
     if (!data) return
-    const status = statusFor(data.trial, todayISO())
 
     if (existing) {
-      updateSubscription(existing.id, {
-        ...data,
-        // A paused subscription stays paused when it is edited
-        status: existing.status === 'inactive' ? 'inactive' : status,
-      })
+      // `data` has no `isPaused`, so a paused subscription stays paused when it is edited
+      updateSubscription(existing.id, data)
       showToast('Cambios guardados', 'success')
       setIsEditing(false)
       return
@@ -96,7 +90,7 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
     addSubscription({
       ...data,
       id: createId(),
-      status,
+      isPaused: false,
       createdAt: new Date().toISOString(),
     })
     showToast('¡Se ha agregado la subscripción!', 'success')

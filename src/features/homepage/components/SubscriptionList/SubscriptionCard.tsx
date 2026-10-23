@@ -83,9 +83,9 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     pushOverlay('subscription-form', { subscriptionId: subscription.id })
   }
 
-  const isPaused = subscription.status === 'inactive'
+  const isPaused = subscription.isPaused
 
-  // Calculated, not read from the stored field, so it never shows a date that already passed
+  // Calculated from today, so it never shows a date that already passed
   const nextCharge = nextBillDate(
     subscription.firstBillDate,
     subscription.billingCycle,

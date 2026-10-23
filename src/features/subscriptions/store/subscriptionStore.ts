@@ -23,6 +23,31 @@ interface SubscriptionState {
   reassignCategory: (fromId: string, toId: string) => void
 }
 
+/**
+ * Upgrades a saved file to the current shape, one version step at a time
+ * (`persist` calls it when the file's `version` is older than the store's).
+ * - 0 -> 1: the stored `status` becomes `isPaused`; the old stored `nextBillDate` is dropped.
+ */
+export function migrateSubscriptions(persisted: unknown, version: number) {
+  let state = persisted as { subscriptions: unknown[] }
+  if (version < 1) {
+    state = { subscriptions: (state.subscriptions as SubscriptionV0[]).map(toVersion1) }
+  }
+  return state as { subscriptions: Subscription[] }
+}
+
+/** A subscription as version 0 saved it. */
+type SubscriptionV0 = Omit<Subscription, 'isPaused'> & {
+  status: string
+  nextBillDate?: string
+}
+
+const toVersion1 = ({ status, ...sub }: SubscriptionV0): Subscription => {
+  const upgraded = { ...sub, isPaused: status === 'inactive' }
+  delete upgraded.nextBillDate
+  return upgraded
+}
+
 /** All the user's subscriptions, saved on the device as `aldia/subscriptions.json`. */
 export const useSubscriptionStore = create<SubscriptionState>()(
   persist(
@@ -62,6 +87,9 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       name: 'subscriptions',
       storage: createJSONStorage(() => fileStorage),
       partialize: (state) => ({ subscriptions: state.subscriptions }),
+      // Bump it, and add a step to `migrateSubscriptions`, whenever the saved shape changes
+      version: 1,
+      migrate: migrateSubscriptions,
       // main.tsx loads it before the first render
       skipHydration: true,
     },
