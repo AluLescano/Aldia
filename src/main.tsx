@@ -14,6 +14,7 @@ import { useSubscriptionStore } from './features/subscriptions/store/subscriptio
 
 // UTILS
 import { clearLegacyStorage } from './shared/lib/legacyStorage'
+import { startNotificationSync } from './features/notifications/notificationSync.ts'
 
 // ASSETS: global styles, loaded once for the whole app
 import './styles/_themes.scss'
@@ -38,6 +39,9 @@ await Promise.all([
   useCategoryStore.persist.rehydrate(),
   useSettingsStore.persist.rehydrate(),
 ])
+
+// The stores are loaded: keep the phone's notifications in sync from now on
+startNotificationSync()
 
 /**
  * Entry point: mounts the app in `#root` (index.html). `StrictMode` runs some checks
