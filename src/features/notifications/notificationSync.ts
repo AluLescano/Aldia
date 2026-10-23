@@ -110,6 +110,18 @@ export function startNotificationSync() {
 }
 
 /**
+ * Whether notifications are already allowed, without asking: true on Android 12 and older
+ * (always allowed) or after the user turned them on. The onboarding skips its question then.
+ *
+ * @returns `false` in the browser.
+ */
+export async function hasNotificationPermission(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false
+  const { display } = await LocalNotifications.checkPermissions()
+  return display === 'granted'
+}
+
+/**
  * Asks Android to allow notifications (the system pop-up) and, on a yes, schedules them
  * straight away instead of waiting for the next change. For the onboarding's "Permitir"
  * button and the second ask; what the answer means for the flow is up to the screen.

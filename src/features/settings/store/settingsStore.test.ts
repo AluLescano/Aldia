@@ -71,7 +71,10 @@ describe('onboarding flags', () => {
   it('are false for a file saved before they existed, so updaters see the flow once', async () => {
     savedFiles.set(
       'settings',
-      JSON.stringify({ state: { selectedCurrency: 'ARS', reminderTime: '20:00' }, version: 0 }),
+      JSON.stringify({
+        state: { selectedCurrency: 'ARS', reminderTime: '20:00' },
+        version: 0,
+      }),
     )
     await useSettingsStore.persist.rehydrate()
 

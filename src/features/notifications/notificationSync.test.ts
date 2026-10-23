@@ -245,3 +245,21 @@ describe('requestNotificationPermission', () => {
     },
   )
 })
+
+describe('hasNotificationPermission', () => {
+  it('only looks: true when allowed, never shows the pop-up', async () => {
+    expect(await sync.hasNotificationPermission()).toBe(true)
+    expect(phone.calls).toEqual(['checkPermissions'])
+  })
+
+  it.each(['prompt', 'denied'])('is false when the permission is %s', async (state) => {
+    phone.permission = state
+    expect(await sync.hasNotificationPermission()).toBe(false)
+  })
+
+  it('is false in the browser, without asking the plugin', async () => {
+    phone.native = false
+    expect(await sync.hasNotificationPermission()).toBe(false)
+    expect(phone.calls).toEqual([])
+  })
+})
