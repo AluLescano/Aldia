@@ -82,3 +82,36 @@ export function getReminderTriggers(
   })
   return triggerList
 }
+
+/** All the notifications that fall on one day. */
+export interface ReminderDay {
+  /** `YYYY-MM-DD` */
+  date: string
+  /** One or more: several subscriptions can notify on the same day. */
+  triggers: ReminderTrigger[]
+}
+
+/**
+ * Bundles triggers that fall on the same day, sorted by date, so the notifications can turn
+ * three on one day into one summary ("3 subscripciones se cobran mañana").
+ * Takes triggers from any number of subscriptions, in any order.
+ *
+ * @example
+ * groupTriggersByDay([netflixNov17, spotifyNov12, disneyNov17])
+ * // → [{ date: '2026-11-12', triggers: [spotify] },
+ * //    { date: '2026-11-17', triggers: [netflix, disney] }]
+ */
+export function groupTriggersByDay(triggers: ReminderTrigger[]): ReminderDay[] {
+  // date -> that day's triggers
+  const byDate = new Map<string, ReminderTrigger[]>()
+
+  triggers.forEach((trigger) => {
+    const sameDay = byDate.get(trigger.date)
+    if (sameDay) sameDay.push(trigger)
+    else byDate.set(trigger.date, [trigger])
+  })
+
+  return [...byDate]
+    .map(([date, dayTriggers]) => ({ date, triggers: dayTriggers }))
+    .toSorted((a, b) => a.date.localeCompare(b.date))
+}
