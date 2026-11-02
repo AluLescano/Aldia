@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="432" height="432" viewBox="0 0 108 108">
+  <!-- Android adaptive icon foreground: 108dp canvas, the mark sits inside the 66dp safe zone. Background: #131916 -->
+  <g transform="translate(54 54) scale(0.9) translate(-50 -52)">
+    <path d="M46.9 34.3A18 18 0 1 1 32 52" fill="none" stroke="#e6c583" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="36.2" cy="40.4" r="4.5" fill="#fffbf5"/>
+    <path d="M50 52V43.5M50 52H43.5" fill="none" stroke="#fffbf5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="63.5" y="30" width="9" height="44.5" rx="4.5" fill="#e6c583"/>
+  </g>
+</svg>

@@ -43,6 +43,7 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
     wrapper,
     filterTabs,
     filterPill,
+    scrollArea,
     header,
     listArea,
     emptyState,
@@ -93,48 +94,51 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
         ))}
       </div>
 
-      <div className={container}>
-        <div className={header}>
-          <Typography variant="title">Tus subscripciones</Typography>
-        </div>
+      {/* The only part of Home that scrolls: the whole card moves, the filters stay */}
+      <div className={scrollArea}>
+        <div className={container}>
+          <div className={header}>
+            <Typography variant="title">Tus subscripciones</Typography>
+          </div>
 
-        <div className={listArea}>
-          {subscriptions.length === 0 ? (
-            <div className={emptyState}>
-              <div className={emptyStateIcon}>
-                <IconAddEmpty />
+          <div className={listArea}>
+            {subscriptions.length === 0 ? (
+              <div className={emptyState}>
+                <div className={emptyStateIcon}>
+                  <IconAddEmpty />
+                </div>
+                <Typography variant="body" size="md">
+                  Sin subscripciones aún
+                </Typography>
+                <Typography variant="body" size="sm">
+                  Agrega tus gastos mensuales para mantenerte al tanto de tus días de pago
+                  y tu gasto total.
+                </Typography>
               </div>
-              <Typography variant="body" size="md">
-                Sin subscripciones aún
-              </Typography>
-              <Typography variant="body" size="sm">
-                Agrega tus gastos mensuales para mantenerte al tanto de tus días de pago y
-                tu gasto total.
-              </Typography>
-            </div>
-          ) : (
-            <motion.div layout className={cardsContainer}>
-              <AnimatePresence mode="popLayout" initial={false}>
-                {visible.map((sub) => (
-                  <motion.div
-                    key={sub.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9, filter: 'blur(4px)' }}
-                    animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                    exit={{
-                      opacity: 0,
-                      scale: 0.9,
-                      filter: 'blur(4px)',
-                      transition: { duration: 0.2 },
-                    }}
-                    className={cardMotionWrapper}
-                  >
-                    <SubscriptionCard subscription={sub} onDelete={onDelete} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
+            ) : (
+              <motion.div layout className={cardsContainer}>
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {visible.map((sub) => (
+                    <motion.div
+                      key={sub.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9, filter: 'blur(4px)' }}
+                      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                      exit={{
+                        opacity: 0,
+                        scale: 0.9,
+                        filter: 'blur(4px)',
+                        transition: { duration: 0.2 },
+                      }}
+                      className={cardMotionWrapper}
+                    >
+                      <SubscriptionCard subscription={sub} onDelete={onDelete} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
     </div>
