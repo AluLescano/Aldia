@@ -62,6 +62,7 @@
 
   /* 6. Brand */
   --brand: #{$phthalo-600};
+  --brand-logo: #{$phthalo-600}; // the in-app logo (AppLogo); same as --brand
   --brand-hover: #{$phthalo-700};
   --brand-subtle: #{$phthalo-100};
   --brand-on-subtle: #{$phthalo-600};
@@ -190,6 +191,7 @@
 
   /* 6. Brand */
   --brand: #{$phthalo-500};
+  --brand-logo: #{$champagne-300}; // the in-app logo: champagne, like the app icon
   --brand-hover: #{$phthalo-400};
   --brand-subtle: #{rgba($phthalo-400, 0.15)};
   --brand-on-subtle: #{$phthalo-300};
