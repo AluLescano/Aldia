@@ -80,6 +80,17 @@ npx cap open android                    # or open it in Android Studio
 
 Live reload on the phone: run `npm run dev -- --host` (the `--host` matters on Windows), then `npx cap run android -l --host localhost --port 5173 --forwardPorts 5173:5173`.
 
+**Release builds** are signed with a keystore that never enters the repo. Gradle reads its path and passwords from `android/keystore.properties` (gitignored, like `*.jks`):
+
+```properties
+storeFile=C:/path/to/your-release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+Then `cd android && ./gradlew assembleRelease` builds `app/build/outputs/apk/release/app-release.apk`. Without that file the release build comes out unsigned. Testers only ever get signed release builds: an APK signed with another key can't update the installed app, so switching keys means an uninstall.
+
 ---
 
 ## Roadmap
