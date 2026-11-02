@@ -4,6 +4,8 @@ const config: CapacitorConfig = {
   appId: 'com.katyadesign.aldia',
   appName: 'Aldia',
   webDir: 'dist',
+  // Same as the splash ($charcoal-900): no white flash while React loads
+  backgroundColor: '#0a0f0c',
   plugins: {
     LocalNotifications: {
       // The bell in android/app/src/main/res/drawable (white outline, Android tints it)
