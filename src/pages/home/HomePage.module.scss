@@ -4,6 +4,8 @@
   flex-direction: column;
   overflow: hidden;
   gap: 1.5rem; // gap-6 (6 * 0.25rem = 1.5rem)
+  // No bottom padding: the page itself never scrolls. Only the list's scroll area does,
+  // down behind the nav bar, and it keeps the room for the nav and the FAB itself
 }
 
 .header {

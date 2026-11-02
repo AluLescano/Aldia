@@ -8,7 +8,10 @@
 .appWrapper {
   width: 100%;
   max-width: 28rem;
-  min-height: 100vh;
+  // Exactly the screen, so <main> scrolls inside it (and Home's list inside its card).
+  // dvh follows the visible height; vh is the fallback for older WebViews
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   padding-left: 1rem;
@@ -21,7 +24,9 @@
   flex: 1 1 0%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  // The tabs scroll here (each one leaves room for the nav bar at its bottom)
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding-top: 0.5rem;
 }
 

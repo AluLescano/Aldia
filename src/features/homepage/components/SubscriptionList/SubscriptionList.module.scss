@@ -66,6 +66,21 @@
   flex-shrink: 0;
 }
 
+// Home's only scroller: everything under the filters, down behind the nav bar. The card
+// inside grows with its cards and scrolls as a whole. Bottom room = the nav bar plus the
+// FAB (1rem above the nav, ~4.6rem tall) plus ~1rem, so the card's end clears the FAB
+.scrollArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 6.5rem);
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -87,12 +102,6 @@
 }
 
 .listArea {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
   width: 100%;
 }
 
