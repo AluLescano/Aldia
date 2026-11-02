@@ -14,7 +14,7 @@ import { useDeleteSubscription } from '@/features/subscriptions/hooks/useDeleteS
 // UTILS
 import { getMonthlyTotal } from '@/features/subscriptions/utils/monthlyTotal'
 import { formatDate } from '@/shared/lib/formatDate'
-import { todayISO } from '@/shared/lib/isoDate'
+import { daysBetween, todayISO } from '@/shared/lib/isoDate'
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 
 // COMPONENTS
@@ -26,6 +26,8 @@ import SubscriptionList from '@/features/homepage/components/SubscriptionList/Su
 import { IconAdd } from '@/assets/icons/IconAdd'
 
 import styles from './HomePage.module.scss'
+
+const STALE_RATES_DAYS = 2
 
 /** The main tab: monthly total, the subscription list and the add button. */
 export const HomePage = () => {
@@ -50,7 +52,7 @@ export const HomePage = () => {
   const totalNote =
     unconverted > 0
       ? `${unconverted} sin sumar: faltan tasas de cambio`
-      : converted > 0 && rates && rates.date < today
+      : converted > 0 && rates && daysBetween(rates.date, today) >= STALE_RATES_DAYS
         ? `Tasas del ${formatDate(rates.date)}`
         : undefined
 

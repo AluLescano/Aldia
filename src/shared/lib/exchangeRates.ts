@@ -17,13 +17,15 @@ const RATE_URLS = [
 /**
  * Downloads today's rates, trying the fallback URL if the first one fails.
  * This is the only network request of the app: no user data is sent.
+ * `cache: 'no-cache'` makes the WebView check with the server before reusing its copy:
+ * jsDelivr says the file is good for 7 days, which froze the rates for a week.
  *
  * @throws when both URLs fail (offline, for example).
  */
 export async function fetchExchangeRates(): Promise<ExchangeRates> {
   for (const url of RATE_URLS) {
     try {
-      const response = await fetch(url)
+      const response = await fetch(url, { cache: 'no-cache' })
       if (!response.ok) continue
       const json = (await response.json()) as {
         date: string
