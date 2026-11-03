@@ -69,13 +69,12 @@ vi.mock('@/shared/lib/fileStorage', () => ({
 const netflix: Subscription = {
   id: 'netflix',
   name: 'Netflix',
-  price: 10,
-  currency: 'USD',
+  priceHistory: [{ from: '2026-01-15', price: 10, currency: 'USD' }],
   billingCycle: { type: 'every', interval: 1, unit: 'month' },
   firstBillDate: '2026-01-15',
   categoryId: 'entertainment',
   reminders: [{ id: 'r3', daysBefore: 3, isEnabled: true }],
-  isPaused: false,
+  pauses: [],
   createdAt: '2026-01-15T00:00:00.000Z',
 }
 
@@ -167,8 +166,12 @@ describe('startNotificationSync', () => {
     phone.calls = []
 
     useSubscriptionStore.getState().addSubscription(netflix)
-    useSubscriptionStore.getState().updateSubscription('netflix', { price: 12 })
-    useSubscriptionStore.getState().updateSubscription('netflix', { price: 15 })
+    useSubscriptionStore.getState().updateSubscription('netflix', {
+      priceHistory: [{ from: '2026-01-15', price: 12, currency: 'USD' }],
+    })
+    useSubscriptionStore.getState().updateSubscription('netflix', {
+      priceHistory: [{ from: '2026-01-15', price: 15, currency: 'USD' }],
+    })
     await vi.advanceTimersByTimeAsync(999)
     expect(phone.calls).toEqual([]) // still waiting
 

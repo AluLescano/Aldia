@@ -2,6 +2,7 @@ import type { CurrencyCode, Subscription } from '@/shared/types'
 import { nextBillDate } from './billingCycle'
 import type { ExchangeRates } from '@/shared/lib/exchangeRates'
 import { monthlyPriceIn } from './monthlyTotal'
+import { isPausedOn } from './subscriptionHistory'
 
 /** Which subscriptions the Home list shows. */
 export type ListFilter =
@@ -17,11 +18,11 @@ export const filterKey = (filter: ListFilter) =>
 
 /**
  * The filter tabs for a list: "all", one per category in use, and "inactive" only
- * when at least one subscription is paused. No tab ever leads to an empty list.
+ * when at least one subscription is paused `today`. No tab ever leads to an empty list.
  */
-export function listFilters(subscriptions: Subscription[]): ListFilter[] {
+export function listFilters(subscriptions: Subscription[], today: string): ListFilter[] {
   const categoryIds = [...new Set(subscriptions.map((sub) => sub.categoryId))]
-  const hasPaused = subscriptions.some((sub) => sub.isPaused)
+  const hasPaused = subscriptions.some((sub) => isPausedOn(sub.pauses, today))
   return [
     { type: 'all' },
     ...categoryIds.map((categoryId) => ({ type: 'category' as const, categoryId })),
@@ -29,16 +30,17 @@ export function listFilters(subscriptions: Subscription[]): ListFilter[] {
   ]
 }
 
-/** Keeps the subscriptions that match the filter. */
+/** Keeps the subscriptions that match the filter ("inactive" = paused `today`). */
 export function filterSubscriptions(
   subscriptions: Subscription[],
   filter: ListFilter,
+  today: string,
 ): Subscription[] {
   switch (filter.type) {
     case 'all':
       return subscriptions
     case 'inactive':
-      return subscriptions.filter((sub) => sub.isPaused)
+      return subscriptions.filter((sub) => isPausedOn(sub.pauses, today))
     case 'category':
       return subscriptions.filter((sub) => sub.categoryId === filter.categoryId)
   }
@@ -71,8 +73,8 @@ export function sortSubscriptions(
 
   /** Cheapest first (`direction` 1) or priciest first (-1). No price (no rate) goes after the rest either way. */
   const byPrice = (subA: Subscription, subB: Subscription, direction: 1 | -1) => {
-    const priceA = monthlyPriceIn(subA, context.currency, context.rates)
-    const priceB = monthlyPriceIn(subB, context.currency, context.rates)
+    const priceA = monthlyPriceIn(subA, context.currency, context.rates, context.today)
+    const priceB = monthlyPriceIn(subB, context.currency, context.rates, context.today)
     if (priceA === null && priceB === null) return byName(subA, subB)
     if (priceA === null) return 1 // a has no price: a goes after
     if (priceB === null) return -1 // b has no price: b goes after
@@ -80,7 +82,9 @@ export function sortSubscriptions(
   }
 
   return [...subscriptions].sort((a, b) => {
-    if (a.isPaused !== b.isPaused) return a.isPaused ? 1 : -1
+    const pausedA = isPausedOn(a.pauses, context.today)
+    const pausedB = isPausedOn(b.pauses, context.today)
+    if (pausedA !== pausedB) return pausedA ? 1 : -1
     switch (sort) {
       case 'name-asc':
         return byName(a, b)

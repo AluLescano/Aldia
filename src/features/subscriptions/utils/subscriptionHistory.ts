@@ -1,5 +1,8 @@
+// UTILS
+import { nextBillDate } from './billingCycle'
+
 // TYPES
-import type { Pause, PriceChange, PriceHistory } from '@/shared/types'
+import type { BillingCycle, Pause, PriceChange, PriceHistory } from '@/shared/types'
 
 /**
  * The price in force on `date`: the last change that started on or before it. A date
@@ -28,4 +31,80 @@ export function priceOn(history: PriceHistory, date: string): PriceChange {
  */
 export function isPausedOn(pauses: Pause[], date: string): boolean {
   return pauses.some((pause) => pause.from <= date && (!pause.to || date < pause.to))
+}
+
+/**
+ * The history after the user saves a price (and currency) in the form. Nothing changes if
+ * it's the price already in force on `from`. Otherwise the new price starts on `from`, and
+ * any change planned on or after that day is replaced. With no charge before `from` (the
+ * first charge hasn't happened), the history is just the new price.
+ *
+ * @param from `YYYY-MM-DD`, a charge day: the next charge, or one the user picks.
+ * @example
+ * // 11.300 from Sep 5, then the user saves 11.768 with the next charge on Nov 5
+ * applyPriceEdit(history, { from: '2026-11-05', price: 11768, currency: 'ARS' }, '2026-09-05')
+ * // [{ from: '2026-09-05', price: 11300, ... }, { from: '2026-11-05', price: 11768, ... }]
+ */
+export function applyPriceEdit(
+  history: PriceHistory,
+  change: PriceChange,
+  firstBillDate: string,
+): PriceHistory {
+  if (change.from <= firstBillDate) return [{ ...change, from: firstBillDate }]
+
+  const inForce = priceOn(history, change.from)
+  if (inForce.price === change.price && inForce.currency === change.currency)
+    return history
+
+  // The first price always stays, starting on the first charge (it covers the charges
+  // before the change), so the result is never empty; later ones only if they start
+  // before the change
+  const [first, ...rest] = history
+  return [
+    { ...first, from: firstBillDate },
+    ...rest.filter((entry) => entry.from < change.from),
+    change,
+  ]
+}
+
+/** The pauses after the user taps "Pausar" on `today`: a new open pause. */
+export function startPause(pauses: Pause[], today: string): Pause[] {
+  return [...pauses, { from: today }]
+}
+
+/**
+ * The pauses after the user taps "Reanudar" on `today`: the open pause ends today. If no
+ * charge fell inside it (paused and resumed between two charges, or the same day), it
+ * changed nothing, so it isn't kept.
+ */
+export function endPause(
+  pauses: Pause[],
+  today: string,
+  schedule: { firstBillDate: string; billingCycle: BillingCycle },
+): Pause[] {
+  return pauses.flatMap((pause) => {
+    if (pause.to) return [pause]
+    const firstCharge = nextBillDate(
+      schedule.firstBillDate,
+      schedule.billingCycle,
+      pause.from,
+    )
+    const skippedACharge = firstCharge < today
+    return skippedACharge ? [{ from: pause.from, to: today }] : []
+  })
+}
+
+/**
+ * The price of the next charge on or after `today`: what the card, the form, the total
+ * and the sorts show. A change saved for the next charge shows up right away, instead of
+ * waiting for that day. Pure: pass `todayISO()`.
+ */
+export function upcomingPrice(
+  sub: { priceHistory: PriceHistory; firstBillDate: string; billingCycle: BillingCycle },
+  today: string,
+): PriceChange {
+  return priceOn(
+    sub.priceHistory,
+    nextBillDate(sub.firstBillDate, sub.billingCycle, today),
+  )
 }

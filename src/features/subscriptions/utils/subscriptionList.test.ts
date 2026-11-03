@@ -9,8 +9,13 @@ import {
 } from './subscriptionList'
 import type { Subscription } from '@/shared/types'
 
+const TODAY = '2026-11-03'
+
+// A pause that started before today and never ended: paused today
+const PAUSED = [{ from: '2026-10-01' }]
+
 const sub = (name: string, isPaused: boolean, categoryId: string) =>
-  ({ name, isPaused, categoryId }) as Subscription
+  ({ name, pauses: isPaused ? PAUSED : [], categoryId }) as unknown as Subscription
 
 const list = [
   sub('Zeta', false, 'ai'),
@@ -20,7 +25,7 @@ const list = [
 
 describe('listFilters', () => {
   it('has all, one tab per category in use, and inactive', () => {
-    expect(listFilters(list).map(filterKey)).toEqual([
+    expect(listFilters(list, TODAY).map(filterKey)).toEqual([
       'all',
       'category:ai',
       'category:gaming',
@@ -28,26 +33,34 @@ describe('listFilters', () => {
     ])
   })
 
+  it('hides "inactive" when a pause already ended', () => {
+    const resumed = [
+      sub('Zeta', false, 'ai'),
+      { ...sub('alfa', false, 'ai'), pauses: [{ from: '2026-09-01', to: '2026-10-01' }] },
+    ]
+    expect(listFilters(resumed, TODAY).map(filterKey)).not.toContain('inactive')
+  })
+
   it('hides "inactive" when nothing is paused', () => {
-    const noPaused = list.filter((s) => !s.isPaused)
-    expect(listFilters(noPaused).map(filterKey)).not.toContain('inactive')
+    const noPaused = list.filter((s) => s.pauses.length === 0)
+    expect(listFilters(noPaused, TODAY).map(filterKey)).not.toContain('inactive')
   })
 })
 
 describe('filterSubscriptions', () => {
   it('keeps one category', () => {
-    const ai = filterSubscriptions(list, { type: 'category', categoryId: 'ai' })
+    const ai = filterSubscriptions(list, { type: 'category', categoryId: 'ai' }, TODAY)
     expect(ai.map((s) => s.name)).toEqual(['Zeta', 'alfa'])
   })
 
   it('keeps the paused ones', () => {
-    expect(filterSubscriptions(list, { type: 'inactive' }).map((s) => s.name)).toEqual([
-      'alfa',
-    ])
+    expect(
+      filterSubscriptions(list, { type: 'inactive' }, TODAY).map((s) => s.name),
+    ).toEqual(['alfa'])
   })
 
   it('keeps everything for "all"', () => {
-    expect(filterSubscriptions(list, { type: 'all' })).toHaveLength(3)
+    expect(filterSubscriptions(list, { type: 'all' }, TODAY)).toHaveLength(3)
   })
 })
 
@@ -101,10 +114,10 @@ describe('sortSubscriptions', () => {
   const charged = (name: string, firstBillDate: string, isPaused = false) =>
     ({
       name,
-      isPaused,
+      pauses: isPaused ? PAUSED : [],
       firstBillDate,
       billingCycle: { type: 'every', interval: 1, unit: 'month' },
-    }) as Subscription
+    }) as unknown as Subscription
 
   it('next-charge: the soonest charge first, counting today', () => {
     const subs = [
@@ -147,11 +160,11 @@ describe('sortSubscriptions', () => {
   ) =>
     ({
       name,
-      price,
-      currency,
-      isPaused,
+      priceHistory: [{ from: '2026-01-01', price, currency }],
+      firstBillDate: '2026-01-01',
+      pauses: isPaused ? PAUSED : [],
       billingCycle: { type: 'every', interval: 1, unit },
-    }) as Subscription
+    }) as unknown as Subscription
 
   const prices = [
     priced('Quince', 15, 'USD'),

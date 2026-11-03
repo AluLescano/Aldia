@@ -153,9 +153,11 @@ export type SubscriptionIcon =
 export interface Subscription {
   id: string
   name: string
-  /** Per cycle, in `currency`. */
-  price: number
-  currency: CurrencyCode
+  /**
+   * Every price it has had, oldest first; the only place the price lives. Read the
+   * current one with `priceOn(sub.priceHistory, todayISO())`.
+   */
+  priceHistory: PriceHistory
   billingCycle: BillingCycle
 
   /** `YYYY-MM-DD`. Every charge is counted from this one. */
@@ -170,13 +172,14 @@ export interface Subscription {
 
   reminders: SubscriptionReminder[]
 
-  /** A logo path like '/logos/logo_netflix.webp'. */
-  iconUrl?: string
-  /** A built-in icon, for bills without a logo. */
-  iconKey?: IconKey
+  /** Its logo or built-in icon; missing = the name's initial. */
+  icon?: SubscriptionIcon
 
-  /** Paused by the user. The only part of the status that is stored (see `SubscriptionStatus`). */
-  isPaused: boolean
+  /**
+   * The times the user paused it, oldest first. The only part of the status that is
+   * stored (see `SubscriptionStatus`): paused today = `isPausedOn(sub.pauses, todayISO())`.
+   */
+  pauses: Pause[]
   /** ISO date and time of creation. */
   createdAt: string
 }

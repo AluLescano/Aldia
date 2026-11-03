@@ -19,6 +19,9 @@ import { useBackHandler } from '@/shared/hooks/useBackHandler'
 
 // UTILS
 import { createId } from '@/shared/lib/id'
+import { todayISO } from '@/shared/lib/isoDate'
+import { nextBillDate } from '@/features/subscriptions/utils/billingCycle'
+import { applyPriceEdit } from '@/features/subscriptions/utils/subscriptionHistory'
 import { subscriptionToFormValues } from '@/features/subscriptions/utils/subscriptionToFormValues'
 import { newSubscriptionValues } from '@/features/subscriptions/utils/newSubscriptionValues'
 import { formValuesToSubscriptionData } from '@/features/subscriptions/utils/formValuesToSubscriptionData'
@@ -65,7 +68,7 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
   const readOnly = existing !== undefined && !isEditing
 
   const initialValues = existing
-    ? subscriptionToFormValues(existing)
+    ? subscriptionToFormValues(existing, todayISO())
     : newSubscriptionValues(preset, selectedCurrency, categories)
 
   // In edit mode, back drops the changes and returns to view mode; otherwise it closes the screen.
@@ -78,19 +81,30 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
   const handleSubmit = (values: SubscriptionFormValues) => {
     const data = formValuesToSubscriptionData(values)
     if (!data) return
+    const { price, currency, ...fields } = data
 
     if (existing) {
-      // `data` has no `isPaused`, so a paused subscription stays paused when it is edited
-      updateSubscription(existing.id, data)
+      // A new price starts on the next charge; the charges before keep theirs.
+      // `fields` has no `pauses`, so a paused subscription stays paused when it is edited
+      const from = nextBillDate(fields.firstBillDate, fields.billingCycle, todayISO())
+      updateSubscription(existing.id, {
+        ...fields,
+        priceHistory: applyPriceEdit(
+          existing.priceHistory,
+          { from, price, currency },
+          fields.firstBillDate,
+        ),
+      })
       showToast('Cambios guardados', 'success')
       setIsEditing(false)
       return
     }
 
     addSubscription({
-      ...data,
+      ...fields,
+      priceHistory: [{ from: fields.firstBillDate, price, currency }],
       id: createId(),
-      isPaused: false,
+      pauses: [],
       createdAt: new Date().toISOString(),
     })
     showToast('¡Se ha agregado la subscripción!', 'success')
