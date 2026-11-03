@@ -17,6 +17,7 @@ import {
 } from '@/features/notifications/notificationSync'
 
 // COMPONENTS
+import AppLogo from '@/shared/ui/AppLogo/AppLogo'
 import Button from '@/shared/ui/Button/Button'
 import Typography from '@/shared/ui/Typography/Typography'
 
@@ -172,9 +173,8 @@ const OnboardingFlow = () => {
         return (
           <>
             <div className={art}>
-              {/* Until the app has its real logo */}
               <div className={logo} aria-hidden="true">
-                Aldia
+                <AppLogo size={64} />
               </div>
             </div>
             <div className={texts}>

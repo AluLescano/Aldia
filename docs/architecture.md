@@ -282,10 +282,10 @@ Each of these comes from a real bug in this codebase.
 
 ## 8. Exchange Rates
 
-- Source: the free [exchange-api](https://github.com/fawazahmed0/exchange-api) (no key, daily JSON on a CDN, with a fallback URL). Download and conversion live in `shared/lib/exchangeRates.ts`.
+- Source: the free [exchange-api](https://github.com/fawazahmed0/exchange-api) (no key, daily JSON on a CDN, with a fallback URL). Every download goes out with `cache: 'no-cache'`: jsDelivr marks the file as good for 7 days, so without it the WebView kept serving a week-old copy. Download and conversion live in `shared/lib/exchangeRates.ts`.
 - `useRatesStore` (`shared/store/ratesStore.ts`, persisted as `aldia_rates`) downloads once per local day: `App.tsx` calls `refreshIfStale()` on start and every time the app becomes visible again. Two calls at once share one download. If the download fails, the last saved rates stay in use.
 - Conversion is a pure function (`convert(amount, from, to, rates)`), so totals and statistics stay testable offline. The same currency never needs rates.
-- Home (`getMonthlyTotal` in `features/subscriptions/utils/monthlyTotal.ts`) adds only the active subscriptions, each turned into its monthly cost (`monthlyEquivalent`) and converted. It says so when rates are older than today ("Tasas del ...") or when some subscriptions could not be converted ("N sin sumar").
+- Home (`getMonthlyTotal` in `features/subscriptions/utils/monthlyTotal.ts`) adds only the active subscriptions, each turned into its monthly cost (`monthlyEquivalent`) and converted. It says so when rates are 2 or more days old ("Tasas del ..."; 1 day behind is normal for a daily API) or when some subscriptions could not be converted ("N sin sumar").
 - Known limit: the API gives official rates. A USD subscription paid with an Argentine card is charged at the official rate plus taxes, so the ARS total can be lower than the real charge.
 
 ---

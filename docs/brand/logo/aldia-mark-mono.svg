@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="27 29 46 46" fill="none" aria-hidden="true">
+  <!-- One color: takes the text color (currentColor), like the app's Icon.tsx icons -->
+  <path d="M46.9 34.3A18 18 0 1 1 32 52" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="36.2" cy="40.4" r="4.5" fill="currentColor"/>
+  <path d="M50 52V43.5M50 52H43.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="63.5" y="30" width="9" height="44.5" rx="4.5" fill="currentColor"/>
+</svg>

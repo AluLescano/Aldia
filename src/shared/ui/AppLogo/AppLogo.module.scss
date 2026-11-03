@@ -1,0 +1,10 @@
+// The mark, colored by currentColor (--brand-logo: green on light, champagne on dark)
+.logo {
+  display: inline-flex;
+  color: var(--brand-logo);
+
+  svg {
+    display: block; // no gap under it (an svg sits on the text baseline by default)
+    flex-shrink: 0;
+  }
+}
