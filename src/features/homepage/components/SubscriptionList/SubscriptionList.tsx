@@ -12,7 +12,11 @@ import {
   listFilters,
   sortSubscriptions,
   type ListFilter,
+  type SortContext,
 } from '@/features/subscriptions/utils/subscriptionList'
+import { todayISO } from '@/shared/lib/isoDate'
+import { useSettingsStore } from '@/features/settings/store/settingsStore'
+import { useRatesStore } from '@/shared/store/ratesStore'
 
 // COMPONENTS
 import SubscriptionListSkeleton from './SubscriptionListSkeleton'
@@ -25,6 +29,7 @@ import type { Subscription } from '@/shared/types'
 
 // ASSETS
 import { IconAddEmpty } from '@/assets/icons/IconAddEmpty'
+
 import styles from './SubscriptionList.module.scss'
 
 interface Props {
@@ -54,6 +59,9 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
 
   const [chosenFilter, setChosenFilter] = useState<ListFilter>({ type: 'all' })
   const categories = useCategoryStore((state) => state.categories)
+  const sort = useSettingsStore((state) => state.listSort)
+  const currency = useSettingsStore((state) => state.selectedCurrency)
+  const rates = useRatesStore((state) => state.rates)
 
   const filters = listFilters(subscriptions)
 
@@ -70,7 +78,17 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
     return categories.find((c) => c.id === filter.categoryId)?.name ?? filter.categoryId
   }
 
-  const visible = sortSubscriptions(filterSubscriptions(subscriptions, activeFilter))
+  const context: SortContext = {
+    today: todayISO(),
+    currency: currency,
+    rates: rates,
+  }
+
+  const visible = sortSubscriptions(
+    filterSubscriptions(subscriptions, activeFilter),
+    sort,
+    context,
+  )
 
   if (isLoading) {
     return <SubscriptionListSkeleton />
