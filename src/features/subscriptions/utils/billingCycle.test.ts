@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { addCycles, formatBillingCycle, nextBillDate } from './billingCycle'
+import {
+  addCycles,
+  formatBillingCycle,
+  formatCyclePhrase,
+  nextBillDate,
+} from './billingCycle'
 import type { BillingCycle, BillingUnit } from '@/shared/types'
 
 const every = (interval: number, unit: BillingUnit): BillingCycle => ({
@@ -89,5 +94,21 @@ describe('formatBillingCycle', () => {
     [every(15, 'day'), 'Cada 15 días'],
   ])('%o → %s', (cycle, expected) => {
     expect(formatBillingCycle(cycle)).toBe(expected)
+  })
+})
+
+describe('formatCyclePhrase', () => {
+  it.each([
+    [every(1, 'day'), 'al día'],
+    [every(1, 'week'), 'a la semana'],
+    [every(1, 'month'), 'al mes'],
+    [every(1, 'year'), 'al año'],
+    [every(2, 'day'), 'cada 2 días'],
+    [every(2, 'week'), 'cada 2 semanas'],
+    [every(3, 'month'), 'cada 3 meses'],
+    [every(2, 'year'), 'cada 2 años'],
+    [ONE_TIME, 'una vez'],
+  ])('%o → %s', (cycle, expected) => {
+    expect(formatCyclePhrase(cycle)).toBe(expected)
   })
 })

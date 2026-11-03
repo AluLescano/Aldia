@@ -1,7 +1,7 @@
 import type { CurrencyCode, Subscription } from '@/shared/types'
 import { nextBillDate } from './billingCycle'
-import { convert, type ExchangeRates } from '@/shared/lib/exchangeRates'
-import { monthlyEquivalent } from './monthlyTotal'
+import type { ExchangeRates } from '@/shared/lib/exchangeRates'
+import { monthlyPriceIn } from './monthlyTotal'
 
 /** Which subscriptions the Home list shows. */
 export type ListFilter =
@@ -69,18 +69,10 @@ export function sortSubscriptions(
   const byName = (subA: Subscription, subB: Subscription) =>
     subA.name.localeCompare(subB.name)
 
-  const monthlyPrice = (sub: Subscription) =>
-    convert(
-      monthlyEquivalent(sub.price, sub.billingCycle),
-      sub.currency,
-      context.currency,
-      context.rates,
-    )
-
   /** Cheapest first (`direction` 1) or priciest first (-1). No price (no rate) goes after the rest either way. */
   const byPrice = (subA: Subscription, subB: Subscription, direction: 1 | -1) => {
-    const priceA = monthlyPrice(subA)
-    const priceB = monthlyPrice(subB)
+    const priceA = monthlyPriceIn(subA, context.currency, context.rates)
+    const priceB = monthlyPriceIn(subB, context.currency, context.rates)
     if (priceA === null && priceB === null) return byName(subA, subB)
     if (priceA === null) return 1 // a has no price: a goes after
     if (priceB === null) return -1 // b has no price: b goes after

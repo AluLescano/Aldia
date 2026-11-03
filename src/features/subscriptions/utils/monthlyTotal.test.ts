@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getMonthlyTotal, monthlyEquivalent } from './monthlyTotal'
+import { getMonthlyTotal, monthlyEquivalent, monthlyPriceIn } from './monthlyTotal'
 import type { ExchangeRates } from '@/shared/lib/exchangeRates'
 import type { BillingCycle, BillingUnit, Subscription } from '@/shared/types'
 
@@ -36,6 +36,24 @@ describe('monthlyEquivalent', () => {
     [50, { type: 'one-time' } as BillingCycle, 0],
   ])('%d per %o is %d a month', (price, cycle, expected) => {
     expect(monthlyEquivalent(price, cycle)).toBeCloseTo(expected, 2)
+  })
+})
+
+describe('monthlyPriceIn', () => {
+  it('spreads the price over the cycle and converts it', () => {
+    // 18,000 ARS a year = 1,500 ARS a month = 1 USD
+    expect(monthlyPriceIn(sub(18000, 'ARS', every(1, 'year')), 'USD', rates)).toBeCloseTo(
+      1,
+      5,
+    )
+  })
+
+  it('needs no rates for the same currency', () => {
+    expect(monthlyPriceIn(sub(30, 'USD', every(3, 'month')), 'USD', null)).toBe(10)
+  })
+
+  it('is null when a rate is missing', () => {
+    expect(monthlyPriceIn(sub(100, 'ARS', every(1, 'month')), 'USD', null)).toBeNull()
   })
 })
 

@@ -26,6 +26,31 @@ export function formatBillingCycle(cycle: BillingCycle): string {
   return `Cada ${cycle.interval} ${units[cycle.unit]}`
 }
 
+/**
+ * The cycle as the end of a sentence, after a price: "$ 8.500 al año".
+ *
+ * @example
+ * formatCyclePhrase({ type: 'every', interval: 1, unit: 'year' })  // 'al año'
+ * formatCyclePhrase({ type: 'every', interval: 3, unit: 'month' }) // 'cada 3 meses'
+ */
+export function formatCyclePhrase(cycle: BillingCycle): string {
+  if (cycle.type === 'one-time') return 'una vez'
+
+  if (cycle.interval === 1) {
+    const everyOne = {
+      day: 'al día',
+      week: 'a la semana',
+      month: 'al mes',
+      year: 'al año',
+    }
+    return everyOne[cycle.unit]
+  }
+
+  // Past the `interval === 1` case it's always 2 or more, so always plural
+  const units = { day: 'días', week: 'semanas', month: 'meses', year: 'años' }
+  return `cada ${cycle.interval} ${units[cycle.unit]}`
+}
+
 // One cycle as whole months or as days (a year is 12 months, a week 7 days)
 function cycleStep(cycle: BillingCycle) {
   if (cycle.type === 'one-time') return { months: 0, days: 0 }
