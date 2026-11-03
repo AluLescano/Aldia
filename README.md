@@ -91,14 +91,14 @@ keyPassword=...
 
 Then `cd android && ./gradlew assembleRelease` builds `app/build/outputs/apk/release/app-release.apk`. Without that file the release build comes out unsigned. Testers only ever get signed release builds: an APK signed with another key can't update the installed app, so switching keys means an uninstall.
 
-**Versions** live only in `package.json`: Gradle reads `versionName` from it and builds `versionCode` as `major * 10000 + minor * 100 + patch` (0.2.1 → 201), so every release must raise the version. Bump it with `npm version patch` (or `minor`) plus `--no-git-tag-version` on the release branch; the tag goes on `main`.
+**Versions** live only in `package.json`: Gradle reads `versionName` from it and builds `versionCode` as `major * 10000 + minor * 100 + patch` (0.2.1 → 201), so every release must raise the version. Bump it with `npm run release:patch` (fixes) or `npm run release:minor` (new features) on the release branch; the tag goes on `main`.
 
 ### Releasing
 
-1. On a `chore/*` branch off `dev`: `npm version patch --no-git-tag-version`, commit `chore: release X.Y.Z`, PR into `dev`.
-2. PR `dev` → `main` titled `Release X.Y.Z`.
-3. On the merged `main`: `git tag -a vX.Y.Z -m "Aldia X.Y.Z"` and `git push origin vX.Y.Z`.
-4. Build the APK from that tag (`npm run build`, `npx cap sync android`, `./gradlew assembleRelease`) and rename it `aldia-X.Y.Z.apk`.
+1. On a `chore/*` branch off `dev`: `npm run release:patch` (or `release:minor`), commit `chore: release X.Y.Z`, PR into `dev`.
+2. PR `dev` → `main` titled `Release X.Y.Z`, merge it, then `git switch main` and `git pull`.
+3. `npm run release:tag`: checks you are on an up-to-date, clean `main` and the tag is new, then creates and pushes `vX.Y.Z`.
+4. `npm run release:apk`: builds the signed APK and copies it to `release/aldia-X.Y.Z.apk` (gitignored). It prints the path and, on Windows, opens the folder. It warns if the commit isn't the tag: that APK is only for testing.
 5. On GitHub, Releases → Draft a new release → pick the tag, write the notes, attach the APK, tick "Set as a pre-release" while Aldia is in alpha.
 
 ---
