@@ -7,6 +7,14 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// The app version lives only in package.json; Android reads it from there
+def packageJson = new groovy.json.JsonSlurper().parse(rootProject.file("../package.json"))
+def appVersion = packageJson.version
+
+// "0.2.1" -> 201. versionCode must grow with every release or phones refuse the update
+def (major, minor, patch) = appVersion.split('-')[0].tokenize('.').collect { it.toInteger() }
+def appVersionCode = major * 10000 + minor * 100 + patch
+
 android {
     namespace = "com.katyadesign.aldia"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -14,8 +22,8 @@ android {
         applicationId "com.katyadesign.aldia"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "0.2.0"
+        versionCode appVersionCode
+        versionName appVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
