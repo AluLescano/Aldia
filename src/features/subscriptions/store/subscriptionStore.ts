@@ -33,6 +33,10 @@ interface SubscriptionState {
  *
  * @param today `YYYY-MM-DD`: a paused subscription's pause starts on the day it's upgraded,
  * since version 1 never saved when it was paused. Tests pass a fixed day.
+ *
+ * A step can be deleted once every phone has opened a build that ran it (the file is saved
+ * in the new shape right after). Only the testers ever had version 0 or 1 data: both steps
+ * go once they've opened 0.3.0 (tracked in the vault's Active Priorities).
  */
 export function migrateSubscriptions(
   persisted: unknown,
