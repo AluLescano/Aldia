@@ -13,7 +13,11 @@
     "format:check": "prettier --check .",
     "commit": "cz",
     "preview": "vite preview",
-    "optimize-logos": "node scripts/compress-images.mjs"
+    "optimize-logos": "node scripts/compress-images.mjs",
+    "release:patch": "npm version patch --no-git-tag-version",
+    "release:minor": "npm version minor --no-git-tag-version",
+    "release:tag": "node scripts/release-tag.mjs",
+    "release:apk": "node scripts/release-apk.mjs"
   },
   "config": {
     "commitizen": {
