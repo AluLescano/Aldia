@@ -12,8 +12,14 @@ import { cn } from '@/shared/lib/cn'
 import { formatNextCharge, formatTrial } from '@/shared/lib/formatDate'
 import { todayISO } from '@/shared/lib/isoDate'
 import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
-import { convert } from '@/shared/lib/exchangeRates'
-import { nextBillDate } from '@/features/subscriptions/utils/billingCycle'
+import {
+  monthlyEquivalent,
+  monthlyPriceIn,
+} from '@/features/subscriptions/utils/monthlyTotal'
+import {
+  formatCyclePhrase,
+  nextBillDate,
+} from '@/features/subscriptions/utils/billingCycle'
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 
 // COMPONENTS
@@ -94,16 +100,25 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     today,
   )
 
-  // In another currency: show it converted to the one picked on Home, and keep the
-  // original (what the card is really charged) small underneath. No rate: original only.
-  const isForeign = subscription.currency !== selectedCurrency
-  const converted = isForeign
-    ? convert(subscription.price, subscription.currency, selectedCurrency, rates)
-    : null
-  const shownAmount = converted ?? subscription.price
+  const cycle = subscription.billingCycle
+  const isMonthly =
+    cycle.type === 'every' && cycle.interval === 1 && cycle.unit === 'month'
+  // Big: what it costs per month in the Home currency, the same number the total adds up
+  // and the price sort compares. No rate: per month in its own currency
+  const monthly = monthlyPriceIn(subscription, selectedCurrency, rates)
+  const shownAmount = monthly ?? monthlyEquivalent(subscription.price, cycle)
   const shownSymbol = getCurrencySymbol(
-    converted !== null ? selectedCurrency : subscription.currency,
+    monthly !== null ? selectedCurrency : subscription.currency,
   )
+
+  // Small: what is really charged, in its own currency, with its cycle when it isn't monthly.
+  // Only when it adds something: not monthly, or converted from another currency
+  const isForeign = subscription.currency !== selectedCurrency
+  const showsCharge = !isMonthly || (isForeign && monthly !== null)
+
+  const chargeText = `${getCurrencySymbol(subscription.currency)} ${formatAmount(subscription.price)}${
+    isMonthly ? '' : ` ${formatCyclePhrase(cycle)}`
+  }`
 
   return (
     <div className={cardWrapper}>
@@ -171,19 +186,13 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
               </Typography>
             )}
           </div>
-          <div
-            className={cn(
-              cardPrice,
-              isPaused && opacity50,
-              converted !== null && centered,
-            )}
-          >
+          <div className={cn(cardPrice, isPaused && opacity50, showsCharge && centered)}>
             <Typography variant="currency" size="lg" currencySymbol={shownSymbol}>
               {shownAmount}
             </Typography>
-            {converted !== null && (
+            {showsCharge && (
               <Typography variant="label" size="sm" className={originalPrice}>
-                {`${getCurrencySymbol(subscription.currency)} ${formatAmount(subscription.price)}`}
+                {chargeText}
               </Typography>
             )}
           </div>

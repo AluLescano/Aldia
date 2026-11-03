@@ -32,6 +32,23 @@ export function monthlyEquivalent(price: number, cycle: BillingCycle): number {
   return price / (cycle.interval * MONTHS_PER_UNIT[cycle.unit])
 }
 
+/**
+ * What a subscription costs per month in `currency`: the number the Home total adds up,
+ * the price sorts compare and the cards show. `null` when a rate is missing.
+ */
+export function monthlyPriceIn(
+  sub: Pick<Subscription, 'price' | 'currency' | 'billingCycle'>,
+  currency: CurrencyCode,
+  rates: ExchangeRates | null,
+): number | null {
+  return convert(
+    monthlyEquivalent(sub.price, sub.billingCycle),
+    sub.currency,
+    currency,
+    rates,
+  )
+}
+
 /** The result of `getMonthlyTotal`. */
 export interface MonthlyTotal {
   /** Monthly cost of the active subscriptions, in the requested currency. */
@@ -56,8 +73,7 @@ export function getMonthlyTotal(
 
   for (const sub of subscriptions) {
     if (statusFor(sub, today) !== 'active') continue
-    const monthly = monthlyEquivalent(sub.price, sub.billingCycle)
-    const amount = convert(monthly, sub.currency, currency, rates)
+    const amount = monthlyPriceIn(sub, currency, rates)
     if (amount === null) {
       result.unconverted++
       continue

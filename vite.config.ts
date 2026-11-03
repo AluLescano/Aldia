@@ -11,6 +11,11 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  server: {
+    // IPv4: on Windows "localhost" can end up IPv6-only (::1), and the phone's
+    // `cap run -l --forwardPorts` tunnel (adb reverse) only reaches 127.0.0.1
+    host: '127.0.0.1',
+  },
   test: {
     // Pure functions only for now: plain Node, no browser needed
     environment: 'node',
