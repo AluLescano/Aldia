@@ -1,67 +1,86 @@
-.navContainer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  padding-bottom: var(--safe-bottom);
-  border-top: 1px solid var(--border-subtle);
-  background-color: var(--bg-surface-raised);
-}
+// Sizes live in index.css (--nav-*): the FAB, the toast and the pages read them too
 
-.navWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
+.navContainer {
+  // The notch: a circle a bit bigger than the ball, so a ring of page shows around it.
+  // --notch-x comes from the .tsx (Motion springs it from tab to tab)
+  --notch-r: calc(var(--nav-ball-size) / 2 + 0.375rem);
+
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + var(--nav-gap));
+  left: 0.25rem;
+  right: 0.25rem;
   max-width: 28rem;
-  height: var(--nav-height);
-  margin: 0 auto;
-  padding: 0 0.5rem;
+  height: var(--nav-bar-height);
+  margin-inline: auto;
+  z-index: 40;
+
+  // The glass, on its own layer: a mask on .navContainer would cut the ball and the tabs too
+  .bar {
+    position: absolute;
+    inset: 0;
+
+    border-radius: 5rem;
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    // Only an inset rim: the mask would cut an outer shadow away
+    box-shadow: inset 0 1px 0 var(--glass-rim);
+
+    // Transparent inside the circle (cut away), solid outside; the 1px between softens the edge
+    mask-image: radial-gradient(
+      circle var(--notch-r) at var(--notch-x) var(--nav-notch-y),
+      transparent calc(var(--notch-r) - 1px),
+      #000 var(--notch-r)
+    );
+  }
+
+  // Holds the active tab's icon. Its centre sits on the notch's centre
+  .ball {
+    position: absolute;
+    top: calc(var(--nav-notch-y) - var(--nav-ball-size) / 2);
+    left: var(--notch-x);
+    translate: -50% 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--nav-ball-size);
+    aspect-ratio: 1/1;
+
+    border-radius: 50%;
+    background-color: var(--brand-logo);
+    color: var(--icon-on-brand-logo);
+    // A glow in the ball's own color, so it follows the theme (green / champagne)
+    box-shadow: 0 3px 7px color-mix(in srgb, var(--brand-logo) 75%, transparent);
+  }
+
+  // Edge to edge, so tab i's centre is at (i + 0.5) / 5 of the bar, like the notch math
+  .navWrapper {
+    position: relative;
+    display: flex;
+    height: 100%;
+  }
 }
 
 .navItem {
   position: relative;
-  isolation: isolate;
   display: flex;
   flex: 1 1 0%;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 1.5rem;
-  min-height: 3rem;
   color: var(--text-muted);
-  transition: color 200ms ease-out;
-
-  aspect-ratio: 1/1;
-
-  &.active {
-    color: var(--brand-on-subtle);
-  }
 }
 
-// The active tab's background. A Motion layoutId slides it from tab to tab (see the .tsx)
-.highlight {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background-color: var(--bg-surface-subtle);
-}
-
-// Round area around the icon; shrinks a little while pressed
+// The tab's own icon; fades out on the active tab, whose icon is in the ball
 .pill {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.5rem;
+  width: 3rem;
   aspect-ratio: 1/1;
   border-radius: 100%;
-  transition:
-    background-color 200ms ease-out,
-    transform 150ms ease-out;
+  transition: opacity 100ms ease-in-out;
 
-  .navItem:active & {
-    transform: scale(0.94);
+  .active & {
+    opacity: 0;
   }
 }
 
@@ -70,8 +89,26 @@
   height: 1.5rem;
 }
 
+// Out of the layout (absolute), so showing it never moves the icons.
+// Only the active tab's shows; the others stay readable for screen readers (opacity, not removed)
 .label {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0.375rem;
+  text-align: center;
+
+  opacity: 0;
+  translate: 0 0.25rem; // starts a little low...
+  transition:
+    opacity 150ms ease-out,
+    translate 150ms ease-out;
+
+  color: var(--brand-logo);
+
   .active & {
     font-weight: 500;
+    opacity: 1;
+    translate: 0 0; // ...and rises into place
+    transition-delay: 100ms; // waits for the ball; the old label fades out right away
   }
 }
