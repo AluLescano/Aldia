@@ -2,6 +2,7 @@ import type { CurrencyCode, Subscription } from '@/shared/types'
 import { nextBillDate } from './billingCycle'
 import type { ExchangeRates } from '@/shared/lib/exchangeRates'
 import { monthlyPriceIn } from './monthlyTotal'
+import { isInactive } from './subscriptionStatus'
 
 /** Which subscriptions the Home list shows. */
 export type ListFilter =
@@ -17,28 +18,30 @@ export const filterKey = (filter: ListFilter) =>
 
 /**
  * The filter tabs for a list: "all", one per category in use, and "inactive" only
- * when at least one subscription is paused. No tab ever leads to an empty list.
+ * when at least one subscription is paused or ended `today`. No tab ever leads to an
+ * empty list.
  */
-export function listFilters(subscriptions: Subscription[]): ListFilter[] {
+export function listFilters(subscriptions: Subscription[], today: string): ListFilter[] {
   const categoryIds = [...new Set(subscriptions.map((sub) => sub.categoryId))]
-  const hasPaused = subscriptions.some((sub) => sub.isPaused)
+  const hasInactive = subscriptions.some((sub) => isInactive(sub, today))
   return [
     { type: 'all' },
     ...categoryIds.map((categoryId) => ({ type: 'category' as const, categoryId })),
-    ...(hasPaused ? [{ type: 'inactive' as const }] : []),
+    ...(hasInactive ? [{ type: 'inactive' as const }] : []),
   ]
 }
 
-/** Keeps the subscriptions that match the filter. */
+/** Keeps the subscriptions that match the filter ("inactive" = paused or ended `today`). */
 export function filterSubscriptions(
   subscriptions: Subscription[],
   filter: ListFilter,
+  today: string,
 ): Subscription[] {
   switch (filter.type) {
     case 'all':
       return subscriptions
     case 'inactive':
-      return subscriptions.filter((sub) => sub.isPaused)
+      return subscriptions.filter((sub) => isInactive(sub, today))
     case 'category':
       return subscriptions.filter((sub) => sub.categoryId === filter.categoryId)
   }
@@ -52,7 +55,7 @@ export interface SortContext {
 }
 
 /**
- * Orders the list by `sort`. Paused subscriptions always go last, sorted the same way among
+ * Orders the list by `sort`. Paused and ended subscriptions always go last, sorted the same way among
  * themselves; ties fall back to A-Z so the order never jumps around. Returns a new array.
  *
  * @example
@@ -71,8 +74,8 @@ export function sortSubscriptions(
 
   /** Cheapest first (`direction` 1) or priciest first (-1). No price (no rate) goes after the rest either way. */
   const byPrice = (subA: Subscription, subB: Subscription, direction: 1 | -1) => {
-    const priceA = monthlyPriceIn(subA, context.currency, context.rates)
-    const priceB = monthlyPriceIn(subB, context.currency, context.rates)
+    const priceA = monthlyPriceIn(subA, context.currency, context.rates, context.today)
+    const priceB = monthlyPriceIn(subB, context.currency, context.rates, context.today)
     if (priceA === null && priceB === null) return byName(subA, subB)
     if (priceA === null) return 1 // a has no price: a goes after
     if (priceB === null) return -1 // b has no price: b goes after
@@ -80,7 +83,10 @@ export function sortSubscriptions(
   }
 
   return [...subscriptions].sort((a, b) => {
-    if (a.isPaused !== b.isPaused) return a.isPaused ? 1 : -1
+    // Paused and ended ones go last, sorted the same way among themselves
+    const inactiveA = isInactive(a, context.today)
+    const inactiveB = isInactive(b, context.today)
+    if (inactiveA !== inactiveB) return inactiveA ? 1 : -1
     switch (sort) {
       case 'name-asc':
         return byName(a, b)

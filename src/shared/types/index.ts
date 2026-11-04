@@ -91,10 +91,11 @@ export type BillingCycle =
   { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
 
 /**
- * `trial`: in its free trial · `active`: paying · `inactive`: paused by the user.
+ * `trial`: in its free trial · `active`: paying · `inactive`: paused by the user ·
+ * `ended`: no charges left (its `endDate` comes before the next one).
  * Never stored (a trial ends on its own): calculate it with `statusFor(sub, todayISO())`.
  */
-export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
+export type SubscriptionStatus = 'active' | 'trial' | 'inactive' | 'ended'
 
 /** A free trial: no charges between these two days. */
 export interface TrialConfig {
@@ -107,13 +108,57 @@ export interface TrialConfig {
 /** Built-in icons for bills without a logo (see `shared/lib/icons.tsx`). */
 export type IconKey = 'electricity' | 'water' | 'gas' | 'phone' | 'rent' | 'internet'
 
+/**
+ * A price that applies to the charges from `from` on, until the next change.
+ * Read it with `priceOn(history, date)` (`subscriptionHistory.ts`).
+ */
+export interface PriceChange {
+  /** `YYYY-MM-DD`. A charge day: prices only change on one. */
+  from: string
+  /** Per cycle, in `currency`. */
+  price: number
+  currency: CurrencyCode
+}
+
+/**
+ * Every price a subscription has had, oldest first. Never empty: the first entry starts
+ * on `firstBillDate`, so every charge has a price (the type guarantees at least one).
+ */
+export type PriceHistory = [PriceChange, ...PriceChange[]]
+
+/**
+ * A time the user paused a subscription: no charges in `[from, to)`. Recorded by
+ * the Pause / Resume buttons (never typed in), and only kept if it skipped a charge.
+ */
+export interface Pause {
+  /** `YYYY-MM-DD`. The day it was paused. */
+  from: string
+  /** `YYYY-MM-DD`. The day it was resumed; a charge on this day happens. Missing while still paused. */
+  to?: string
+}
+
+/**
+ * The picture on a subscription's card and form. No icon at all: the Avatar shows the
+ * name's initial. Check `kind` first, like `BillingCycle`'s `type`.
+ */
+export type SubscriptionIcon =
+  /** A logo bundled with the app, e.g. '/logos/logo_netflix.webp'. */
+  | { kind: 'preset'; path: string }
+  /** A logo downloaded for this subscription, saved on the phone. Only the file name
+      is stored: the full path can change between installs. */
+  | { kind: 'file'; fileName: string }
+  /** A built-in icon, for bills without a logo. */
+  | { kind: 'key'; key: IconKey }
+
 /** A saved subscription or recurring bill. Persisted in the subscription store. */
 export interface Subscription {
   id: string
   name: string
-  /** Per cycle, in `currency`. */
-  price: number
-  currency: CurrencyCode
+  /**
+   * Every price it has had, oldest first; the only place the price lives. Read the
+   * current one with `priceOn(sub.priceHistory, todayISO())`.
+   */
+  priceHistory: PriceHistory
   billingCycle: BillingCycle
 
   /** `YYYY-MM-DD`. Every charge is counted from this one. */
@@ -128,13 +173,14 @@ export interface Subscription {
 
   reminders: SubscriptionReminder[]
 
-  /** A logo path like '/logos/logo_netflix.webp'. */
-  iconUrl?: string
-  /** A built-in icon, for bills without a logo. */
-  iconKey?: IconKey
+  /** Its logo or built-in icon; missing = the name's initial. */
+  icon?: SubscriptionIcon
 
-  /** Paused by the user. The only part of the status that is stored (see `SubscriptionStatus`). */
-  isPaused: boolean
+  /**
+   * The times the user paused it, oldest first. The only part of the status that is
+   * stored (see `SubscriptionStatus`): paused today = `isPausedOn(sub.pauses, todayISO())`.
+   */
+  pauses: Pause[]
   /** ISO date and time of creation. */
   createdAt: string
 }

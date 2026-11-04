@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/features/settings/store/settingsStore'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
-import { formatNextCharge, formatTrial } from '@/shared/lib/formatDate'
+import { formatDate, formatNextCharge, formatTrial } from '@/shared/lib/formatDate'
 import { todayISO } from '@/shared/lib/isoDate'
 import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
 import {
@@ -21,6 +21,8 @@ import {
   nextBillDate,
 } from '@/features/subscriptions/utils/billingCycle'
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
+import { upcomingPrice } from '@/features/subscriptions/utils/subscriptionHistory'
+import { iconSource } from '@/features/subscriptions/utils/subscriptionIcon'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -90,10 +92,11 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     pushOverlay('subscription-form', { subscriptionId: subscription.id })
   }
 
-  const isPaused = subscription.isPaused
-
   // Calculated from today, so it never shows a date that already passed
   const today = todayISO()
+  const status = statusFor(subscription, today)
+  // Paused or ended: greyed out, no next charge
+  const isPaused = status === 'inactive' || status === 'ended'
   const nextCharge = nextBillDate(
     subscription.firstBillDate,
     subscription.billingCycle,
@@ -105,20 +108,23 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     cycle.type === 'every' && cycle.interval === 1 && cycle.unit === 'month'
   // Big: what it costs per month in the Home currency, the same number the total adds up
   // and the price sort compares. No rate: per month in its own currency
-  const monthly = monthlyPriceIn(subscription, selectedCurrency, rates)
-  const shownAmount = monthly ?? monthlyEquivalent(subscription.price, cycle)
+  const charge = upcomingPrice(subscription, today)
+  const monthly = monthlyPriceIn(subscription, selectedCurrency, rates, today)
+  const shownAmount = monthly ?? monthlyEquivalent(charge.price, cycle)
   const shownSymbol = getCurrencySymbol(
-    monthly !== null ? selectedCurrency : subscription.currency,
+    monthly !== null ? selectedCurrency : charge.currency,
   )
 
   // Small: what is really charged, in its own currency, with its cycle when it isn't monthly.
   // Only when it adds something: not monthly, or converted from another currency
-  const isForeign = subscription.currency !== selectedCurrency
+  const isForeign = charge.currency !== selectedCurrency
   const showsCharge = !isMonthly || (isForeign && monthly !== null)
 
-  const chargeText = `${getCurrencySymbol(subscription.currency)} ${formatAmount(subscription.price)}${
+  const chargeText = `${getCurrencySymbol(charge.currency)} ${formatAmount(charge.price)}${
     isMonthly ? '' : ` ${formatCyclePhrase(cycle)}`
   }`
+
+  const { src: logo, iconKey } = iconSource(subscription.icon)
 
   return (
     <div className={cardWrapper}>
@@ -155,16 +161,16 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
         }}
         className={cn(subscriptionContainer, isPaused && disabled)}
       >
-        <div style={{ '--image': `url("${subscription.iconUrl}")` } as CSSProperties}>
-          {subscription.iconUrl ? (
+        <div style={{ '--image': `url("${logo}")` } as CSSProperties}>
+          {logo ? (
             <img
-              src={subscription.iconUrl}
+              src={logo}
               alt="" // decorative: the name is right next to it
               className={cn(cardImg, isPaused && opacity50)}
             />
           ) : (
             <Avatar
-              iconKey={subscription.iconKey}
+              iconKey={iconKey}
               name={subscription.name}
               className={cn(cardImg, isPaused && opacity50)}
             />
@@ -180,9 +186,15 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
             {!isPaused && (
               <Typography variant="label" size="sm">
                 {/* In a trial, say so: "En 7 días" alone reads like a charge */}
-                {subscription.trial && statusFor(subscription, today) === 'trial'
+                {subscription.trial && status === 'trial'
                   ? formatTrial(subscription.trial, today)
                   : formatNextCharge(nextCharge, today)}
+              </Typography>
+            )}
+            {/* Ended: say when, so it doesn't look like it's just paused */}
+            {status === 'ended' && subscription.endDate && (
+              <Typography variant="label" size="sm" className={opacity50}>
+                {`${subscription.endDate < today ? 'Terminó' : 'Termina'} el ${formatDate(subscription.endDate)}`}
               </Typography>
             )}
           </div>

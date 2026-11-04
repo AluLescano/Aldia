@@ -127,7 +127,8 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
   const currency = useSettingsStore((state) => state.selectedCurrency)
   const rates = useRatesStore((state) => state.rates)
 
-  const filters = listFilters(subscriptions)
+  const today = todayISO()
+  const filters = listFilters(subscriptions, today)
 
   // Falls back to the first one if the saved sort no longer exists
   const currentSort =
@@ -146,14 +147,10 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
     return categories.find((c) => c.id === filter.categoryId)?.name ?? filter.categoryId
   }
 
-  const context: SortContext = {
-    today: todayISO(),
-    currency: currency,
-    rates: rates,
-  }
+  const context: SortContext = { today, currency, rates }
 
   const visible = sortSubscriptions(
-    filterSubscriptions(subscriptions, activeFilter),
+    filterSubscriptions(subscriptions, activeFilter, today),
     sort,
     context,
   )
