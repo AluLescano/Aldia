@@ -12,6 +12,7 @@ import { useCategoryStore } from '@/features/categories/store/categoryStore'
 import IconButton from '@/shared/ui/IconButton/IconButton'
 import SubscriptionForm from '@/features/subscriptions/components/SubscriptionForm/SubscriptionForm'
 import PauseToggleIcon from '@/features/subscriptions/components/PauseToggleIcon/PauseToggleIcon'
+import PriceChangeSheet from '@/features/subscriptions/components/PriceChangeSheet/PriceChangeSheet'
 
 // HOOKS
 import { useSubscriptionActions } from '@/features/subscriptions/hooks/useSubscriptionActions'
@@ -21,10 +22,17 @@ import { useBackHandler } from '@/shared/hooks/useBackHandler'
 import { createId } from '@/shared/lib/id'
 import { todayISO } from '@/shared/lib/isoDate'
 import { nextBillDate } from '@/features/subscriptions/utils/billingCycle'
-import { applyPriceEdit } from '@/features/subscriptions/utils/subscriptionHistory'
+import {
+  applyPriceEdit,
+  pastCharges,
+  upcomingPrice,
+} from '@/features/subscriptions/utils/subscriptionHistory'
 import { subscriptionToFormValues } from '@/features/subscriptions/utils/subscriptionToFormValues'
 import { newSubscriptionValues } from '@/features/subscriptions/utils/newSubscriptionValues'
-import { formValuesToSubscriptionData } from '@/features/subscriptions/utils/formValuesToSubscriptionData'
+import {
+  formValuesToSubscriptionData,
+  type SubscriptionData,
+} from '@/features/subscriptions/utils/formValuesToSubscriptionData'
 
 // TYPES
 import type { SubscriptionFormValues } from '@/features/subscriptions/types'
@@ -78,27 +86,49 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
 
   useBackHandler(() => setIsEditing(false), isEditing)
 
+  // An edit waiting for the "¿Desde cuándo?" answer (only when the price changed)
+  const [pendingEdit, setPendingEdit] = useState<SubscriptionData | null>(null)
+
+  // Saves an edit. The new price starts on `from` (a charge day); the charges before keep
+  // theirs. `fields` has no `pauses`, so a paused subscription stays paused when it is edited
+  const saveEdit = (data: SubscriptionData, from: string) => {
+    if (!existing) return
+    const { price, currency, ...fields } = data
+    updateSubscription(existing.id, {
+      ...fields,
+      priceHistory: applyPriceEdit(
+        existing.priceHistory,
+        { from, price, currency },
+        fields.firstBillDate,
+      ),
+    })
+    setPendingEdit(null)
+    showToast('Cambios guardados', 'success')
+    setIsEditing(false)
+  }
+
+  const today = todayISO()
+  const editNextCharge = pendingEdit
+    ? nextBillDate(pendingEdit.firstBillDate, pendingEdit.billingCycle, today)
+    : ''
+
   const handleSubmit = (values: SubscriptionFormValues) => {
     const data = formValuesToSubscriptionData(values)
     if (!data) return
-    const { price, currency, ...fields } = data
 
     if (existing) {
-      // A new price starts on the next charge; the charges before keep theirs.
-      // `fields` has no `pauses`, so a paused subscription stays paused when it is edited
-      const from = nextBillDate(fields.firstBillDate, fields.billingCycle, todayISO())
-      updateSubscription(existing.id, {
-        ...fields,
-        priceHistory: applyPriceEdit(
-          existing.priceHistory,
-          { from, price, currency },
-          fields.firstBillDate,
-        ),
-      })
-      showToast('Cambios guardados', 'success')
-      setIsEditing(false)
+      const shown = upcomingPrice(existing, today)
+      const priceChanged = data.price !== shown.price || data.currency !== shown.currency
+      // Only ask when there are past charges to pick from; otherwise it's the next one
+      if (priceChanged && pastCharges(data, today).length > 0) {
+        setPendingEdit(data)
+        return
+      }
+      saveEdit(data, nextBillDate(data.firstBillDate, data.billingCycle, today))
       return
     }
+
+    const { price, currency, ...fields } = data
 
     addSubscription({
       ...fields,
@@ -151,6 +181,14 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
           onSubmit={handleSubmit}
         />
       </div>
+
+      <PriceChangeSheet
+        isOpen={pendingEdit !== null}
+        onClose={() => setPendingEdit(null)}
+        nextCharge={editNextCharge}
+        pastCharges={pendingEdit ? pastCharges(pendingEdit, today) : []}
+        onPick={(from) => pendingEdit && saveEdit(pendingEdit, from)}
+      />
     </div>
   )
 }
