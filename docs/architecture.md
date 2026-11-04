@@ -43,13 +43,13 @@ src/
 │   │   ├── store/            # categoryStore.ts (Zustand + persist, aldia/categories.json), OTHERS_ID
 │   │   └── utils/            # validateCategoryName
 │   ├── homepage/
-│   │   └── components/       # MonthlyExpenses, SubscriptionList, SubscriptionCard, skeletons
+│   │   └── components/       # MonthlyExpenses, SubscriptionList (filters, "Ordenar por" sheet), SubscriptionCard, skeletons
 │   ├── subscriptions/
-│   │   ├── components/       # SubscriptionForm (+ FormRow, SubscriptionFormSheets), BillingCyclePicker, PresetCard, PauseToggleIcon
+│   │   ├── components/       # SubscriptionForm (+ FormRow, SubscriptionFormSheets), BillingCyclePicker, PriceChangeSheet, PresetCard, PauseToggleIcon
 │   │   ├── data/             # presets.ts (the preset picker list)
 │   │   ├── hooks/            # useSubscriptionForm (form state), useSubscriptionActions (pause, delete)
-│   │   ├── store/            # subscriptionStore.ts (Zustand + persist, aldia/subscriptions.json)
-│   │   ├── utils/            # billingCycle, validation, form <-> subscription mapping, status, monthlyTotal, subscriptionList
+│   │   ├── store/            # subscriptionStore.ts (Zustand + persist, aldia/subscriptions.json, migrateSubscriptions)
+│   │   ├── utils/            # billingCycle, validation, form <-> subscription mapping, subscriptionStatus, subscriptionHistory (prices, pauses, next charge), subscriptionIcon, monthlyTotal, subscriptionList (filters, sorts), reminders
 │   │   └── types.ts          # SubscriptionFormValues, FormErrors
 │   ├── notifications/
 │   │   ├── notificationSync.ts # keeps the phone's scheduled notifications in sync; permission check and request
@@ -57,9 +57,9 @@ src/
 │   ├── onboarding/
 │   │   └── components/       # OnboardingFlow (first-open welcome, notifications permission, privacy)
 │   ├── settings/
-│   │   └── store/            # settingsStore.ts (currencies, reminderTime, onboarding flags, persist, aldia/settings.json)
+│   │   └── store/            # settingsStore.ts (currencies, listSort, reminderTime, onboarding flags, persist, aldia/settings.json)
 │   └── navigation/
-│       └── components/       # BottomNavBar
+│       └── components/       # BottomNavBar (glass bar with a notch, Motion)
 │   (planned: cards/, calendar/, statistics/)
 │
 ├── pages/                    # Screen level views (orchestrate feature components)
@@ -99,29 +99,58 @@ export type BillingCycle =
   { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
 // 'one-time' is hidden in the form (kept for the income and expenses book); only a
 // subscription already saved that way still offers it.
-export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
+export type SubscriptionStatus = 'active' | 'trial' | 'inactive' | 'ended'
+// Never stored: statusFor(sub, today). 'inactive' = paused, 'ended' = no charge left.
+
+export interface PriceChange {
+  from: string // YYYY-MM-DD, a charge day: prices only change on one
+  price: number // per cycle, in `currency`
+  currency: CurrencyCode // 'USD' | 'EUR' | 'ARS' | 'CLP' | 'GBP' | any string
+}
+// Oldest first and never empty: the first entry starts on firstBillDate
+export type PriceHistory = [PriceChange, ...PriceChange[]]
+
+export interface Pause {
+  from: string // YYYY-MM-DD, the day it was paused
+  to?: string // YYYY-MM-DD, the day it was resumed (a charge that day happens); missing = still paused
+}
+
+export type SubscriptionIcon =
+  | { kind: 'preset'; path: string } // a bundled logo, '/logos/logo_netflix.webp'
+  | { kind: 'file'; fileName: string } // a downloaded logo saved on the phone (logo feature, not built yet)
+  | { kind: 'key'; key: IconKey } // built-in icon for bills (electricity, water, gas, phone, rent, internet)
 
 export interface Subscription {
   id: string
   name: string
-  price: number
-  currency: CurrencyCode // 'USD' | 'EUR' | 'ARS' | 'CLP' | 'GBP' | any string
+  priceHistory: PriceHistory // the only place the price lives
   billingCycle: BillingCycle
 
-  firstBillDate: string // YYYY-MM-DD
-  endDate?: string // YYYY-MM-DD
+  firstBillDate: string // YYYY-MM-DD, every charge is counted from it
+  endDate?: string // YYYY-MM-DD, no charges after it
   trial?: TrialConfig // { startDate, endDate }
 
   categoryId: string
   paymentMethodId?: string
   reminders: SubscriptionReminder[]
 
-  iconUrl?: string
-  iconKey?: IconKey // built-in icon for bills (electricity, water, gas, phone, rent, internet)
-  isPaused: boolean // the status (trial / active / inactive) is calculated: statusFor(sub, today)
+  icon?: SubscriptionIcon // missing = the Avatar shows the name's initial
+  pauses: Pause[] // the only stored part of the status
   createdAt: string
 }
 ```
+
+**Prices, pauses and the next charge** (`features/subscriptions/utils/subscriptionHistory.ts`, all pure and tested):
+
+- `priceOn(history, date)` is the price in force on a day. `upcomingPrice(sub, today)` is the price of the next charge, which the card, the form, the total and the sorts show, so a change saved for the next charge shows up right away.
+- `applyPriceEdit(history, change, firstBillDate)` is what saving a price does: the new price starts on `change.from`, changes planned on or after that day are replaced, and the first price always stays (from the first charge). The form page (`SubscriptionFormPage`) only asks "¿Desde cuándo?" (`PriceChangeSheet`) when the price or currency changed and there are past charges to pick from (`pastCharges`, newest first, at most 12). Otherwise the change starts on the next charge.
+- `startPause` / `endPause`: "Pausar" opens a pause, "Reanudar" closes it, and a pause that skipped no charge is dropped. `isPausedOn(pauses, date)` answers "paused that day?".
+- `nextCharge(sub, today)` is the next charge, or `null` when the end date comes first. The status, the card, the total and the sorts all go through it, so they agree about ended subscriptions (the reminders check `endDate` per charge on their own).
+- `statusFor` (`subscriptionStatus.ts`) gives `ended`, then `inactive` (paused today), then `trial` or `active`. `isInactive` (paused or ended) decides the "Inactivas" filter, puts them last in every sort and keeps them out of the total.
+
+**Home list** (`features/subscriptions/utils/subscriptionList.ts`): `listFilters` gives "all", one tab per category in use, and "Inactivas" only when something is paused or ended, so no tab leads to an empty list. `sortSubscriptions` orders by next charge, name (A-Z, Z-A) or monthly price (either way): inactive ones always last, ties A-Z, and a price with no exchange rate after the priced ones. The pick is saved as `listSort` in the settings. Every card shows `monthlyPriceIn` (the same number the total adds up and the price sorts compare) and, underneath, the real charge with its cycle when it adds something ("$ 8.500 al año", `formatCyclePhrase`).
+
+**Icons** (`subscriptionIcon.ts`): `iconSource(icon)` turns the stored icon into what the Avatar and the card draw (an image `src`, an `iconKey`, or nothing); `presetIcon(preset)` builds one from a preset. A `file` icon shows the initial until the logo feature can turn its file name into a path on the phone.
 
 ### B. Payment Method (Cards / Accounts)
 
@@ -179,9 +208,9 @@ export interface Preset {
 }
 ```
 
-User preferences live in `useSettingsStore` (`selectedCurrency`, `favoriteCurrencies`, `reminderTime`, `09:00` until Ajustes can change it; `hasSeenOnboarding` and `hasAskedForNotificationsAgain`, which only go false → true). The theme setting is planned.
+User preferences live in `useSettingsStore` (`selectedCurrency`, `favoriteCurrencies`, `listSort`, `reminderTime`, `09:00` until Ajustes can change it; `hasSeenOnboarding` and `hasAskedForNotificationsAgain`, which only go false → true). The theme setting is planned.
 
-**Reminders** (`features/subscriptions/utils/reminders.ts`, all pure and tested): `getReminderTriggers(sub, today, until)` lists the days a subscription notifies inside a planning window; `groupTriggersByDay` bundles them so several on one day become one summary; `nextReminderDate` gives the "Próxima" date of the Notificaciones sheet. `features/notifications` schedules them on the phone (Capacitor Local Notifications, inexact): `startNotificationSync` re-plans 60 days ahead whenever the data or the reminder time changes and when the app comes back; nothing is scheduled until notifications are allowed.
+**Reminders** (`features/subscriptions/utils/reminders.ts`, all pure and tested): `getReminderTriggers(sub, today, until)` lists the days a subscription notifies inside a planning window; `groupTriggersByDay` bundles them so several on one day become one summary; `nextReminderDate` gives the "Próxima" date of the Notificaciones sheet. `features/notifications` schedules them on the phone (Capacitor Local Notifications, inexact): `startNotificationSync` re-plans 60 days ahead whenever the data or the reminder time changes and when the app comes back; nothing is scheduled until notifications are allowed. A charge inside a pause gets no reminder, and each notification shows the price of its own charge (`priceOn`), so a planned price change shows up on its day.
 
 **Onboarding** (`features/onboarding`): on first open `App.tsx` shows `OnboardingFlow` instead of the app (the app mounts only after it, so nothing underneath is reachable). Three steps: welcome, notifications (skipped if already allowed; "Permitir" calls `requestNotificationPermission`, which syncs right away on a yes; "Ahora no" never reaches Android, so its prompt stays unspent) and privacy. "Empezar" calls `finishOnboarding`.
 
@@ -191,8 +220,8 @@ User preferences live in `useSettingsStore` (`selectedCurrency`, `favoriteCurren
 
 State lives in **Zustand** stores:
 
-- `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription`, `restoreSubscription` (the toast's "Deshacer"; each toast keeps its own deleted subscription), `updateSubscription`, `reassignCategory`. Saved as `aldia/subscriptions.json` (see section 5).
-- `useSettingsStore` (`features/settings/store/settingsStore.ts`): selected and favorite currencies, the reminder time and the onboarding flags. Saved as `aldia/settings.json`.
+- `useSubscriptionStore` (`features/subscriptions/store/subscriptionStore.ts`): subscriptions plus `addSubscription`, `deleteSubscription`, `restoreSubscription` (the toast's "Deshacer"; each toast keeps its own deleted subscription), `updateSubscription`, `reassignCategory`. Saved as `aldia/subscriptions.json` (see section 5). Pausing and price edits go through `updateSubscription` with the new `pauses` or `priceHistory` worked out by the helpers in section 3.
+- `useSettingsStore` (`features/settings/store/settingsStore.ts`): selected and favorite currencies, the list sort, the reminder time and the onboarding flags. Saved as `aldia/settings.json`.
 - `useCategoryStore` (`features/categories/store/categoryStore.ts`): default and custom categories with `addCategory`, `renameCategory`, `deleteCategory` (moves its subscriptions to "Otros" first). Saved as `aldia/categories.json`.
 - `useToastStore` (`shared/store/toastStore.ts`): the one app-wide toast, rendered by `App.tsx`.
 - `useUIStore` (`shared/store/uiStore.ts`): a stack of overlays (`preset-picker`, `subscription-form`) with `pushOverlay`, `popOverlay` and `closeAllOverlays`. `App.tsx` renders the top of the stack.
@@ -214,7 +243,7 @@ Each persisted store is one JSON file in the app's private folder (Capacitor Fil
 | `useSettingsStore`     | `aldia/settings.json`      |
 | cards (planned)        | `aldia/cards.json`         |
 
-Every file holds Zustand's format, `{ "state": { ... }, "version": N }` (subscriptions are at 1, the others at 0). A file appears the first time its store changes; until then the store uses its defaults. A change to the shape of stored data bumps `version` and comes with a `migrate` (section 7).
+Every file holds Zustand's format, `{ "state": { ... }, "version": N }` (subscriptions are at 2, the others at 0). A file appears the first time its store changes; until then the store uses its defaults. A change to the shape of stored data bumps `version` and comes with a `migrate` (section 7).
 
 The exchange rates are the exception: `useRatesStore` stays in `localStorage` (`aldia_rates`). It's a download cache, so losing it only costs one download.
 
@@ -269,9 +298,11 @@ When you want to build a new screen or component:
 
 Each of these comes from a real bug in this codebase.
 
-- **Never store what you can calculate.** A stored `nextBillDate` goes stale as soon as the date passes. Store the inputs (`firstBillDate`, `billingCycle`) and calculate the next charge when showing it. The same goes for converted prices: store the price in its own currency, convert on screen. And the status: a stored `'trial'` stayed `'trial'` after the trial ended, so the subscription dropped out of the monthly total. Only the user's choice (`isPaused`) is stored; trial or active comes from the dates.
+- **Never store what you can calculate.** A stored `nextBillDate` goes stale as soon as the date passes. Store the inputs (`firstBillDate`, `billingCycle`) and calculate the next charge when showing it. The same goes for converted prices: store the price in its own currency, convert on screen. And the status: a stored `'trial'` stayed `'trial'` after the trial ended, so the subscription dropped out of the monthly total. Only the user's choices (`pauses`, `priceHistory`) are stored; trial, active or ended comes from the dates.
+- **One helper per question.** `endDate` was only read by the reminders, so a subscription past its end date kept counting in the total and showing a next charge. Now `nextCharge` answers "is there a charge left?" and the status, card, total and sorts all ask it.
+- **Keep the history, don't overwrite it.** One `price` field meant a price rise rewrote what every past charge cost. A change is a new `priceHistory` entry from a charge day; read it with `priceOn` / `upcomingPrice`, never `priceHistory[0]`.
 - **Dates are `YYYY-MM-DD` strings in local time.** Use `shared/lib/isoDate.ts` (`parseISODate`, `toISODate`, `todayISO`); never `toISOString()`, which works in UTC and can move a date to the day before in Argentina.
-- **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update. Example: `migrateSubscriptions` in `subscriptionStore.ts` (version 1 turned `status` into `isPaused`); add one step per version there.
+- **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update. Example: `migrateSubscriptions` in `subscriptionStore.ts` (1: `status` became `isPaused`; 2: `price` + `currency` became `priceHistory`, `isPaused` became `pauses`, `iconUrl` / `iconKey` became `icon`); add one step per version there and test it with a planted old file. A step can be deleted once every phone has opened a build that ran it.
 - **Load the data before rendering.** A store that saves before it has loaded writes its empty defaults over the user's file. Persisted stores use `skipHydration`, and `main.tsx` awaits them before `createRoot`.
 - **One way out with the Android back button.** Back closes the top-most layer first (bottom sheet, edit mode, overlay), then goes back to Home, and only leaves the app from Home (`useBackHandler` + the Capacitor App plugin's `backButton` listener in `App.tsx`).
 - **A control inside `Field` is a plain `<input>` or `<button>`.** `Field` owns the look; the `Button` component is for actions and brings its own styles and ripple.
@@ -285,7 +316,7 @@ Each of these comes from a real bug in this codebase.
 - Source: the free [exchange-api](https://github.com/fawazahmed0/exchange-api) (no key, daily JSON on a CDN, with a fallback URL). Every download goes out with `cache: 'no-cache'`: jsDelivr marks the file as good for 7 days, so without it the WebView kept serving a week-old copy. Download and conversion live in `shared/lib/exchangeRates.ts`.
 - `useRatesStore` (`shared/store/ratesStore.ts`, persisted as `aldia_rates`) downloads once per local day: `App.tsx` calls `refreshIfStale()` on start and every time the app becomes visible again. Two calls at once share one download. If the download fails, the last saved rates stay in use.
 - Conversion is a pure function (`convert(amount, from, to, rates)`), so totals and statistics stay testable offline. The same currency never needs rates.
-- Home (`getMonthlyTotal` in `features/subscriptions/utils/monthlyTotal.ts`) adds only the active subscriptions, each turned into its monthly cost (`monthlyEquivalent`) and converted. It says so when rates are 2 or more days old ("Tasas del ..."; 1 day behind is normal for a daily API) or when some subscriptions could not be converted ("N sin sumar").
+- Home (`getMonthlyTotal` in `features/subscriptions/utils/monthlyTotal.ts`) adds only the `active` subscriptions (not paused, ended or in a trial), each at the price of its next charge, turned into a monthly cost (`monthlyEquivalent`) and converted: `monthlyPriceIn`, the same number the cards show and the price sorts compare. It says so when rates are 2 or more days old ("Tasas del ..."; 1 day behind is normal for a daily API) or when some subscriptions could not be converted ("N sin sumar").
 - Known limit: the API gives official rates. A USD subscription paid with an Argentine card is charged at the official rate plus taxes, so the ARS total can be lower than the real charge.
 
 ---
@@ -294,6 +325,7 @@ Each of these comes from a real bug in this codebase.
 
 Vitest (`npm test`, also run by CI on every pull request), in plain Node, test files next to their sources (`*.test.ts`).
 
-- **Pure functions first:** billing cycles and next charge dates, validation, monthly totals, currency conversion, the calendar grid, category names. They hold most of the logic and need no browser.
+- **Pure functions first:** billing cycles and next charge dates, price history and pauses, the status, the list filters and sorts, validation, monthly totals, currency conversion, reminders, the calendar grid, category names. They hold most of the logic and need no browser.
+- **Migrations:** `subscriptionStore.test.ts` feeds `migrateSubscriptions` version 0 and 1 files and checks the version 2 result (with a fixed `today` for the pauses).
 - **Stores:** tested through their actions. Capacitor plugins don't work in Node, so a store test replaces `fileStorage` with an in-memory `Map` (`vi.mock`, see `subscriptionStore.test.ts`).
 - **`fileStorage`:** tested against a fake `@capacitor/filesystem` (`fileStorage.test.ts`) that behaves like the real plugin where it matters: missing files throw, rename deletes the destination first (like Android), and writes take a moment, so concurrent saves really interleave.
