@@ -51,6 +51,7 @@
   --icon-default: #{rgba($phthalo-700, 0.75)};
   --icon-muted: #{rgba($phthalo-700, 0.35)};
   --icon-active: #{$phthalo-600};
+  --icon-on-brand-logo: #{$color-white};
 
   /* 5. Borders */
   --border-subtle: #{rgba($color-black, 0.06)};
@@ -180,6 +181,7 @@
   --icon-default: #{rgba($paper-0, 0.75)};
   --icon-muted: #{rgba($paper-0, 0.35)};
   --icon-active: #{$phthalo-300};
+  --icon-on-brand-logo: #{$charcoal-500};
 
   /* 5. Borders */
   --border-subtle: #{rgba($color-white, 0.08)};

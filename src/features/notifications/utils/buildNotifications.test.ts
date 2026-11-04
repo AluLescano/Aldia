@@ -11,13 +11,12 @@ const NOW = new Date(2026, 9, 22, 8, 0)
 const sub = (extra: Partial<Subscription> = {}): Subscription => ({
   id: 'netflix',
   name: 'Netflix',
-  price: 10,
-  currency: 'USD',
+  priceHistory: [{ from: '2026-01-15', price: 10, currency: 'USD' }],
   billingCycle: { type: 'every', interval: 1, unit: 'month' },
   firstBillDate: '2026-01-15',
   categoryId: 'entertainment',
   reminders: [{ id: 'r3', daysBefore: 3, isEnabled: true }],
-  isPaused: false,
+  pauses: [],
   createdAt: '2026-01-15T00:00:00.000Z',
   ...extra,
 })
@@ -37,6 +36,19 @@ describe('buildNotifications', () => {
     ])
   })
 
+  it('says the price of that charge, so a planned change shows on its day', () => {
+    const raised = sub({
+      priceHistory: [
+        { from: '2026-01-15', price: 10, currency: 'USD' },
+        { from: '2026-12-15', price: 12, currency: 'USD' },
+      ],
+    })
+    expect(summary(buildNotifications([raised], NOW, '09:00'))).toEqual([
+      '2026-11-12 09:00 | Netflix se cobra en 3 días | U$S 10,00 · 15 Nov',
+      '2026-12-12 09:00 | Netflix se cobra en 3 días | U$S 12,00 · 15 Dic',
+    ])
+  })
+
   it('uses the date as the id', () => {
     expect(buildNotifications([sub()], NOW, '09:00')[0].id).toBe(20261112)
   })
@@ -53,7 +65,7 @@ describe('buildNotifications', () => {
     const crunchyroll = sub({
       id: 'crunchyroll',
       name: 'Crunchyroll',
-      price: 5,
+      priceHistory: [{ from: '2026-11-19', price: 5, currency: 'USD' }],
       firstBillDate: '2026-11-19',
       trial: { startDate: '2026-10-20', endDate: '2026-11-19' },
       reminders: [{ id: 'r2', daysBefore: 2, isEnabled: true }],
@@ -114,7 +126,9 @@ describe('buildNotifications', () => {
   })
 
   it('gives nothing for paused subscriptions or no subscriptions', () => {
-    expect(buildNotifications([sub({ isPaused: true })], NOW, '09:00')).toEqual([])
+    expect(
+      buildNotifications([sub({ pauses: [{ from: '2026-10-01' }] })], NOW, '09:00'),
+    ).toEqual([])
     expect(buildNotifications([], NOW, '09:00')).toEqual([])
   })
 })

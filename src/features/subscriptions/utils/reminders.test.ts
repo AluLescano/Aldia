@@ -26,13 +26,12 @@ const reminder = (daysBefore: number, isEnabled = true): SubscriptionReminder =>
 const sub = (extra: Partial<Subscription> = {}): Subscription => ({
   id: 'netflix',
   name: 'Netflix',
-  price: 10,
-  currency: 'USD',
+  priceHistory: [{ from: '2026-01-15', price: 10, currency: 'USD' }],
   billingCycle: { type: 'every', interval: 1, unit: 'month' },
   firstBillDate: '2026-01-15',
   categoryId: 'entertainment',
   reminders: [reminder(3)],
-  isPaused: false,
+  pauses: [],
   createdAt: '2026-01-15T00:00:00.000Z',
   ...extra,
 })
@@ -77,6 +76,14 @@ describe('getReminderTriggers', () => {
     expect(triggers[0]).toMatchObject({ date: '2026-11-15', eventDate: '2026-11-15' })
   })
 
+  it('skips only the charges inside a pause', () => {
+    // Paused from Nov 10 to Nov 20: the Nov 15 charge doesn't happen, Dec 15 does
+    const paused = sub({ pauses: [{ from: '2026-11-10', to: '2026-11-20' }] })
+    expect(summary(getReminderTriggers(paused, TODAY, UNTIL))).toEqual([
+      '2026-12-12 > 2026-12-15 : billing',
+    ])
+  })
+
   it('stops at the end date', () => {
     expect(
       summary(getReminderTriggers(sub({ endDate: '2026-11-20' }), TODAY, UNTIL)),
@@ -115,7 +122,7 @@ describe('getReminderTriggers', () => {
   })
 
   it.each([
-    ['a paused subscription', sub({ isPaused: true })],
+    ['a paused subscription', sub({ pauses: [{ from: '2026-10-01' }] })],
     [
       'a one-time payment',
       sub({ billingCycle: { type: 'one-time' }, firstBillDate: '2026-11-01' }),

@@ -2,7 +2,7 @@
 import type {
   BillingCycle,
   CurrencyCode,
-  IconKey,
+  SubscriptionIcon,
   SubscriptionReminder,
   TrialConfig,
 } from '@/shared/types'
@@ -29,8 +29,7 @@ export interface SubscriptionFormValues {
   reminders: SubscriptionReminder[]
 
   // Branding
-  iconUrl?: string
-  iconKey?: IconKey
+  icon?: SubscriptionIcon
 }
 
 /** One Spanish message per invalid field; a field that is valid has no key. */

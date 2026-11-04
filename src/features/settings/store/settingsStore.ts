@@ -6,11 +6,15 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { fileStorage } from '@/shared/lib/fileStorage'
 import { DEFAULT_CURRENCIES } from '@/shared/lib/currencies'
 
+// TYPES
+import type { ListSort } from '@/features/subscriptions/utils/subscriptionList'
+
 interface SettingsState {
   /** The currency Home shows totals in (the flag pill). Also the default for new subscriptions. */
   selectedCurrency: string
   /** The currencies offered first in the pickers. Editable from Settings later. */
   favoriteCurrencies: string[]
+  listSort: ListSort
   /**
    * `HH:MM`, the time every notification rings (one time for all, chosen in Ajustes later).
    * A file saved before this existed keeps the default: `persist` fills in missing fields.
@@ -29,6 +33,7 @@ interface SettingsState {
   hasAskedForNotificationsAgain: boolean
   setSelectedCurrency: (code: string) => void
   setFavoriteCurrencies: (codes: string[]) => void
+  setListSort: (sort: ListSort) => void
   setReminderTime: (time: string) => void
   // The two flags only go false → true, so their actions take no value
   finishOnboarding: () => void
@@ -42,10 +47,12 @@ export const useSettingsStore = create<SettingsState>()(
       selectedCurrency: 'USD',
       favoriteCurrencies: DEFAULT_CURRENCIES.map((currency) => currency.code),
       reminderTime: '09:00',
+      listSort: 'next-charge',
       hasSeenOnboarding: false,
       hasAskedForNotificationsAgain: false,
       setSelectedCurrency: (code) => set({ selectedCurrency: code }),
       setFavoriteCurrencies: (codes) => set({ favoriteCurrencies: codes }),
+      setListSort: (sort) => set({ listSort: sort }),
       setReminderTime: (time) => set({ reminderTime: time }),
       finishOnboarding: () => set({ hasSeenOnboarding: true }),
       markNotificationsAskedAgain: () => set({ hasAskedForNotificationsAgain: true }),

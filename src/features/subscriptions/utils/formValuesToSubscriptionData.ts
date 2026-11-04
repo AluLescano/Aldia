@@ -1,11 +1,18 @@
 import { parsePrice } from './validateSubscriptionForm'
 
 // TYPES
-import type { Subscription } from '@/shared/types'
+import type { CurrencyCode, Subscription } from '@/shared/types'
 import type { SubscriptionFormValues } from '../types'
 
-/** Everything a form can produce. The id, the pause and the creation date are not form fields. */
-export type SubscriptionData = Omit<Subscription, 'id' | 'isPaused' | 'createdAt'>
+/**
+ * Everything a form can produce. The id, the pauses and the creation date are not form
+ * fields, and the form edits one price, not the history: the screen turns `price` +
+ * `currency` into the history (a new one, or `applyPriceEdit` on the saved one).
+ */
+export type SubscriptionData = Omit<
+  Subscription,
+  'id' | 'pauses' | 'createdAt' | 'priceHistory'
+> & { price: number; currency: CurrencyCode }
 
 /**
  * Turns the form's values (price as text) into the stored shape (price as a number).
@@ -31,7 +38,6 @@ export const formValuesToSubscriptionData = (
     trial: values.trial,
     categoryId: values.categoryId,
     reminders: values.reminders,
-    iconUrl: values.iconUrl,
-    iconKey: values.iconKey,
+    icon: values.icon,
   }
 }

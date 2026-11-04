@@ -6,6 +6,10 @@ import { useSubscriptionStore } from '../store/subscriptionStore'
 // HOOKS
 import { useDeleteSubscription } from './useDeleteSubscription'
 
+// UTILS
+import { todayISO } from '@/shared/lib/isoDate'
+import { endPause, isPausedOn, startPause } from '../utils/subscriptionHistory'
+
 // TYPES
 import type { Subscription } from '@/shared/types'
 
@@ -20,13 +24,18 @@ export const useSubscriptionActions = (subscription: Subscription | undefined) =
   const popOverlay = useUIStore((state) => state.popOverlay)
   const showToast = useToastStore((state) => state.showToast)
 
-  const isPaused = subscription?.isPaused ?? false
+  const today = todayISO()
+  const isPaused = subscription ? isPausedOn(subscription.pauses, today) : false
 
-  // Only the pause is stored; trial or active is worked out from the dates when it's needed
+  // Only the pauses are stored; trial or active is worked out from the dates when it's needed.
+  // Resuming closes the pause, and drops it if it didn't skip a charge
   const togglePause = () => {
     if (!subscription) return
 
-    updateSubscription(subscription.id, { isPaused: !isPaused })
+    const pauses = isPaused
+      ? endPause(subscription.pauses, today, subscription)
+      : startPause(subscription.pauses, today)
+    updateSubscription(subscription.id, { pauses })
     if (isPaused) showToast('Subscripción reanudada', 'success')
     else showToast('Subscripción pausada', 'info')
   }

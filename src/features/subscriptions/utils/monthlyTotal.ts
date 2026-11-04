@@ -1,6 +1,7 @@
 // UTILS
 import { convert, type ExchangeRates } from '@/shared/lib/exchangeRates'
 import { statusFor } from './subscriptionStatus'
+import { upcomingPrice } from './subscriptionHistory'
 
 // TYPES
 import type {
@@ -32,6 +33,21 @@ export function monthlyEquivalent(price: number, cycle: BillingCycle): number {
   return price / (cycle.interval * MONTHS_PER_UNIT[cycle.unit])
 }
 
+/**
+ * What a subscription costs per month in `currency`: the number the Home total adds up,
+ * the price sorts compare and the cards show. `null` when a rate is missing.
+ * Uses the price of the next charge from `today` on (pass `todayISO()`), like the card.
+ */
+export function monthlyPriceIn(
+  sub: Pick<Subscription, 'priceHistory' | 'billingCycle' | 'firstBillDate'>,
+  currency: CurrencyCode,
+  rates: ExchangeRates | null,
+  today: string,
+): number | null {
+  const { price, currency: from } = upcomingPrice(sub, today)
+  return convert(monthlyEquivalent(price, sub.billingCycle), from, currency, rates)
+}
+
 /** The result of `getMonthlyTotal`. */
 export interface MonthlyTotal {
   /** Monthly cost of the active subscriptions, in the requested currency. */
@@ -56,14 +72,13 @@ export function getMonthlyTotal(
 
   for (const sub of subscriptions) {
     if (statusFor(sub, today) !== 'active') continue
-    const monthly = monthlyEquivalent(sub.price, sub.billingCycle)
-    const amount = convert(monthly, sub.currency, currency, rates)
+    const amount = monthlyPriceIn(sub, currency, rates, today)
     if (amount === null) {
       result.unconverted++
       continue
     }
     result.total += amount
-    if (sub.currency !== currency) result.converted++
+    if (upcomingPrice(sub, today).currency !== currency) result.converted++
   }
 
   return result

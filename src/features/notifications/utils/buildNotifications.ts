@@ -8,6 +8,7 @@ import {
   type ReminderDay,
   type ReminderTrigger,
 } from '@/features/subscriptions/utils/reminders'
+import { priceOn } from '@/features/subscriptions/utils/subscriptionHistory'
 
 // TYPES
 import type { Subscription } from '@/shared/types'
@@ -29,8 +30,11 @@ export interface PlannedNotification {
 const whenText = (days: number) =>
   days === 0 ? 'hoy' : days === 1 ? 'mañana' : `en ${days} días`
 
-const amountText = (sub: Subscription) =>
-  `${getCurrencySymbol(sub.currency)} ${formatAmount(sub.price)}`
+// The price of that charge, so a planned price change shows up on its own day
+const amountText = (sub: Subscription, chargeDate: string) => {
+  const { price, currency } = priceOn(sub.priceHistory, chargeDate)
+  return `${getCurrencySymbol(currency)} ${formatAmount(price)}`
+}
 
 // The text of a day with one subscription: a charge, or the end of its free trial
 function singleText(trigger: ReminderTrigger, sub: Subscription) {
@@ -38,12 +42,12 @@ function singleText(trigger: ReminderTrigger, sub: Subscription) {
   if (trigger.target === 'trial_end') {
     return {
       title: `Tu prueba de ${sub.name} termina ${when}`,
-      body: `Después se cobran ${amountText(sub)}.`,
+      body: `Después se cobran ${amountText(sub, trigger.eventDate)}.`,
     }
   }
   return {
     title: `${sub.name} se cobra ${when}`,
-    body: `${amountText(sub)} · ${formatDayMonth(trigger.eventDate)}`,
+    body: `${amountText(sub, trigger.eventDate)} · ${formatDayMonth(trigger.eventDate)}`,
   }
 }
 

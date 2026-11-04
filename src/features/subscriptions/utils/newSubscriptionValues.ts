@@ -3,6 +3,7 @@ import { OTHERS_ID } from '@/features/categories/store/categoryStore'
 
 // UTILS
 import { todayISO } from '@/shared/lib/isoDate'
+import { presetIcon } from './subscriptionIcon'
 
 // TYPES
 import type { Category, CurrencyCode, Preset } from '@/shared/types'
@@ -34,7 +35,6 @@ export const newSubscriptionValues = (
     firstBillDate: todayISO(),
     reminders: [],
     categoryId: presetCategory && categoryExists ? presetCategory : OTHERS_ID,
-    iconUrl: preset?.iconUrl,
-    iconKey: preset?.iconKey,
+    icon: presetIcon(preset),
   }
 }

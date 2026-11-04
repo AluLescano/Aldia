@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getMonthlyTotal, monthlyEquivalent } from './monthlyTotal'
+import { getMonthlyTotal, monthlyEquivalent, monthlyPriceIn } from './monthlyTotal'
 import type { ExchangeRates } from '@/shared/lib/exchangeRates'
 import type { BillingCycle, BillingUnit, Subscription } from '@/shared/types'
 
@@ -18,7 +18,14 @@ const sub = (
   currency: string,
   billingCycle: BillingCycle,
   extra: Partial<Subscription> = {},
-) => ({ price, currency, billingCycle, isPaused: false, ...extra }) as Subscription
+) =>
+  ({
+    priceHistory: [{ from: '2026-01-01', price, currency }],
+    firstBillDate: '2026-01-01',
+    billingCycle,
+    pauses: [],
+    ...extra,
+  }) as Subscription
 
 const trialEnding = (endDate: string) => ({ trial: { startDate: '2026-10-01', endDate } })
 
@@ -39,13 +46,33 @@ describe('monthlyEquivalent', () => {
   })
 })
 
+describe('monthlyPriceIn', () => {
+  it('spreads the price over the cycle and converts it', () => {
+    // 18,000 ARS a year = 1,500 ARS a month = 1 USD
+    expect(
+      monthlyPriceIn(sub(18000, 'ARS', every(1, 'year')), 'USD', rates, TODAY),
+    ).toBeCloseTo(1, 5)
+  })
+
+  it('needs no rates for the same currency', () => {
+    expect(monthlyPriceIn(sub(30, 'USD', every(3, 'month')), 'USD', null, TODAY)).toBe(10)
+  })
+
+  it('is null when a rate is missing', () => {
+    expect(
+      monthlyPriceIn(sub(100, 'ARS', every(1, 'month')), 'USD', null, TODAY),
+    ).toBeNull()
+  })
+})
+
 describe('getMonthlyTotal', () => {
   const list = [
     sub(120, 'USD', every(1, 'year')), // 10 USD a month
     sub(3000, 'ARS', every(1, 'month')), // 2 USD a month at 1500
-    sub(99, 'USD', every(1, 'month'), { isPaused: true }), // paused: not counted
+    sub(99, 'USD', every(1, 'month'), { pauses: [{ from: '2026-10-01' }] }), // paused: not counted
     sub(10, 'USD', every(1, 'month'), trialEnding('2026-11-01')), // still free: not counted
     sub(5, 'XXX', every(1, 'month')), // unknown currency: left out, and counted as such
+    sub(50, 'USD', every(1, 'month'), { endDate: '2026-09-30' }), // ended: not counted
   ]
 
   it('adds the active ones in the chosen currency', () => {

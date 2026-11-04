@@ -1,0 +1,61 @@
+.intro {
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 1rem;
+}
+
+// Same rows as the "Ordenar por" sheet
+.row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.875rem;
+  background-color: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  transition: background-color 150ms ease-out;
+
+  &:hover {
+    background-color: var(--bg-surface-hover);
+  }
+
+  // The first row is the usual answer: tinted like a selected one
+  &:first-child {
+    background-color: var(--brand-subtle);
+
+    .rowIcon {
+      color: var(--brand-on-subtle);
+    }
+  }
+}
+
+.rowIcon {
+  flex-shrink: 0;
+  width: 1.375rem;
+  height: 1.375rem;
+  color: var(--text-muted);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+}
+
+.mutedText {
+  color: var(--text-muted);
+}
+
+.sectionLabel {
+  padding: 0.75rem 1rem 0.25rem;
+  color: var(--text-muted);
+}

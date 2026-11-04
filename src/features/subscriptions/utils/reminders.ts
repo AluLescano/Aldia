@@ -1,5 +1,6 @@
 // UTILS
 import { addCycles, nextBillDate } from './billingCycle'
+import { isPausedOn } from './subscriptionHistory'
 import { addDays } from '@/shared/lib/isoDate'
 
 // TYPES
@@ -76,7 +77,7 @@ export function nextReminderDate(
   const source = {
     ...schedule,
     id: '',
-    isPaused: false,
+    pauses: [],
     reminders: [{ ...reminder, isEnabled: true }],
   }
   return getReminderTriggers(source, today, until)[0]?.date ?? null
@@ -93,7 +94,7 @@ export function formatDaysBefore(days: number) {
 /** One notification to schedule: on which day, for which reminder, about which event. */
 /** What `getReminderTriggers` reads: the charge schedule plus the reminders. A `Subscription` fits. */
 export type ReminderSource = ChargeSchedule &
-  Pick<Subscription, 'id' | 'isPaused' | 'reminders'>
+  Pick<Subscription, 'id' | 'pauses' | 'reminders'>
 
 export interface ReminderTrigger {
   subscriptionId: string
@@ -135,8 +136,8 @@ export function getReminderTriggers(
   const triggerList: ReminderTrigger[] = []
 
   const subReminders = sub.reminders
-  // Paused, or a one-time payment: no reminders
-  if (sub.isPaused || sub.billingCycle.type === 'one-time') return triggerList
+  // A one-time payment: no reminders (a paused charge is skipped below)
+  if (sub.billingCycle.type === 'one-time') return triggerList
 
   subReminders.forEach((reminder) => {
     if (!reminder.isEnabled) return
@@ -147,8 +148,9 @@ export function getReminderTriggers(
 
     // Stops when the notify day leaves the window or the subscription has ended
     while (notifyWhen <= until && (!sub.endDate || chargeDate <= sub.endDate)) {
-      // A notify day that already passed is skipped, but the loop goes on to the next charge
-      if (notifyWhen >= today) {
+      // A notify day that already passed is skipped, but the loop goes on to the next charge.
+      // A charge inside a pause won't happen: no reminder (still paused = none at all)
+      if (notifyWhen >= today && !isPausedOn(sub.pauses, chargeDate)) {
         const trigger: ReminderTrigger = {
           subscriptionId: sub.id,
           reminderId: reminder.id,

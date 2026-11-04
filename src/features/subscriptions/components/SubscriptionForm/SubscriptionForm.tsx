@@ -12,6 +12,7 @@ import { useCategoryStore } from '@/features/categories/store/categoryStore'
 import { formatBillingCycle } from '../../utils/billingCycle'
 import { getCurrencySymbol } from '@/shared/lib/currencies'
 import { formatDate } from '@/shared/lib/formatDate'
+import { iconSource } from '../../utils/subscriptionIcon'
 
 // COMPONENTS
 import Avatar from '@/shared/ui/Avatar/Avatar'
@@ -97,12 +98,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
       <div className={fieldSet}>
         <fieldset disabled={readOnly} className={fieldGroup}>
           <div className={logoWrapper}>
-            <Avatar
-              src={values.iconUrl}
-              iconKey={values.iconKey}
-              name={values.name}
-              size="large"
-            />
+            <Avatar {...iconSource(values.icon)} name={values.name} size="large" />
           </div>
 
           <div className={container}>
