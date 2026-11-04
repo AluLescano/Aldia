@@ -4,6 +4,8 @@ import {
   applyPriceEdit,
   endPause,
   isPausedOn,
+  nextCharge,
+  pastCharges,
   priceOn,
   startPause,
   upcomingPrice,
@@ -191,6 +193,48 @@ describe('startPause / endPause', () => {
     expect(endPause([old, { from: '2026-03-08' }], '2026-03-12', schedule)).toEqual([
       old,
       { from: '2026-03-08', to: '2026-03-12' },
+    ])
+  })
+})
+
+describe('nextCharge', () => {
+  const claro = { firstBillDate: '2026-09-05', billingCycle: MONTHLY } // the 5th
+
+  it('is the next charge on or after today', () => {
+    expect(nextCharge(claro, '2026-11-03')).toBe('2026-11-05')
+    expect(nextCharge(claro, '2026-11-05')).toBe('2026-11-05')
+  })
+
+  it.each([
+    ['2026-11-20', '2026-11-03', '2026-11-05'], // the end is after the next charge
+    ['2026-11-05', '2026-11-03', '2026-11-05'], // the end date is a charge day: it happens
+    ['2026-11-20', '2026-11-06', null], // Dec 5 is after the end: none left
+    ['2026-10-31', '2026-11-03', null], // already ended
+  ])('ending %s, on %s the next charge is %s', (endDate, today, expected) => {
+    expect(nextCharge({ ...claro, endDate }, today)).toBe(expected)
+  })
+})
+
+describe('pastCharges', () => {
+  const claro = { firstBillDate: '2026-09-05', billingCycle: MONTHLY }
+
+  it('lists the charges before today, newest first', () => {
+    expect(pastCharges(claro, '2026-11-03')).toEqual(['2026-10-05', '2026-09-05'])
+  })
+
+  it("doesn't count today's charge: it's the next one", () => {
+    expect(pastCharges(claro, '2026-10-05')).toEqual(['2026-09-05'])
+  })
+
+  it('is empty before the first charge', () => {
+    expect(pastCharges(claro, '2026-09-01')).toEqual([])
+  })
+
+  it('keeps only the newest ones', () => {
+    expect(pastCharges(claro, '2027-11-03', 3)).toEqual([
+      '2027-10-05',
+      '2027-09-05',
+      '2027-08-05',
     ])
   })
 })

@@ -15,7 +15,13 @@ const TODAY = '2026-11-03'
 const PAUSED = [{ from: '2026-10-01' }]
 
 const sub = (name: string, isPaused: boolean, categoryId: string) =>
-  ({ name, pauses: isPaused ? PAUSED : [], categoryId }) as unknown as Subscription
+  ({
+    name,
+    pauses: isPaused ? PAUSED : [],
+    categoryId,
+    firstBillDate: '2026-01-01',
+    billingCycle: { type: 'every', interval: 1, unit: 'month' },
+  }) as unknown as Subscription
 
 const list = [
   sub('Zeta', false, 'ai'),
@@ -44,6 +50,29 @@ describe('listFilters', () => {
   it('hides "inactive" when nothing is paused', () => {
     const noPaused = list.filter((s) => s.pauses.length === 0)
     expect(listFilters(noPaused, TODAY).map(filterKey)).not.toContain('inactive')
+  })
+})
+
+describe('ended subscriptions', () => {
+  // Monthly on the 1st that ended Oct 15: the Nov 1 charge never comes
+  const ended = { ...sub('Fin', false, 'ai'), endDate: '2026-10-15' }
+
+  it('show the "inactive" tab and are in it', () => {
+    expect(
+      listFilters([sub('Zeta', false, 'ai'), ended], TODAY).map(filterKey),
+    ).toContain('inactive')
+    expect(
+      filterSubscriptions([sub('Zeta', false, 'ai'), ended], { type: 'inactive' }, TODAY),
+    ).toEqual([ended])
+  })
+
+  it('go last in every sort, like the paused ones', () => {
+    const context = { today: TODAY, currency: 'USD', rates: null }
+    expect(
+      sortSubscriptions([ended, sub('Zeta', false, 'ai')], 'name-asc', context).map(
+        (s) => s.name,
+      ),
+    ).toEqual(['Zeta', 'Fin'])
   })
 })
 

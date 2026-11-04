@@ -91,10 +91,11 @@ export type BillingCycle =
   { type: 'one-time' } | { type: 'every'; interval: number; unit: BillingUnit }
 
 /**
- * `trial`: in its free trial · `active`: paying · `inactive`: paused by the user.
+ * `trial`: in its free trial · `active`: paying · `inactive`: paused by the user ·
+ * `ended`: no charges left (its `endDate` comes before the next one).
  * Never stored (a trial ends on its own): calculate it with `statusFor(sub, todayISO())`.
  */
-export type SubscriptionStatus = 'active' | 'trial' | 'inactive'
+export type SubscriptionStatus = 'active' | 'trial' | 'inactive' | 'ended'
 
 /** A free trial: no charges between these two days. */
 export interface TrialConfig {

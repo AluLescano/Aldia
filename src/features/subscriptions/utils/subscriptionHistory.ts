@@ -1,5 +1,5 @@
 // UTILS
-import { nextBillDate } from './billingCycle'
+import { addCycles, nextBillDate } from './billingCycle'
 
 // TYPES
 import type { BillingCycle, Pause, PriceChange, PriceHistory } from '@/shared/types'
@@ -107,4 +107,47 @@ export function upcomingPrice(
     sub.priceHistory,
     nextBillDate(sub.firstBillDate, sub.billingCycle, today),
   )
+}
+
+/**
+ * The next charge on or after `today`, or `null` when there is none left: the end date
+ * comes before it. The one place that knows about `endDate`, so the card, the total, the
+ * sorts and the status all agree. Pure: pass `todayISO()`.
+ *
+ * @example
+ * // Monthly on the 5th, ending Nov 20
+ * nextCharge(claro, '2026-11-03') // '2026-11-05'
+ * nextCharge(claro, '2026-11-06') // null: Dec 5 is after the end
+ */
+export function nextCharge(
+  sub: { firstBillDate: string; billingCycle: BillingCycle; endDate?: string },
+  today: string,
+): string | null {
+  const date = nextBillDate(sub.firstBillDate, sub.billingCycle, today)
+  return sub.endDate && date > sub.endDate ? null : date
+}
+
+/**
+ * The charges that already happened (before `today`), newest first, at most `limit`: the
+ * days a price change can start on besides the next charge ("¿Desde cuándo?" sheet).
+ *
+ * @example
+ * // Monthly on the 5th since Sep 5, today Nov 3
+ * pastCharges(claro, '2026-11-03') // ['2026-10-05', '2026-09-05']
+ */
+export function pastCharges(
+  sub: { firstBillDate: string; billingCycle: BillingCycle },
+  today: string,
+  limit = 12,
+): string[] {
+  if (sub.billingCycle.type === 'one-time') {
+    return sub.firstBillDate < today ? [sub.firstBillDate] : []
+  }
+  const dates: string[] = []
+  for (let count = 0; ; count++) {
+    const date = addCycles(sub.firstBillDate, sub.billingCycle, count)
+    if (date >= today) break
+    dates.push(date)
+  }
+  return dates.reverse().slice(0, limit)
 }

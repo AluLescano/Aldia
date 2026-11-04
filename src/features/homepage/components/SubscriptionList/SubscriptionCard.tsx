@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/features/settings/store/settingsStore'
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
-import { formatNextCharge, formatTrial } from '@/shared/lib/formatDate'
+import { formatDate, formatNextCharge, formatTrial } from '@/shared/lib/formatDate'
 import { todayISO } from '@/shared/lib/isoDate'
 import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
 import {
@@ -21,10 +21,7 @@ import {
   nextBillDate,
 } from '@/features/subscriptions/utils/billingCycle'
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
-import {
-  isPausedOn,
-  upcomingPrice,
-} from '@/features/subscriptions/utils/subscriptionHistory'
+import { upcomingPrice } from '@/features/subscriptions/utils/subscriptionHistory'
 import { iconSource } from '@/features/subscriptions/utils/subscriptionIcon'
 
 // COMPONENTS
@@ -97,7 +94,9 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
 
   // Calculated from today, so it never shows a date that already passed
   const today = todayISO()
-  const isPaused = isPausedOn(subscription.pauses, today)
+  const status = statusFor(subscription, today)
+  // Paused or ended: greyed out, no next charge
+  const isPaused = status === 'inactive' || status === 'ended'
   const nextCharge = nextBillDate(
     subscription.firstBillDate,
     subscription.billingCycle,
@@ -187,9 +186,15 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
             {!isPaused && (
               <Typography variant="label" size="sm">
                 {/* In a trial, say so: "En 7 días" alone reads like a charge */}
-                {subscription.trial && statusFor(subscription, today) === 'trial'
+                {subscription.trial && status === 'trial'
                   ? formatTrial(subscription.trial, today)
                   : formatNextCharge(nextCharge, today)}
+              </Typography>
+            )}
+            {/* Ended: say when, so it doesn't look like it's just paused */}
+            {status === 'ended' && subscription.endDate && (
+              <Typography variant="label" size="sm" className={opacity50}>
+                {`${subscription.endDate < today ? 'Terminó' : 'Termina'} el ${formatDate(subscription.endDate)}`}
               </Typography>
             )}
           </div>

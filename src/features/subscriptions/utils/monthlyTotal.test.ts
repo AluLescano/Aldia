@@ -72,6 +72,7 @@ describe('getMonthlyTotal', () => {
     sub(99, 'USD', every(1, 'month'), { pauses: [{ from: '2026-10-01' }] }), // paused: not counted
     sub(10, 'USD', every(1, 'month'), trialEnding('2026-11-01')), // still free: not counted
     sub(5, 'XXX', every(1, 'month')), // unknown currency: left out, and counted as such
+    sub(50, 'USD', every(1, 'month'), { endDate: '2026-09-30' }), // ended: not counted
   ]
 
   it('adds the active ones in the chosen currency', () => {
