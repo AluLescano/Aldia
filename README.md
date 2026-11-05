@@ -11,15 +11,19 @@ It is a portfolio and learning project first: for now it is shared with family a
 
 ## What works today
 
-- **Home:** monthly total, subscription list filtered by category, swipe to delete with undo.
+- **Home:** monthly total (other currencies converted with daily exchange rates, the last saved ones when offline), the list filtered by category or by "Inactivas" (paused and ended), sorted by next charge, name or price (the pick is remembered), swipe to delete with undo.
+- **Cards:** each one shows the monthly price, the same number the total uses, with the real charge underneath when it's different ("$ 8.500 al año").
 - **Add a subscription:** 51 presets (streaming, AI, gaming, utility bills searchable by company, e.g. "Edenor") or a custom one.
 - **The form:** name, price, currency, billing cycle (every N days / weeks / months / years), free trial (from any start date), start and end dates, category, and up to 3 notifications (N days before each charge).
+- **Price changes:** changing the price of a subscription that was already charged asks "¿Desde cuándo?", so past charges keep the price that was really paid.
+- **End dates:** once a subscription ends it leaves the total, moves to "Inactivas" and its card says "Terminó el …".
+- **Reminders:** real phone notifications N days before each charge, at 9:00. They're planned 60 days ahead and refreshed whenever a subscription changes or the app comes back to the screen. The first-open welcome asks for the permission.
 - **Categories:** 12 defaults plus your own (create, rename, delete; deleted ones fall back to "Otros").
 - **Detail screen:** view, edit, pause/resume and delete a subscription.
 
-- **Android:** runs on the phone (Capacitor), with safe areas, the back button and system bar colors handled. Data is saved as files in the app's private folder.
+- **Android:** runs on the phone (Capacitor), with safe areas, the back button and system bar colors handled. Data is saved as files in the app's private folder, with a version number, so data from an older version is upgraded on the first open.
 
-Not built yet: Calendar, Statistics, Cards and Settings screens (placeholders), the notifications actually ringing on the phone (they're set up in the form, not scheduled yet), JSON export/import.
+Not built yet: Calendar, Statistics ("Resumen"), Cards and Settings screens (placeholders), picking the reminder time (fixed at 9:00 until Settings exists), JSON export/import.
 
 ---
 
@@ -45,6 +49,8 @@ Not built yet: Calendar, Statistics, Cards and Settings screens (placeholders), 
 - **JSON files in the app's private folder** instead of `localStorage`: the system can clear the WebView's storage, while the app's own files stay until the user clears the app's data or uninstalls it. Each save writes a temporary file and swaps it in, so a crash never leaves half a file (details in `docs/architecture.md`).
 - **SCSS Modules** instead of Tailwind (Tailwind was removed): every component owns its styles, JSX stays readable, and themed pseudo-elements and keyframes are easy.
 - **Billing cycle as data**, `{ type: 'every', interval, unit }`, instead of a fixed list of names: "every 2 months" or "every 15 days" need no new code.
+- **Price history instead of one price:** each subscription keeps `priceHistory` (every price with the date it starts) and its `pauses`, so a price rise never rewrites what past charges cost, and the calendar will be able to show which charges a pause skipped.
+- **Versioned saved data:** the subscriptions file carries a version number and a `migrate` step (Zustand `persist`), so a new data shape upgrades what's already on the testers' phones instead of breaking it.
 - **Dates as `YYYY-MM-DD` strings in local time**, never `toISOString()`: no time zone can move a charge to the day before.
 - **Shared field wiring** (`useFieldControl`): every input gets the same ids, accessibility links and error shake from one place.
 
@@ -113,7 +119,10 @@ Then `cd android && ./gradlew assembleRelease` builds `app/build/outputs/apk/rel
 - [x] Monthly total that respects billing cycle and currency (daily exchange rates, cached)
 - [x] Initialize the Capacitor Android platform
 - [x] Data saved as files on the device, safe against crashes
-- [ ] Local notifications before each charge (Capacitor Local Notifications)
+- [x] Local notifications before each charge (Capacitor Local Notifications)
+- [x] First-open welcome: what Aldia is for, the notifications permission, the privacy promise
+- [x] Sort the list; monthly prices on the cards
+- [x] Price history, pauses and end dates (saved data v2, upgraded automatically)
 - [ ] JSON export/import (the only backup until Drive sync)
 
 ### v1.x — The other screens
