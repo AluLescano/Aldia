@@ -58,6 +58,8 @@ interface Props {
   activeTab: TabType
   /** Called with the tapped tab. */
   onSelectTab: (tab: TabType) => void
+  /** True while a screen is open on top: the bar can't be tapped or focused. */
+  inert?: boolean
 }
 
 /**
@@ -66,7 +68,7 @@ interface Props {
  * notch over to it (a gentle overshoot, or a jump with reduced motion), and only the active
  * tab shows its label, so the selection doesn't rely on color alone.
  */
-const BottomNavBar = ({ activeTab, onSelectTab }: Props) => {
+const BottomNavBar = ({ activeTab, onSelectTab, inert }: Props) => {
   const activeIndex = NAV_ITEMS.findIndex((item) => item.id === activeTab)
   const ActiveIcon = NAV_ITEMS[activeIndex].Icon
   // The tabs are equal and edge to edge, so tab i's centre is (i + 0.5) / 5 of the bar
@@ -88,6 +90,7 @@ const BottomNavBar = ({ activeTab, onSelectTab }: Props) => {
     <motion.nav
       className={navContainer}
       aria-label="Secciones"
+      inert={inert}
       style={{ '--notch-x': notchXPercent } as MotionStyle}
     >
       <div className={bar} aria-hidden="true" />

@@ -63,6 +63,8 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabType>('home')
   const [direction, setDirection] = useState(1)
   const overlays = useUIStore((state) => state.overlays)
+  // A screen is open on top: the tabs under it can't be tapped, even while it slides in
+  const hasOverlay = overlays.length > 0
   const showOnboarding = !useSettingsStore((state) => state.hasSeenOnboarding)
 
   const toast = useToastStore((state) => state.toast)
@@ -135,7 +137,7 @@ function App() {
           <div className={appWrapper}>
             {/* The old page slides out one way while the new one slides in from the other.
             `custom` on AnimatePresence: the leaving page uses the new direction too */}
-            <main className={mainContent}>
+            <main className={mainContent} inert={hasOverlay}>
               <AnimatePresence mode="popLayout" initial={false} custom={direction}>
                 <motion.div
                   key={activeTab}
@@ -152,14 +154,20 @@ function App() {
             </main>
 
             {/* Fixed Mobile Bottom Navigation */}
-            <BottomNavBar activeTab={activeTab} onSelectTab={selectTab} />
+            <BottomNavBar
+              activeTab={activeTab}
+              onSelectTab={selectTab}
+              inert={hasOverlay}
+            />
 
             {/* Overlay stack: every open screen stays mounted (it keeps its state), each new one
-            slides in from the right over the previous, and going back slides it out again */}
+            slides in from the right over the previous, and going back slides it out again.
+            Keyed by the overlay's own id: a key made from its place in the stack would let a
+            new screen take over one still sliding out, keeping that screen's state */}
             <AnimatePresence>
               {overlays.map((overlay, index) => (
                 <motion.div
-                  key={`${index}-${overlay.type}`}
+                  key={overlay.id}
                   className={overlayContainer}
                   style={{ zIndex: 50 + index }}
                   // Only the top screen is reachable; the ones under it are hidden from screen readers
