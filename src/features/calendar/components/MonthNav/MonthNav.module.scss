@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+
+  .nextIcon {
+    transform: rotate(180deg);
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+
+    .todayPill {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0.5rem;
+
+      background-color: var(--brand-chip-bg);
+      border: none;
+      color: var(--brand-on-subtle);
+    }
+  }
+}

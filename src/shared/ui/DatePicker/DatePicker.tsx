@@ -2,7 +2,7 @@
 import { useState } from 'react'
 
 // UTILS
-import { getMonthGrid } from '@/shared/lib/calendar'
+import { getMonthGrid, MONTHS } from '@/shared/lib/calendar'
 import { parseISODate, todayISO } from '@/shared/lib/isoDate'
 import { cn } from '@/shared/lib/cn'
 
@@ -45,12 +45,6 @@ const fullDate = (iso: string) =>
   parseISODate(iso)?.toLocaleDateString('es-AR', { dateStyle: 'full' })
 
 const WEEKDAYS = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
-
-// "octubre" -> "Octubre", built once when the file loads
-const MONTHS = Array.from({ length: 12 }, (_, month) => {
-  const name = new Date(2000, month, 1).toLocaleDateString('es-AR', { month: 'long' })
-  return name.charAt(0).toUpperCase() + name.slice(1)
-})
 
 const monthOptions = MONTHS.map((label, value) => ({ value, label }))
 

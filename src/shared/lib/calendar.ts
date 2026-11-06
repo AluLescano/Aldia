@@ -19,3 +19,9 @@ export function getMonthGrid(year: number, month: number) {
   }
   return days
 }
+
+// "octubre" -> "Octubre", built once when the file loads
+export const MONTHS = Array.from({ length: 12 }, (_, month) => {
+  const name = new Date(2000, month, 1).toLocaleDateString('es-AR', { month: 'long' })
+  return name.charAt(0).toUpperCase() + name.slice(1)
+})

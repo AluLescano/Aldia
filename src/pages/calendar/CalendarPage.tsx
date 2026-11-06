@@ -1,38 +1,46 @@
-// ASSETS
-import { IconCalendar } from '@/assets/icons/IconCalendar'
+// HOOKS
+import { useState } from 'react'
 
+// UTILS
+import { parseISODate, todayISO } from '@/shared/lib/isoDate'
+
+// COMPONENTS
+import MonthNav from '@/features/calendar/components/MonthNav/MonthNav'
+
+// ASSETS
 import styles from './CalendarPage.module.scss'
 
-/** Placeholder until the screen is built (v1.x): describes what it will show. */
 export const CalendarPage = () => {
-  const {
-    container,
-    header,
-    title,
-    subtitle,
-    card,
-    iconContainer,
-    icon,
-    cardTitle,
-    cardText,
-  } = styles
+  const { container } = styles
+
+  const today = todayISO()
+  const start = parseISODate(today)!
+  // The month on screen ({ year, month 0-11 }). It lives here because the grid, the day sheet
+  // and the total will all read it
+  const [view, setView] = useState({ year: start.getFullYear(), month: start.getMonth() })
+
+  const goToMonth = (delta: number) => {
+    const next = new Date(view.year, view.month + delta, 1)
+    setView({ year: next.getFullYear(), month: next.getMonth() })
+  }
+
+  const goToToday = () => {
+    setView({ year: start.getFullYear(), month: start.getMonth() })
+  }
+
+  const isCurrentMonth =
+    view.year === start.getFullYear() && view.month === start.getMonth()
 
   return (
     <div className={container}>
-      <div className={header}>
-        <h1 className={title}>Calendar</h1>
-        <p className={subtitle}>View charges scheduled for each day of the month</p>
-      </div>
-
-      <div className={card}>
-        <div className={iconContainer}>
-          <IconCalendar className={icon} strokeWidth={1.75} />
-        </div>
-        <p className={cardTitle}>Interactive Calendar View</p>
-        <p className={cardText}>
-          Charge days and card expiration dates will be displayed here in a monthly grid.
-        </p>
-      </div>
+      <MonthNav
+        year={view.year}
+        month={view.month}
+        showToday={!isCurrentMonth}
+        onPrevious={() => goToMonth(-1)}
+        onNext={() => goToMonth(+1)}
+        onToday={goToToday}
+      />
     </div>
   )
 }
