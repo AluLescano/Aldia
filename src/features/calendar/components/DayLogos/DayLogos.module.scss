@@ -1,0 +1,63 @@
+// Centered at the top of the tile, above the day number
+.container {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+
+  // A neighbour month's day: its logos fade like its number
+  &.faded {
+    opacity: 0.45;
+  }
+}
+
+.stack {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  // `.stack .logo` outranks the Avatar's own size and glow, whatever order the CSS loads in
+  .logo {
+    width: 22px;
+    height: 22px;
+    font-size: 0.6875rem; // the initial, when there's no logo
+    // A thin ring in the tile's color, so overlapping logos look cut out
+    box-shadow: 0 0 0 1.5px var(--bg-surface-raised);
+
+    // The Avatar's color glow is for big logos; on a tile it would tint the whole day
+    &::before {
+      content: none;
+    }
+
+    & + .logo {
+      margin-left: -9px;
+    }
+
+    &.paused {
+      filter: grayscale(1);
+      opacity: 0.55;
+    }
+  }
+
+  .container.faded & .logo {
+    box-shadow: 0 0 0 1.5px var(--bg-screen);
+  }
+}
+
+// "+N": a badge on the top right of the stacked logos
+.more {
+  position: absolute;
+  left: calc(100% - 10px);
+  top: -5px;
+  z-index: 1;
+  padding: 0 4px;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  line-height: 15px;
+  font-weight: 500;
+  background-color: var(--bg-surface-raised);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+}

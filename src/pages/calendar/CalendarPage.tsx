@@ -1,8 +1,11 @@
 // HOOKS
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
 
 // UTILS
 import { parseISODate, todayISO } from '@/shared/lib/isoDate'
+import { getMonthGrid } from '@/shared/lib/calendar'
+import { chargesByDay } from '@/features/calendar/utils/chargesByDay'
 
 // COMPONENTS
 import MonthNav from '@/features/calendar/components/MonthNav/MonthNav'
@@ -19,6 +22,19 @@ export const CalendarPage = () => {
   // The month on screen ({ year, month 0-11 }). It lives here because the grid, the day sheet
   // and the total will all read it
   const [view, setView] = useState({ year: start.getFullYear(), month: start.getMonth() })
+  const subscriptions = useSubscriptionStore((state) => state.subscriptions)
+
+  // Rebuilt only when the month or the subscriptions change, not on every render
+  const days = useMemo(() => getMonthGrid(view.year, view.month), [view.year, view.month])
+  const byDay = useMemo(
+    () => chargesByDay(subscriptions, days[0], days[days.length - 1]),
+    [subscriptions, days],
+  )
+  // A charge only carries its subscription's id: this finds the sub for its logo
+  const subsById = useMemo(
+    () => new Map(subscriptions.map((sub) => [sub.id, sub])),
+    [subscriptions],
+  )
 
   const goToMonth = (delta: number) => {
     const next = new Date(view.year, view.month + delta, 1)
@@ -42,7 +58,13 @@ export const CalendarPage = () => {
         onNext={() => goToMonth(+1)}
         onToday={goToToday}
       />
-      <MonthGrid year={view.year} month={view.month} today={today} />
+      <MonthGrid
+        days={days}
+        month={view.month}
+        today={today}
+        byDay={byDay}
+        subsById={subsById}
+      />
     </div>
   )
 }
