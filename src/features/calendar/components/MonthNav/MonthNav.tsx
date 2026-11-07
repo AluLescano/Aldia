@@ -15,7 +15,7 @@ interface Props {
   year: number
   /** The month on screen, 0-11 (0 is January), like `Date.getMonth()`. */
   month: number
-  /** Shows the "Hoy" pill. The page sets it when the month on screen isn't today's. */
+  /** Shows the "Hoy" button. The page sets it when the month on screen isn't today's. */
   showToday: boolean
   /** The ‹ arrow was tapped. */
   onPrevious: () => void
@@ -26,7 +26,7 @@ interface Props {
 }
 
 /**
- * The Calendario's month row: ‹ arrow, "Noviembre 2026" with an optional "Hoy" pill, › arrow.
+ * The Calendario's month row: ‹ arrow, "Noviembre 2026" with an optional "Hoy" button beside the › arrow.
  * It holds no state: the page owns the month on screen (the grid, the day sheet and the
  * total all read it) and decides what each tap means.
  *

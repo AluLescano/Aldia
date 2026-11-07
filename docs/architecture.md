@@ -38,8 +38,9 @@ src/
 │
 ├── features/                 # Domain-driven feature modules
 │   ├── calendar/
-│   │   ├── components/       # MonthNav (month row, "Hoy"), MonthGrid (42 tiles), DayLogos, DaySheet (a day's charges and trials), CalendarLegend
-│   │   └── utils/            # chargesByDay, trialsByDay, chargesTotal (a month's or day's real cost, converted), countText
+│   │   ├── components/       # MonthNav (month row, "Hoy"), MonthGrid (42 tiles, swipe to change month), DayLogos, DaySheet (a day's charges and trials), CalendarLegend
+│   │   ├── hooks/            # useCalendarMonth (the shown month, moving it), useMonthCharges (its days, charges, trials and total)
+│   │   └── utils/            # chargesByDay, trialsByDay, chargesTotal (a month's or day's real cost, converted), chargeInCurrency, countText / daySummary
 │   ├── categories/
 │   │   ├── components/       # CategoryPicker, CategoryFooter
 │   │   ├── hooks/            # useCategoryEditor (add / rename / delete state)

@@ -1,20 +1,21 @@
-// HOOKS
-import { useMemo, useState } from 'react'
-import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
+// DEPENDENCIES
+import { useState } from 'react'
+
+// STORES
 import { useUIStore } from '@/shared/store/uiStore'
-import { useSettingsStore } from '@/features/settings/store/settingsStore'
-import { useRatesStore } from '@/shared/store/ratesStore'
+
+// HOOKS
+import { useCalendarMonth } from '@/features/calendar/hooks/useCalendarMonth'
+import { useMonthCharges } from '@/features/calendar/hooks/useMonthCharges'
 
 // UTILS
-import { parseISODate, todayISO } from '@/shared/lib/isoDate'
-import { getMonthGrid, MONTHS } from '@/shared/lib/calendar'
+import { todayISO } from '@/shared/lib/isoDate'
+import { MONTHS } from '@/shared/lib/calendar'
 import { ratesNote } from '@/shared/lib/exchangeRates'
-import { chargesByDay } from '@/features/calendar/utils/chargesByDay'
-import { chargesTotal } from '@/features/calendar/utils/chargesTotal'
 import { countText } from '@/features/calendar/utils/countText'
-import { trialsByDay } from '@/features/calendar/utils/trialsByDay'
 
 // COMPONENTS
+import Typography from '@/shared/ui/Typography/Typography'
 import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses/MonthlyExpenses'
 import MonthNav from '@/features/calendar/components/MonthNav/MonthNav'
 import MonthGrid from '@/features/calendar/components/MonthGrid/MonthGrid'
@@ -24,69 +25,43 @@ import CalendarLegend from '@/features/calendar/components/CalendarLegend/Calend
 // ASSETS
 import styles from './CalendarPage.module.scss'
 
+/**
+ * The Calendario tab: what the shown month really charges, the month row, the grid of days
+ * (swipe to change month) with its legend, and the tapped day's sheet. The month lives in
+ * `useCalendarMonth`; its charges, trials and total come from `useMonthCharges`.
+ */
 export const CalendarPage = () => {
-  const { container } = styles
-
+  const { container, emptyMonth } = styles
   const pushOverlay = useUIStore((state) => state.pushOverlay)
-  const selectedCurrency = useSettingsStore((state) => state.selectedCurrency)
-  const rates = useRatesStore((state) => state.rates)
 
   const today = todayISO()
-  const start = parseISODate(today)!
-  // The month on screen ({ year, month 0-11 }). It lives here because the grid, the day sheet
-  // and the total will all read it
-  const [view, setView] = useState({ year: start.getFullYear(), month: start.getMonth() })
-  const subscriptions = useSubscriptionStore((state) => state.subscriptions)
+  const { view, direction, goToMonth, goToToday, isCurrentMonth } =
+    useCalendarMonth(today)
+  const {
+    days,
+    byDay,
+    trials,
+    subsById,
+    monthTotal,
+    hasTrial,
+    isEmpty,
+    currency,
+    rates,
+  } = useMonthCharges(view)
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const monthName = MONTHS[view.month].toLowerCase()
 
-  // Rebuilt only when the month or the subscriptions change, not on every render
-  const days = useMemo(() => getMonthGrid(view.year, view.month), [view.year, view.month])
-  const byDay = useMemo(
-    () => chargesByDay(subscriptions, days[0], days[days.length - 1]),
-    [subscriptions, days],
-  )
-  // Which subs are on a free trial each day of the grid: tinted tiles and the sheet's rows
-  const trials = useMemo(
-    () => trialsByDay(subscriptions, days[0], days[days.length - 1]),
-    [subscriptions, days],
-  )
-  // A charge only carries its subscription's id: this finds the sub for its logo
-  const subsById = useMemo(
-    () => new Map(subscriptions.map((sub) => [sub.id, sub])),
-    [subscriptions],
-  )
-
-  // What the shown month really charges: only its own days, not the neighbour months' days
-  // the grid also shows. A yearly charge counts whole on its month (unlike Home's average)
-  const monthPrefix = `${view.year}-${String(view.month + 1).padStart(2, '0')}-` // "2026-11-"
-  const monthTotal = useMemo(() => {
-    const monthCharges = [...byDay]
-      .filter(([date]) => date.startsWith(monthPrefix))
-      .flatMap(([, charges]) => charges)
-    return chargesTotal(monthCharges, selectedCurrency, rates)
-  }, [byDay, monthPrefix, selectedCurrency, rates])
-
-  // The legend lists only the marks this month has (the neighbour days don't count)
-  const monthHasTrial = [...trials.keys()].some((date) => date.startsWith(monthPrefix))
-
-  const selectedCharges = selectedDate ? (byDay.get(selectedDate) ?? []) : []
-
-  const goToMonth = (delta: number) => {
-    const next = new Date(view.year, view.month + delta, 1)
-    setView({ year: next.getFullYear(), month: next.getMonth() })
+  // The sheet closes first, so it isn't sitting there when the user comes back
+  const openOverlay = (...args: Parameters<typeof pushOverlay>) => {
+    setSelectedDate(null)
+    pushOverlay(...args)
   }
-
-  const goToToday = () => {
-    setView({ year: start.getFullYear(), month: start.getMonth() })
-  }
-
-  const isCurrentMonth =
-    view.year === start.getFullYear() && view.month === start.getMonth()
 
   return (
     <div className={container}>
       <MonthlyExpenses
-        title={`Cobros de ${MONTHS[view.month].toLowerCase()}`}
+        title={`Cobros de ${monthName}`}
         amount={monthTotal.total}
         detail={countText(monthTotal.count)}
         note={ratesNote(monthTotal.converted, monthTotal.unconverted, rates, today)}
@@ -96,7 +71,7 @@ export const CalendarPage = () => {
         month={view.month}
         showToday={!isCurrentMonth}
         onPrevious={() => goToMonth(-1)}
-        onNext={() => goToMonth(+1)}
+        onNext={() => goToMonth(1)}
         onToday={goToToday}
       />
       <MonthGrid
@@ -107,26 +82,26 @@ export const CalendarPage = () => {
         subsById={subsById}
         trials={trials}
         onSelectDay={setSelectedDate}
+        onSwipe={goToMonth}
+        direction={direction}
       />
-      <CalendarLegend hasToday={isCurrentMonth} hasTrial={monthHasTrial} />
+      <CalendarLegend hasToday={isCurrentMonth} hasTrial={hasTrial} />
+      {isEmpty && (
+        <Typography variant="body" size="sm" className={emptyMonth}>
+          {`Nada se cobra en ${monthName}. Toca un día para agregar una subscripción.`}
+        </Typography>
+      )}
       <DaySheet
         isOpen={selectedDate !== null}
         date={selectedDate}
-        charges={selectedCharges}
+        charges={selectedDate ? (byDay.get(selectedDate) ?? []) : []}
         trials={selectedDate ? (trials.get(selectedDate) ?? []) : []}
-        dayTotal={chargesTotal(selectedCharges, selectedCurrency, rates)}
-        currency={selectedCurrency}
+        subsById={subsById}
+        currency={currency}
         rates={rates}
         onClose={() => setSelectedDate(null)}
-        subsById={subsById}
-        onOpenSub={(id) => {
-          setSelectedDate(null)
-          pushOverlay('subscription-form', { subscriptionId: id })
-        }}
-        onAddSub={(date) => {
-          setSelectedDate(null)
-          pushOverlay('preset-picker', { firstBillDate: date })
-        }}
+        onOpenSub={(id) => openOverlay('subscription-form', { subscriptionId: id })}
+        onAddSub={(date) => openOverlay('preset-picker', { firstBillDate: date })}
       />
     </div>
   )

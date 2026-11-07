@@ -6,3 +6,11 @@
     var(--nav-height) + var(--safe-bottom) + 1rem
   ); // room for the nav bar
 }
+
+// A month where nothing happens: say so, and how to add something
+.emptyMonth {
+  margin-top: -0.75rem; // closer to the calendar than the page's 1.5rem gap
+  padding: 0 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+}

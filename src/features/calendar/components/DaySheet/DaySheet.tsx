@@ -1,15 +1,22 @@
-// UTILS
-import { countText } from '@/features/calendar/utils/countText'
-import { formatDayMonth } from '@/shared/lib/formatDate'
-import { dayAndMonth } from '@/shared/lib/calendar'
-import { formatBillingCycle } from '@/features/subscriptions/utils/billingCycle'
-import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
-import { convert, type ExchangeRates } from '@/shared/lib/exchangeRates'
-
 // TYPES
+import type { ReactNode } from 'react'
 import type { Charge } from '@/features/subscriptions/utils/subscriptionHistory'
-import type { ChargesTotal } from '@/features/calendar/utils/chargesTotal'
+import type { ExchangeRates } from '@/shared/lib/exchangeRates'
 import type { CurrencyCode, Subscription } from '@/shared/types'
+
+// UTILS
+import { dayAndMonth } from '@/shared/lib/calendar'
+import { getCurrencySymbol } from '@/shared/lib/currencies'
+import { ratesNote } from '@/shared/lib/exchangeRates'
+import { formatDayMonth } from '@/shared/lib/formatDate'
+import { todayISO } from '@/shared/lib/isoDate'
+import { formatBillingCycle } from '@/features/subscriptions/utils/billingCycle'
+import {
+  chargeInCurrency,
+  type ShownPrice,
+} from '@/features/calendar/utils/chargeInCurrency'
+import { chargesTotal } from '@/features/calendar/utils/chargesTotal'
+import { daySummary } from '@/features/calendar/utils/countText'
 
 // COMPONENTS
 import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
@@ -20,6 +27,8 @@ import Typography from '@/shared/ui/Typography/Typography'
 // ASSETS
 import styles from './DaySheet.module.scss'
 
+const { list, rowButton, mutedLine, trialLine, emptyText, total, totalNote } = styles
+
 interface Props {
   /** Shows the sheet. */
   isOpen: boolean
@@ -29,41 +38,71 @@ interface Props {
   charges: Charge[]
   /** The subs on a free trial that day, from `trialsByDay`. */
   trials: Subscription[]
-  /** Backdrop, Escape, back button or dragging it down. The page clears the date. */
-  onClose: () => void
   /** Every subscription by id: a charge only carries its `subscriptionId`. */
   subsById: Map<string, Subscription>
-  /** A row was tapped: the page closes the sheet and opens that subscription's form. */
-  onOpenSub: (subscriptionId: string) => void
-  /** "Agregar una subscripción" on an empty day: the page opens the preset picker with this date. */
-  onAddSub: (date: string) => void
-  /** The day's charges added up in `currency` (`chargesTotal`). Shown with 2+ paying charges. */
-  dayTotal: ChargesTotal
   /** The currency picked at the top: the rows and the day total show it. */
   currency: CurrencyCode
   /** To convert each charge into `currency`. */
   rates: ExchangeRates | null
+  /** Backdrop, Escape, back button or dragging it down. The page clears the date. */
+  onClose: () => void
+  /** A row was tapped: the page closes the sheet and opens that subscription's form. */
+  onOpenSub: (subscriptionId: string) => void
+  /** "Agregar una subscripción": the page opens the preset picker starting on this day. */
+  onAddSub: (date: string) => void
 }
 
+interface RowProps {
+  sub: Subscription
+  /** The line under the name, already styled. */
+  subLine: ReactNode
+  onOpen: () => void
+  /** Missing: the row says "Gratis" (a trial day). */
+  price?: ShownPrice
+  isPaused?: boolean
+}
+
+// One tappable row: the same look as Home's cards, inside a button that opens the sub
+const DayRow = ({ sub, subLine, onOpen, price, isPaused }: RowProps) => (
+  <Button variant="secondary" width="full" onClick={onOpen} className={rowButton}>
+    <SubscriptionRow
+      icon={sub.icon}
+      name={sub.name}
+      subLine={subLine}
+      amount={price?.amount}
+      currencySymbol={price?.currencySymbol}
+      priceNote={price?.note}
+      isPaused={isPaused}
+    />
+  </Button>
+)
+
 /**
- * The tapped day's sheet in the Calendario: the date as its title, how many charges it has,
- * and one row per charge (`SubscriptionRow`, the same look as Home's cards). Each row shows
- * that charge's own price (a yearly sub its whole year, not a monthly share) in the picked
- * currency, with the original under it when it was converted, and says
- * "Pausada", "Fin de prueba: primer cobro" or the cycle. Tapping a row opens that
- * subscription to edit it. Free trials running that day come first, as "Gratis" rows (not on
- * their last day: that's the first charge, already a row). An empty day says so and offers to
- * add a subscription starting on it. With 2 or more paying charges, "Total del día" adds them up in the selected
- * currency.
+ * The tapped day's sheet in the Calendario: the date as its title, a summary under it
+ * ("2 cobros · 1 prueba gratis"), and one row per trial and charge (`SubscriptionRow`, the
+ * same look as Home's cards):
+ * - free trials running that day first, as "Gratis" rows (not on their last day: that's the
+ *   first charge, already a row);
+ * - each charge at its own price (a yearly sub its whole year, not a monthly share) in the
+ *   picked currency, the original under it when converted, saying "Pausada", "Fin de prueba:
+ *   primer cobro" or the cycle;
+ * - "Total del día" with 2 or more paying charges.
+ *
+ * Tapping a row opens that subscription to edit it. Every day offers "Agregar una
+ * subscripción", starting on it.
  *
  * @example
  * <DaySheet
  *   isOpen
  *   date="2026-11-15"
  *   charges={byDay.get('2026-11-15') ?? []}
+ *   trials={trials.get('2026-11-15') ?? []}
  *   subsById={subsById}
+ *   currency="USD"
+ *   rates={rates}
  *   onClose={close}
  *   onOpenSub={openForm}
+ *   onAddSub={addOnDay}
  * />
  * // "Domingo 15 de noviembre" / "3 cobros" / Netflix, Spotify, ChatGPT
  */
@@ -72,131 +111,80 @@ const DaySheet = ({
   date,
   charges,
   trials,
-  onClose,
   subsById,
-  onOpenSub,
-  onAddSub,
-  dayTotal,
   currency,
   rates,
+  onClose,
+  onOpenSub,
+  onAddSub,
 }: Props) => {
-  const {
-    container,
-    subscriptionList,
-    rowButton,
-    sublineClass,
-    trialLine,
-    total,
-    totalNote,
-  } = styles
   // On a trial's last day its charge row already says "Fin de prueba: primer cobro"
   const runningTrials = trials.filter((sub) => sub.trial?.endDate !== date)
   const isEmpty = charges.length === 0 && runningTrials.length === 0
-  const trialText =
-    runningTrials.length === 1
-      ? '1 prueba gratis'
-      : `${runningTrials.length} pruebas gratis`
-  // "3 cobros", "1 prueba gratis", "2 cobros · 1 prueba gratis"
-  const subtitle =
-    runningTrials.length === 0
-      ? countText(charges.length)
-      : charges.length === 0
-        ? trialText
-        : `${countText(charges.length)} · ${trialText}`
+  // Paused charges don't count (nothing is paid); one charge is its own total
+  const dayTotal = chargesTotal(charges, currency, rates)
+  const dayNote = ratesNote(dayTotal.converted, dayTotal.unconverted, rates, todayISO())
 
   return (
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
       title={date ? dayAndMonth(date) : undefined}
-      subtitle={subtitle}
+      subtitle={daySummary(charges.length, runningTrials.length)}
       footer={
-        date &&
-        isEmpty && (
+        date && (
           <Button width="full" onClick={() => onAddSub(date)}>
             Agregar una subscripción
           </Button>
         )
       }
     >
-      {date &&
-        (isEmpty ? (
-          <div className={container}>
-            <Typography variant="body" size="sm">
-              Nada se cobra este día.
-            </Typography>
-          </div>
-        ) : (
-          <div className={subscriptionList}>
-            {runningTrials.map((sub) => {
-              const endDay = formatDayMonth(sub.trial?.endDate ?? '')
-              const text = `Prueba gratis hasta el ${endDay}`
-              return (
-                <Button
-                  key={`trial-${sub.id}`}
-                  variant="secondary"
-                  width="full"
-                  onClick={() => onOpenSub(sub.id)}
-                  className={rowButton}
-                >
-                  {/* No amount: the row says "Gratis" */}
-                  <SubscriptionRow
-                    icon={sub.icon}
-                    name={sub.name}
-                    subLine={
-                      <Typography variant="label" size="sm" className={trialLine}>
-                        {text}
-                      </Typography>
-                    }
-                  />
-                </Button>
-              )
-            })}
-            {charges.map((charge) => {
-              const sub = subsById.get(charge.subscriptionId)
-              if (!sub) return null
-              // Paused first: a paused charge says so even on a trial's last day
-              const subLine = charge.isPaused
-                ? 'Pausada'
-                : charge.isTrialEnd
-                  ? 'Fin de prueba: primer cobro'
-                  : formatBillingCycle(sub.billingCycle)
-              // In the picked currency, like Home's cards and the totals; what is really
-              // charged goes in the small line. No rate: the charge's own currency, as is
-              const converted = convert(charge.price, charge.currency, currency, rates)
-              const isConverted = converted !== null && charge.currency !== currency
-              return (
-                <Button
-                  key={charge.subscriptionId}
-                  variant="secondary"
-                  width="full"
-                  onClick={() => onOpenSub(charge.subscriptionId)}
-                  className={rowButton}
-                >
-                  <SubscriptionRow
-                    icon={sub.icon}
-                    name={sub.name}
-                    subLine={
-                      <Typography variant="label" size="sm" className={sublineClass}>
-                        {subLine}
-                      </Typography>
-                    }
-                    amount={converted ?? charge.price}
-                    currencySymbol={getCurrencySymbol(
-                      converted === null ? charge.currency : currency,
-                    )}
-                    priceNote={
-                      isConverted
-                        ? `${getCurrencySymbol(charge.currency)} ${formatAmount(charge.price)}`
-                        : undefined
-                    }
-                    isPaused={charge.isPaused}
-                  />
-                </Button>
-              )
-            })}
-            {/* One charge is its own total; paused ones don't count (nothing is paid) */}
-            {dayTotal.count >= 2 && (
+      {isEmpty ? (
+        <Typography variant="body" size="sm" className={emptyText}>
+          Nada se cobra este día.
+        </Typography>
+      ) : (
+        <div className={list}>
+          {runningTrials.map((sub) => (
+            <DayRow
+              key={`trial-${sub.id}`}
+              sub={sub}
+              onOpen={() => onOpenSub(sub.id)}
+              subLine={
+                <Typography variant="label" size="sm" className={trialLine}>
+                  {`Prueba gratis hasta el ${formatDayMonth(sub.trial?.endDate ?? '')}`}
+                </Typography>
+              }
+            />
+          ))}
+
+          {charges.map((charge) => {
+            const sub = subsById.get(charge.subscriptionId)
+            if (!sub) return null
+            // Paused first: a paused charge says so even on a trial's last day
+            const subLine = charge.isPaused
+              ? 'Pausada'
+              : charge.isTrialEnd
+                ? 'Fin de prueba: primer cobro'
+                : formatBillingCycle(sub.billingCycle)
+            return (
+              <DayRow
+                key={charge.subscriptionId}
+                sub={sub}
+                onOpen={() => onOpenSub(charge.subscriptionId)}
+                price={chargeInCurrency(charge, currency, rates)}
+                isPaused={charge.isPaused}
+                subLine={
+                  <Typography variant="label" size="sm" className={mutedLine}>
+                    {subLine}
+                  </Typography>
+                }
+              />
+            )
+          })}
+
+          {dayTotal.count >= 2 && (
+            <>
               <div className={total}>
                 <Typography variant="label" size="md">
                   Total del día
@@ -209,14 +197,15 @@ const DaySheet = ({
                   {dayTotal.total}
                 </Typography>
               </div>
-            )}
-            {dayTotal.count >= 2 && dayTotal.unconverted > 0 && (
-              <Typography variant="label" size="sm" className={totalNote}>
-                {`${dayTotal.unconverted} sin sumar: faltan tasas de cambio`}
-              </Typography>
-            )}
-          </div>
-        ))}
+              {dayNote && (
+                <Typography variant="label" size="sm" className={totalNote}>
+                  {dayNote}
+                </Typography>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </BottomSheet>
   )
 }

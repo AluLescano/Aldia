@@ -20,7 +20,7 @@ It is a portfolio and learning project first: for now it is shared with family a
 - **Reminders:** real phone notifications N days before each charge, at 9:00. They're planned 60 days ahead and refreshed whenever a subscription changes or the app comes back to the screen. The first-open welcome asks for the permission.
 - **Categories:** 12 defaults plus your own (create, rename, delete; deleted ones fall back to "Otros").
 - **Detail screen:** view, edit, pause/resume and delete a subscription.
-- **Calendario:** the month's real charges (a yearly charge counts whole on its month) in the currency you pick, a grid with each day's logos, free trial days tinted champagne, and a sheet per day with its charges, trials and total. Tap a charge to edit it, or add a subscription starting on an empty day.
+- **Calendario:** the month's real charges (a yearly charge counts whole on its month) in the currency you pick, a grid with each day's logos, free trial days tinted champagne, and a sheet per day with its charges, trials and total. Swipe or use the arrows to change month. Tap a charge to edit it, or add a subscription starting on any day.
 
 - **Android:** runs on the phone (Capacitor), with safe areas, the back button and system bar colors handled. Data is saved as files in the app's private folder, with a version number, so data from an older version is upgraded on the first open.
 
