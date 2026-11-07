@@ -1,4 +1,5 @@
 // UTILS
+import { countText } from '@/features/calendar/utils/countText'
 import { fullDate, WEEKDAYS } from '@/shared/lib/calendar'
 import { cn } from '@/shared/lib/cn'
 
@@ -69,10 +70,6 @@ const MonthGrid = ({ days, month, today, byDay, subsById, onSelectDay }: Props) 
           const isOutside = Number(date.slice(5, 7)) - 1 !== month
           const charges = byDay.get(date) ?? []
           const extra = charges.length - MAX_LOGOS
-
-          // "Sin cobros", "1 cobro", "3 cobros"
-          const countText = (count: number) =>
-            count === 0 ? 'Sin cobros' : `${count} ${count === 1 ? 'cobro' : 'cobros'}`
 
           return (
             <div key={date} className={cell}>

@@ -1,11 +1,13 @@
 // UTILS
+import { countText } from '@/features/calendar/utils/countText'
 import { dayAndMonth } from '@/shared/lib/calendar'
 import { formatBillingCycle } from '@/features/subscriptions/utils/billingCycle'
 import { getCurrencySymbol } from '@/shared/lib/currencies'
 
 // TYPES
 import type { Charge } from '@/features/subscriptions/utils/subscriptionHistory'
-import type { Subscription } from '@/shared/types'
+import type { ChargesTotal } from '@/features/calendar/utils/chargesTotal'
+import type { CurrencyCode, Subscription } from '@/shared/types'
 
 // COMPONENTS
 import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
@@ -31,11 +33,11 @@ interface Props {
   onOpenSub: (subscriptionId: string) => void
   /** "Agregar una subscripción" on an empty day: the page opens the preset picker with this date. */
   onAddSub: (date: string) => void
+  /** The day's charges added up in `currency` (`chargesTotal`). Shown with 2+ paying charges. */
+  dayTotal: ChargesTotal
+  /** The selected currency, for the day total. */
+  currency: CurrencyCode
 }
-
-// "Sin cobros", "1 cobro", "3 cobros"
-const countText = (count: number) =>
-  count === 0 ? 'Sin cobros' : `${count} ${count === 1 ? 'cobro' : 'cobros'}`
 
 /**
  * The tapped day's sheet in the Calendario: the date as its title, how many charges it has,
@@ -43,7 +45,8 @@ const countText = (count: number) =>
  * that charge's own price (a yearly sub its whole year, not a monthly share) and says
  * "Pausada", "Fin de prueba: primer cobro" or the cycle. Tapping a row opens that
  * subscription to edit it. An empty day says so and offers to add a subscription starting
- * on it.
+ * on it. With 2 or more paying charges, "Total del día" adds them up in the selected
+ * currency.
  *
  * @example
  * <DaySheet
@@ -64,8 +67,11 @@ const DaySheet = ({
   subsById,
   onOpenSub,
   onAddSub,
+  dayTotal,
+  currency,
 }: Props) => {
-  const { container, subscriptionList, rowButton, sublineClass } = styles
+  const { container, subscriptionList, rowButton, sublineClass, total, totalNote } =
+    styles
   return (
     <BottomSheet
       isOpen={isOpen}
@@ -122,6 +128,26 @@ const DaySheet = ({
                 </Button>
               )
             })}
+            {/* One charge is its own total; paused ones don't count (nothing is paid) */}
+            {dayTotal.count >= 2 && (
+              <div className={total}>
+                <Typography variant="label" size="md">
+                  Total del día
+                </Typography>
+                <Typography
+                  variant="currency"
+                  size="lg"
+                  currencySymbol={getCurrencySymbol(currency)}
+                >
+                  {dayTotal.total}
+                </Typography>
+              </div>
+            )}
+            {dayTotal.count >= 2 && dayTotal.unconverted > 0 && (
+              <Typography variant="label" size="sm" className={totalNote}>
+                {`${dayTotal.unconverted} sin sumar: faltan tasas de cambio`}
+              </Typography>
+            )}
           </div>
         ))}
     </BottomSheet>
