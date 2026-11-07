@@ -1,0 +1,15 @@
+.subscriptionList {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+  gap: 0.5rem;
+
+  .rowButton {
+    padding: 0.75rem;
+    border-radius: 1rem;
+
+    .sublineClass {
+      color: var(--text-muted);
+    }
+  }
+}

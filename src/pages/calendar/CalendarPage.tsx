@@ -1,6 +1,7 @@
 // HOOKS
 import { useMemo, useState } from 'react'
 import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptionStore'
+import { useUIStore } from '@/shared/store/uiStore'
 
 // UTILS
 import { parseISODate, todayISO } from '@/shared/lib/isoDate'
@@ -17,6 +18,8 @@ import styles from './CalendarPage.module.scss'
 
 export const CalendarPage = () => {
   const { container } = styles
+
+  const pushOverlay = useUIStore((state) => state.pushOverlay)
 
   const today = todayISO()
   const start = parseISODate(today)!
@@ -73,6 +76,11 @@ export const CalendarPage = () => {
         date={selectedDate}
         charges={selectedDate ? (byDay.get(selectedDate) ?? []) : []}
         onClose={() => setSelectedDate(null)}
+        subsById={subsById}
+        onOpenSub={(id) => {
+          setSelectedDate(null)
+          pushOverlay('subscription-form', { subscriptionId: id })
+        }}
       />
     </div>
   )
