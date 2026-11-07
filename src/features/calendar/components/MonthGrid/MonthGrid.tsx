@@ -26,6 +26,9 @@ interface Props {
   byDay: Map<string, Charge[]>
   /** Every subscription by id, to draw a charge's logo. */
   subsById: Map<string, Subscription>
+  /** Each day's free trials, from `trialsByDay`: those tiles get the champagne wash. */
+  trials: Map<string, Subscription[]>
+  /** A tile was tapped: the page opens that day's sheet. */
   onSelectDay: (day: string) => void
 }
 
@@ -33,13 +36,30 @@ interface Props {
  * The Calendario's month grid: the weekday row and 42 day tiles (6 weeks from the Sunday of
  * the 1st's week, see `getMonthGrid`). The month's days sit on the raised surface, the
  * neighbour months' days sink into the screen color, and today gets a ring and a dot. Each
- * tile shows its day's logos (`DayLogos`).
+ * tile shows its day's logos (`DayLogos`); free trial days get a soft champagne wash, and the
+ * trial's logo shows on its first day.
  *
  * @example
  * // November 2026: Nov 1 (a Sunday) to Dec 12
- * <MonthGrid days={days} month={10} today="2026-11-07" byDay={byDay} subsById={subsById} />
+ * <MonthGrid
+ *   days={days}
+ *   month={10}
+ *   today="2026-11-07"
+ *   byDay={byDay}
+ *   subsById={subsById}
+ *   trials={trials}
+ *   onSelectDay={setSelectedDate}
+ * />
  */
-const MonthGrid = ({ days, month, today, byDay, subsById, onSelectDay }: Props) => {
+const MonthGrid = ({
+  days,
+  month,
+  today,
+  byDay,
+  subsById,
+  trials,
+  onSelectDay,
+}: Props) => {
   const {
     container,
     weekdays,
@@ -50,6 +70,7 @@ const MonthGrid = ({ days, month, today, byDay, subsById, onSelectDay }: Props) 
     day,
     isToday,
     outside,
+    trial,
     more,
     fadedMore,
   } = styles
@@ -69,7 +90,13 @@ const MonthGrid = ({ days, month, today, byDay, subsById, onSelectDay }: Props) 
           // compare years: a grid spans 3 neighbour months, and even Dec / Jan differ
           const isOutside = Number(date.slice(5, 7)) - 1 !== month
           const charges = byDay.get(date) ?? []
-          const extra = charges.length - MAX_LOGOS
+          const dayTrials = trials.get(date) ?? []
+          const trialStarts = dayTrials.filter((sub) => sub.trial?.startDate === date)
+          const extra = trialStarts.length + charges.length - MAX_LOGOS
+          const label =
+            dayTrials.length > 0
+              ? `${countText(charges.length)}, prueba gratis`
+              : countText(charges.length)
 
           return (
             <div key={date} className={cell}>
@@ -79,10 +106,20 @@ const MonthGrid = ({ days, month, today, byDay, subsById, onSelectDay }: Props) 
                 variant="secondary"
                 type="button"
                 onClick={() => onSelectDay(date)}
-                aria-label={`${fullDate(date)}: ${countText(charges.length)}`}
-                className={cn(dayCard, date === today && isToday, isOutside && outside)}
+                aria-label={`${fullDate(date)}: ${label}`}
+                className={cn(
+                  dayCard,
+                  date === today && isToday,
+                  isOutside && outside,
+                  dayTrials.length > 0 && trial,
+                )}
               >
-                <DayLogos charges={charges} subsById={subsById} isOutside={isOutside} />
+                <DayLogos
+                  charges={charges}
+                  trialStarts={trialStarts}
+                  subsById={subsById}
+                  isOutside={isOutside}
+                />
                 <Typography variant="label" size="sm" className={day}>
                   {Number(date.slice(8))}
                 </Typography>

@@ -68,6 +68,12 @@
     }
   }
 
+  // A free trial day: a champagne wash laid over the tile's own color (raised or screen),
+  // as a background image so it doesn't take the Button's ::after (its press tint)
+  &.trial {
+    background-image: linear-gradient(var(--wash-trial), var(--wash-trial));
+  }
+
   &.isToday {
     border: 1.5px solid var(--brand-on-subtle);
 

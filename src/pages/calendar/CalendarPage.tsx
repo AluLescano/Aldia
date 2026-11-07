@@ -12,6 +12,7 @@ import { ratesNote } from '@/shared/lib/exchangeRates'
 import { chargesByDay } from '@/features/calendar/utils/chargesByDay'
 import { chargesTotal } from '@/features/calendar/utils/chargesTotal'
 import { countText } from '@/features/calendar/utils/countText'
+import { trialsByDay } from '@/features/calendar/utils/trialsByDay'
 
 // COMPONENTS
 import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses/MonthlyExpenses'
@@ -41,6 +42,11 @@ export const CalendarPage = () => {
   const days = useMemo(() => getMonthGrid(view.year, view.month), [view.year, view.month])
   const byDay = useMemo(
     () => chargesByDay(subscriptions, days[0], days[days.length - 1]),
+    [subscriptions, days],
+  )
+  // Which subs are on a free trial each day of the grid: tinted tiles and the sheet's rows
+  const trials = useMemo(
+    () => trialsByDay(subscriptions, days[0], days[days.length - 1]),
     [subscriptions, days],
   )
   // A charge only carries its subscription's id: this finds the sub for its logo
@@ -95,12 +101,14 @@ export const CalendarPage = () => {
         today={today}
         byDay={byDay}
         subsById={subsById}
+        trials={trials}
         onSelectDay={setSelectedDate}
       />
       <DaySheet
         isOpen={selectedDate !== null}
         date={selectedDate}
         charges={selectedCharges}
+        trials={selectedDate ? (trials.get(selectedDate) ?? []) : []}
         dayTotal={chargesTotal(selectedCharges, selectedCurrency, rates)}
         currency={selectedCurrency}
         rates={rates}

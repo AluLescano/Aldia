@@ -76,6 +76,8 @@
   --success-bg: #{$success-100};
   --success-border: #{$success-600};
   --success-text: #{$success-700};
+  // A free trial day on the Calendario: a soft champagne wash over the tile, like the logo
+  --wash-trial: #{rgba($champagne-400, 0.3)};
 
   --warning-fill: #{$amber-400};
   --warning-on-fill: #{$phthalo-700};
@@ -206,6 +208,7 @@
   --success-bg: #{rgba($success-400, 0.15)};
   --success-border: #{$success-400};
   --success-text: #{$success-400};
+  --wash-trial: #{rgba($champagne-500, 0.16)};
 
   --warning-fill: #{$amber-400};
   --warning-on-fill: #{$phthalo-700};

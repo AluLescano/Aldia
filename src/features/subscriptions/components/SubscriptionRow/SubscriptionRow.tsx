@@ -46,7 +46,7 @@ const SubscriptionRow = ({
   priceNote,
   isPaused,
 }: Props) => {
-  const { row, logo, info, price, centered, note, faded } = styles
+  const { row, logo, info, price, centered, note, faded, free } = styles
   const { src, iconKey } = iconSource(icon)
 
   return (
@@ -72,6 +72,7 @@ const SubscriptionRow = ({
           variant={amount !== undefined ? 'currency' : 'label'}
           size={amount !== undefined ? 'lg' : 'md'}
           currencySymbol={currencySymbol}
+          className={amount === undefined ? free : undefined}
         >
           {amount ?? 'Gratis'}
         </Typography>

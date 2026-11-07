@@ -1,5 +1,6 @@
 // UTILS
 import { countText } from '@/features/calendar/utils/countText'
+import { formatDayMonth } from '@/shared/lib/formatDate'
 import { dayAndMonth } from '@/shared/lib/calendar'
 import { formatBillingCycle } from '@/features/subscriptions/utils/billingCycle'
 import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
@@ -26,6 +27,8 @@ interface Props {
   date: string | null
   /** That day's charges, from `chargesByDay`. */
   charges: Charge[]
+  /** The subs on a free trial that day, from `trialsByDay`. */
+  trials: Subscription[]
   /** Backdrop, Escape, back button or dragging it down. The page clears the date. */
   onClose: () => void
   /** Every subscription by id: a charge only carries its `subscriptionId`. */
@@ -48,8 +51,9 @@ interface Props {
  * that charge's own price (a yearly sub its whole year, not a monthly share) in the picked
  * currency, with the original under it when it was converted, and says
  * "Pausada", "Fin de prueba: primer cobro" or the cycle. Tapping a row opens that
- * subscription to edit it. An empty day says so and offers to add a subscription starting
- * on it. With 2 or more paying charges, "Total del día" adds them up in the selected
+ * subscription to edit it. Free trials running that day come first, as "Gratis" rows (not on
+ * their last day: that's the first charge, already a row). An empty day says so and offers to
+ * add a subscription starting on it. With 2 or more paying charges, "Total del día" adds them up in the selected
  * currency.
  *
  * @example
@@ -67,6 +71,7 @@ const DaySheet = ({
   isOpen,
   date,
   charges,
+  trials,
   onClose,
   subsById,
   onOpenSub,
@@ -75,17 +80,39 @@ const DaySheet = ({
   currency,
   rates,
 }: Props) => {
-  const { container, subscriptionList, rowButton, sublineClass, total, totalNote } =
-    styles
+  const {
+    container,
+    subscriptionList,
+    rowButton,
+    sublineClass,
+    trialLine,
+    total,
+    totalNote,
+  } = styles
+  // On a trial's last day its charge row already says "Fin de prueba: primer cobro"
+  const runningTrials = trials.filter((sub) => sub.trial?.endDate !== date)
+  const isEmpty = charges.length === 0 && runningTrials.length === 0
+  const trialText =
+    runningTrials.length === 1
+      ? '1 prueba gratis'
+      : `${runningTrials.length} pruebas gratis`
+  // "3 cobros", "1 prueba gratis", "2 cobros · 1 prueba gratis"
+  const subtitle =
+    runningTrials.length === 0
+      ? countText(charges.length)
+      : charges.length === 0
+        ? trialText
+        : `${countText(charges.length)} · ${trialText}`
+
   return (
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
       title={date ? dayAndMonth(date) : undefined}
-      subtitle={countText(charges.length)}
+      subtitle={subtitle}
       footer={
         date &&
-        charges.length === 0 && (
+        isEmpty && (
           <Button width="full" onClick={() => onAddSub(date)}>
             Agregar una subscripción
           </Button>
@@ -93,7 +120,7 @@ const DaySheet = ({
       }
     >
       {date &&
-        (charges.length === 0 ? (
+        (isEmpty ? (
           <div className={container}>
             <Typography variant="body" size="sm">
               Nada se cobra este día.
@@ -101,6 +128,30 @@ const DaySheet = ({
           </div>
         ) : (
           <div className={subscriptionList}>
+            {runningTrials.map((sub) => {
+              const endDay = formatDayMonth(sub.trial?.endDate ?? '')
+              const text = `Prueba gratis hasta el ${endDay}`
+              return (
+                <Button
+                  key={`trial-${sub.id}`}
+                  variant="secondary"
+                  width="full"
+                  onClick={() => onOpenSub(sub.id)}
+                  className={rowButton}
+                >
+                  {/* No amount: the row says "Gratis" */}
+                  <SubscriptionRow
+                    icon={sub.icon}
+                    name={sub.name}
+                    subLine={
+                      <Typography variant="label" size="sm" className={trialLine}>
+                        {text}
+                      </Typography>
+                    }
+                  />
+                </Button>
+              )
+            })}
             {charges.map((charge) => {
               const sub = subsById.get(charge.subscriptionId)
               if (!sub) return null

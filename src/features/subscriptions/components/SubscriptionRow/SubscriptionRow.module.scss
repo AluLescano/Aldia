@@ -75,4 +75,10 @@
   .faded {
     opacity: 0.5;
   }
+
+  // "Gratis" (a trial day): the champagne of the trial tiles
+  .free {
+    color: var(--text-accent);
+    font-weight: 500;
+  }
 }
