@@ -23,12 +23,17 @@ import { IconSearch } from '@/assets/icons/IconSearch'
 
 import styles from './PresetPicker.module.scss'
 
+interface Props {
+  /** `YYYY-MM-DD` from a Calendario day: passed on to the form as the first charge. */
+  firstBillDate?: string
+}
+
 /**
  * Full-screen overlay for adding a subscription: search the presets (by name or by
  * company, ignoring accents and case) and tap one, or tap `+` for a custom one.
  * Either way it pushes the `subscription-form` overlay on top.
  */
-export const PresetPicker = () => {
+export const PresetPicker = ({ firstBillDate }: Props) => {
   const { container, aura, searchbar, listContainer, presetGrid } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const pushOverlay = useUIStore((state) => state.pushOverlay)
@@ -51,7 +56,7 @@ export const PresetPicker = () => {
         onBack={popOverlay}
         actions={
           <IconButton
-            onClick={() => pushOverlay('subscription-form')}
+            onClick={() => pushOverlay('subscription-form', { firstBillDate })}
             label="Crear subscripción personalizada"
           >
             <IconAdd />
@@ -87,7 +92,7 @@ export const PresetPicker = () => {
               name={preset.name}
               logo={preset.iconUrl}
               iconKey={preset.iconKey}
-              onClick={() => pushOverlay('subscription-form', { preset })}
+              onClick={() => pushOverlay('subscription-form', { preset, firstBillDate })}
             />
           ))}
         </div>

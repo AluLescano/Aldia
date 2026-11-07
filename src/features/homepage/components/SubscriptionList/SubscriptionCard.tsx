@@ -1,5 +1,5 @@
 // DEPENDENCIES
-import { useRef, type CSSProperties } from 'react'
+import { useRef } from 'react'
 import { motion, useAnimation } from 'motion/react'
 
 // STORES
@@ -22,12 +22,11 @@ import {
 } from '@/features/subscriptions/utils/billingCycle'
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 import { upcomingPrice } from '@/features/subscriptions/utils/subscriptionHistory'
-import { iconSource } from '@/features/subscriptions/utils/subscriptionIcon'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import Button from '@/shared/ui/Button/Button'
-import Avatar from '@/shared/ui/Avatar/Avatar'
+import SubscriptionRow from '@/features/subscriptions/components/SubscriptionRow/SubscriptionRow'
 
 // TYPES
 import type { Subscription } from '@/shared/types'
@@ -44,12 +43,7 @@ const {
   deleteLayer,
   deleteButton,
   deleteIcon,
-  cardImg,
-  centered,
   opacity50,
-  cardInfo,
-  cardPrice,
-  originalPrice,
 } = styles
 
 // How far the card slides left to uncover the delete button (about the button's width)
@@ -124,8 +118,6 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     isMonthly ? '' : ` ${formatCyclePhrase(cycle)}`
   }`
 
-  const { src: logo, iconKey } = iconSource(subscription.icon)
-
   return (
     <div className={cardWrapper}>
       {/* Background: the delete button, uncovered by the swipe */}
@@ -161,54 +153,33 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
         }}
         className={cn(subscriptionContainer, isPaused && disabled)}
       >
-        <div style={{ '--image': `url("${logo}")` } as CSSProperties}>
-          {logo ? (
-            <img
-              src={logo}
-              alt="" // decorative: the name is right next to it
-              className={cn(cardImg, isPaused && opacity50)}
-            />
-          ) : (
-            <Avatar
-              iconKey={iconKey}
-              name={subscription.name}
-              className={cn(cardImg, isPaused && opacity50)}
-            />
-          )}
-          <div className={cardInfo}>
-            <Typography
-              variant="label"
-              size="md"
-              className={isPaused ? opacity50 : undefined}
-            >
-              {subscription.name}
-            </Typography>
-            {!isPaused && (
-              <Typography variant="label" size="sm">
-                {/* In a trial, say so: "En 7 días" alone reads like a charge */}
-                {subscription.trial && status === 'trial'
-                  ? formatTrial(subscription.trial, today)
-                  : formatNextCharge(nextCharge, today)}
-              </Typography>
-            )}
-            {/* Ended: say when, so it doesn't look like it's just paused */}
-            {status === 'ended' && subscription.endDate && (
-              <Typography variant="label" size="sm" className={opacity50}>
-                {`${subscription.endDate < today ? 'Terminó' : 'Termina'} el ${formatDate(subscription.endDate)}`}
-              </Typography>
-            )}
-          </div>
-          <div className={cn(cardPrice, isPaused && opacity50, showsCharge && centered)}>
-            <Typography variant="currency" size="lg" currencySymbol={shownSymbol}>
-              {shownAmount}
-            </Typography>
-            {showsCharge && (
-              <Typography variant="label" size="sm" className={originalPrice}>
-                {chargeText}
-              </Typography>
-            )}
-          </div>
-        </div>
+        <SubscriptionRow
+          icon={subscription.icon}
+          name={subscription.name}
+          isPaused={isPaused}
+          amount={shownAmount}
+          currencySymbol={shownSymbol}
+          // What is really charged (own currency, cycle), under the monthly price
+          priceNote={showsCharge ? chargeText : undefined}
+          subLine={
+            <>
+              {!isPaused && (
+                <Typography variant="label" size="sm">
+                  {/* In a trial, say so: "En 7 días" alone reads like a charge */}
+                  {subscription.trial && status === 'trial'
+                    ? formatTrial(subscription.trial, today)
+                    : formatNextCharge(nextCharge, today)}
+                </Typography>
+              )}
+              {/* Ended: say when, so it doesn't look like it's just paused */}
+              {status === 'ended' && subscription.endDate && (
+                <Typography variant="label" size="sm" className={opacity50}>
+                  {`${subscription.endDate < today ? 'Terminó' : 'Termina'} el ${formatDate(subscription.endDate)}`}
+                </Typography>
+              )}
+            </>
+          }
+        />
       </motion.div>
     </div>
   )

@@ -112,11 +112,11 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
                 errorMessage={errorFor('name')}
               />
             </FormRow>
-            <FormRow label="Formato del Cobro">
+            <FormRow label="Cobro">
               <InputSelect
                 size="medium"
                 width="auto"
-                placeholder="Formato del Cobro"
+                placeholder="Cobro"
                 value={billingLabel}
                 onClick={() => setOpenSheet('billingCycle')}
                 errorMessage={errorFor('billingCycle')}

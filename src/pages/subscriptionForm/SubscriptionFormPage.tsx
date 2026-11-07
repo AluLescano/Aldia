@@ -50,13 +50,19 @@ interface Props {
   preset?: Preset
   /** Opens an existing subscription in view mode (edit, pause and delete from the header). */
   subscriptionId?: string
+  /** A new one's first charge, when it was added from a Calendario day. Missing = today. */
+  firstBillDate?: string
 }
 
 /**
  * Overlay screen for one subscription. Without `subscriptionId` it creates a new one
  * (from a preset or empty); with it, it shows the saved one and can edit, pause or delete it.
  */
-export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
+export const SubscriptionFormPage = ({
+  preset,
+  subscriptionId,
+  firstBillDate,
+}: Props) => {
   const { container } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const closeAllOverlays = useUIStore((state) => state.closeAllOverlays)
@@ -77,7 +83,7 @@ export const SubscriptionFormPage = ({ preset, subscriptionId }: Props) => {
 
   const initialValues = existing
     ? subscriptionToFormValues(existing, todayISO())
-    : newSubscriptionValues(preset, selectedCurrency, categories)
+    : newSubscriptionValues(preset, selectedCurrency, categories, firstBillDate)
 
   // In edit mode, back drops the changes and returns to view mode; otherwise it closes the screen.
   // The changes are dropped by the form's `key` below: a new key mounts a fresh form

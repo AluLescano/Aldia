@@ -6,6 +6,7 @@ import {
   formatCyclePhrase,
   nextBillDate,
 } from './billingCycle'
+import { addDays } from '@/shared/lib/isoDate'
 import type { BillingCycle, BillingUnit } from '@/shared/types'
 
 const every = (interval: number, unit: BillingUnit): BillingCycle => ({
@@ -110,5 +111,56 @@ describe('formatCyclePhrase', () => {
     [ONE_TIME, 'una vez'],
   ])('%o → %s', (cycle, expected) => {
     expect(formatCyclePhrase(cycle)).toBe(expected)
+  })
+})
+
+// The original nextBillDate: counts every cycle from the first charge. Slow for old
+// subscriptions, but obviously right, so the fast version is checked against it
+function nextBillDateOneByOne(firstBillDate: string, cycle: BillingCycle, today: string) {
+  let count = 0
+  while (addCycles(firstBillDate, cycle, count) < today) count++
+  return addCycles(firstBillDate, cycle, count)
+}
+
+describe('nextBillDate jumping straight to the cycle', () => {
+  const cycles = [
+    every(1, 'day'),
+    every(3, 'day'),
+    every(1, 'week'),
+    every(2, 'week'),
+    every(1, 'month'),
+    every(2, 'month'),
+    every(3, 'month'),
+    every(6, 'month'),
+    every(1, 'year'),
+    every(2, 'year'),
+  ]
+  // Month ends, a leap day, mid-month and a year change
+  const firstDates = [
+    '2024-01-31',
+    '2024-02-29',
+    '2023-03-15',
+    '2025-12-31',
+    '2026-01-01',
+  ]
+
+  it.each(cycles)('matches counting one by one, every day for 3 years (%o)', (cycle) => {
+    for (const first of firstDates) {
+      // From a week before the first charge (it's returned as is) to 3 years after
+      for (let offset = -7; offset <= 3 * 366; offset++) {
+        const today = addDays(first, offset)
+        expect(nextBillDate(first, cycle, today), `${first} → ${today}`).toBe(
+          nextBillDateOneByOne(first, cycle, today),
+        )
+      }
+    }
+  })
+
+  it.each(cycles)('matches after a long gap (%o)', (cycle) => {
+    for (const today of ['2026-11-06', '2028-02-29', '2031-01-31']) {
+      expect(nextBillDate('2000-01-31', cycle, today)).toBe(
+        nextBillDateOneByOne('2000-01-31', cycle, today),
+      )
+    }
   })
 })

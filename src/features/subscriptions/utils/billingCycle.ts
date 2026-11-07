@@ -1,5 +1,5 @@
 // UTILS
-import { parseISODate, toISODate } from '@/shared/lib/isoDate'
+import { daysBetween, parseISODate, toISODate } from '@/shared/lib/isoDate'
 
 // TYPES
 import type { BillingCycle } from '@/shared/types'
@@ -90,9 +90,31 @@ export function addCycles(date: string, cycle: BillingCycle, count: number) {
   return toISODate(result)
 }
 
+// How many whole cycles fit from `firstBillDate` to `today`, never more: the charge that
+// many cycles in falls on or before `today`, so the next charge is at most one cycle later.
+// Months are counted by calendar month (a clamped Jan 31 -> Feb 28 still lands in February)
+function cyclesBefore(
+  firstBillDate: string,
+  today: string,
+  months: number,
+  days: number,
+) {
+  if (days > 0) return Math.max(0, Math.floor(daysBetween(firstBillDate, today) / days))
+  const start = parseISODate(firstBillDate)
+  const end = parseISODate(today)
+  if (!start || !end) return 0
+  const monthGap =
+    (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth()
+  return Math.max(0, Math.floor(monthGap / months))
+}
+
 /**
  * The next charge on or after `today`. A first charge in the future is returned as is;
  * a one-time payment always returns its date. Pure: pass `todayISO()` as `today`.
+ *
+ * Jumps straight to the right cycle instead of counting them one by one, so a daily
+ * subscription from years ago costs the same as a new one. Still counts from
+ * `firstBillDate`, so a Jan 31 subscription never drifts.
  *
  * @example
  * nextBillDate('2026-01-31', { type: 'every', interval: 1, unit: 'month' }, '2026-03-01') // '2026-03-31'
@@ -102,7 +124,8 @@ export function nextBillDate(firstBillDate: string, cycle: BillingCycle, today: 
   // Anything that does not move forward (one-time, 0, negative, NaN) has no next date.
   // Asking "is it > 0" catches NaN too, because NaN is neither bigger nor equal to anything.
   if (!(months > 0) && !(days > 0)) return firstBillDate
-  let count = 0
+  // Start from the last charge on or before today; at most one more cycle reaches it
+  let count = cyclesBefore(firstBillDate, today, months, days)
   while (addCycles(firstBillDate, cycle, count) < today) count++
   return addCycles(firstBillDate, cycle, count)
 }

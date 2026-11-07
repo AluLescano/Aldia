@@ -20,10 +20,11 @@ It is a portfolio and learning project first: for now it is shared with family a
 - **Reminders:** real phone notifications N days before each charge, at 9:00. They're planned 60 days ahead and refreshed whenever a subscription changes or the app comes back to the screen. The first-open welcome asks for the permission.
 - **Categories:** 12 defaults plus your own (create, rename, delete; deleted ones fall back to "Otros").
 - **Detail screen:** view, edit, pause/resume and delete a subscription.
+- **Calendario:** the month's real charges (a yearly charge counts whole on its month) in the currency you pick, a grid with each day's logos, free trial days tinted champagne, and a sheet per day with its charges, trials and total. Swipe or use the arrows to change month. Tap a charge to edit it, or add a subscription starting on any day.
 
 - **Android:** runs on the phone (Capacitor), with safe areas, the back button and system bar colors handled. Data is saved as files in the app's private folder, with a version number, so data from an older version is upgraded on the first open.
 
-Not built yet: Calendar, Statistics ("Resumen"), Cards and Settings screens (placeholders), picking the reminder time (fixed at 9:00 until Settings exists), JSON export/import.
+Not built yet: Statistics ("Resumen"), Cards and Settings screens (placeholders), picking the reminder time (fixed at 9:00 until Settings exists), JSON export/import.
 
 ---
 
@@ -49,7 +50,7 @@ Not built yet: Calendar, Statistics ("Resumen"), Cards and Settings screens (pla
 - **JSON files in the app's private folder** instead of `localStorage`: the system can clear the WebView's storage, while the app's own files stay until the user clears the app's data or uninstalls it. Each save writes a temporary file and swaps it in, so a crash never leaves half a file (details in `docs/architecture.md`).
 - **SCSS Modules** instead of Tailwind (Tailwind was removed): every component owns its styles, JSX stays readable, and themed pseudo-elements and keyframes are easy.
 - **Billing cycle as data**, `{ type: 'every', interval, unit }`, instead of a fixed list of names: "every 2 months" or "every 15 days" need no new code.
-- **Price history instead of one price:** each subscription keeps `priceHistory` (every price with the date it starts) and its `pauses`, so a price rise never rewrites what past charges cost, and the calendar will be able to show which charges a pause skipped.
+- **Price history instead of one price:** each subscription keeps `priceHistory` (every price with the date it starts) and its `pauses`, so a price rise never rewrites what past charges cost, and the calendar shows which charges a pause skipped.
 - **Versioned saved data:** the subscriptions file carries a version number and a `migrate` step (Zustand `persist`), so a new data shape upgrades what's already on the testers' phones instead of breaking it.
 - **Dates as `YYYY-MM-DD` strings in local time**, never `toISOString()`: no time zone can move a charge to the day before.
 - **Shared field wiring** (`useFieldControl`): every input gets the same ids, accessibility links and error shake from one place.
@@ -127,7 +128,7 @@ Then `cd android && ./gradlew assembleRelease` builds `app/build/outputs/apk/rel
 
 ### v1.x — The other screens
 
-- [ ] Calendar with charge days
+- [x] Calendar with charge days
 - [ ] Statistics by category
 - [ ] Cards: payment methods with expiry dates
 - [ ] Settings: favorite currencies, theme, export/import
