@@ -24,10 +24,10 @@ import styles from './MonthlyExpenses.module.scss'
 interface Props {
   /** Small caps title over the amount. Defaults to "Gastos Mensuales". */
   title?: string
-  /** Monthly cost, already converted to the selected currency. */
-  monthlyAmount?: number
-  /** How many subscriptions are active, for the line under the amount. */
-  subscriptionAmount?: number
+  /** The amount, already converted to the selected currency. */
+  amount?: number
+  /** The line under the amount: "4 subscripciones activas" (Home), "5 cobros" (Calendario). */
+  detail?: string
   /** Optional small line under the count, e.g. when rates are old or missing. */
   note?: string
   /** Shows the skeleton instead. The amount doesn't count up from it. */
@@ -35,13 +35,15 @@ interface Props {
 }
 
 /**
- * The Home header: monthly total in the selected currency, the active count, and the
- * currency pill that opens a sheet to switch currency (saved in the settings store).
+ * A total card: a title, an amount in the selected currency with a line under it, and the
+ * currency pill that opens a sheet to switch currency (saved in the settings store, so
+ * every screen follows). Home shows the monthly average in it; the Calendario, what the
+ * shown month really charges.
  */
 const MonthlyExpenses = ({
   title = 'Gastos Mensuales',
-  monthlyAmount = 0,
-  subscriptionAmount = 0,
+  amount = 0,
+  detail,
   note,
   isLoading,
 }: Props) => {
@@ -53,7 +55,7 @@ const MonthlyExpenses = ({
 
   // Rolls up or down when subscriptions change the total. Jumps instead when only the unit
   // changes (another currency, new rates) and while loading (no counting from 0 on open)
-  const shownAmount = useCountUp(monthlyAmount, {
+  const shownAmount = useCountUp(amount, {
     instant: isLoading,
     jumpKey: `${selectedCurrency}|${ratesDate ?? ''}`,
   })
@@ -61,11 +63,6 @@ const MonthlyExpenses = ({
   // Find the countryCode for the active currency (defaults to 'us')
   const currentCountryCode =
     DEFAULT_CURRENCIES.find((c) => c.code === selectedCurrency)?.countryCode ?? 'us'
-
-  const subAmount =
-    subscriptionAmount === 1
-      ? '1 subscripción activa'
-      : `${String(subscriptionAmount)} subscripciones activas`
 
   if (isLoading) {
     return <MonthlyExpensesSkeleton />
@@ -96,9 +93,11 @@ const MonthlyExpenses = ({
           >
             {shownAmount}
           </Typography>
-          <Typography variant="body" size="sm">
-            {subAmount}
-          </Typography>
+          {detail && (
+            <Typography variant="body" size="sm">
+              {detail}
+            </Typography>
+          )}
           {note && (
             <Typography variant="body" size="xs" className={currencyRate}>
               {note}

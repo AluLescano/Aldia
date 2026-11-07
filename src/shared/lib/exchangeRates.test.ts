@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { convert, fetchExchangeRates, type ExchangeRates } from './exchangeRates'
+import {
+  convert,
+  fetchExchangeRates,
+  ratesNote,
+  type ExchangeRates,
+} from './exchangeRates'
 
 /* A fake `fetch` answer with the API's shape: lowercase codes under `usd`. */
 const apiAnswer = (date: string) =>
@@ -79,5 +84,25 @@ describe('convert', () => {
   it('returns null when a rate is missing', () => {
     expect(convert(10, 'USD', 'ARS', null)).toBeNull()
     expect(convert(10, 'USD', 'BRL', rates)).toBeNull()
+  })
+})
+
+describe('ratesNote', () => {
+  const fresh: ExchangeRates = { date: '2026-11-06', rates: { USD: 1 } }
+  const old: ExchangeRates = { date: '2026-11-05', rates: { USD: 1 } }
+  const today = '2026-11-07'
+
+  it('says how many amounts were left out for lack of a rate', () => {
+    expect(ratesNote(3, 2, fresh, today)).toBe('2 sin sumar: faltan tasas de cambio')
+  })
+
+  it('names the rates once they are 2 days old or more, if something was converted', () => {
+    expect(ratesNote(1, 0, old, today)).toBe('Tasas del 05 Nov 26')
+    expect(ratesNote(1, 0, fresh, today)).toBeUndefined()
+  })
+
+  it('says nothing when nothing was converted, however old the rates', () => {
+    expect(ratesNote(0, 0, old, today)).toBeUndefined()
+    expect(ratesNote(0, 0, null, today)).toBeUndefined()
   })
 })
