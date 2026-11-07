@@ -25,3 +25,5 @@ export const MONTHS = Array.from({ length: 12 }, (_, month) => {
   const name = new Date(2000, month, 1).toLocaleDateString('es-AR', { month: 'long' })
   return name.charAt(0).toUpperCase() + name.slice(1)
 })
+
+export const WEEKDAYS = ['D', 'L', 'M', 'X', 'J', 'V', 'S']

@@ -6,6 +6,7 @@ import { parseISODate, todayISO } from '@/shared/lib/isoDate'
 
 // COMPONENTS
 import MonthNav from '@/features/calendar/components/MonthNav/MonthNav'
+import MonthGrid from '@/features/calendar/components/MonthGrid/MonthGrid'
 
 // ASSETS
 import styles from './CalendarPage.module.scss'
@@ -41,6 +42,7 @@ export const CalendarPage = () => {
         onNext={() => goToMonth(+1)}
         onToday={goToToday}
       />
+      <MonthGrid year={view.year} month={view.month} today={today} />
     </div>
   )
 }
