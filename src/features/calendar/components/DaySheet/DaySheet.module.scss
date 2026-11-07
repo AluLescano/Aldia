@@ -1,3 +1,12 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  padding-top: 2.5rem;
+  height: 5rem;
+}
+
 .subscriptionList {
   display: flex;
   flex-direction: column;

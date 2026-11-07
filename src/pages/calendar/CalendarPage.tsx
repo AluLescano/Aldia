@@ -81,6 +81,10 @@ export const CalendarPage = () => {
           setSelectedDate(null)
           pushOverlay('subscription-form', { subscriptionId: id })
         }}
+        onAddSub={(date) => {
+          setSelectedDate(null)
+          pushOverlay('preset-picker', { firstBillDate: date })
+        }}
       />
     </div>
   )

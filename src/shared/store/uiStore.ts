@@ -15,10 +15,15 @@ interface OverlayContext {
    */
   id: number
   type: OverlayType
-  /** What the overlay needs: the picked preset (new) or the subscription to show (detail). */
+  /**
+   * What the overlay needs: the picked preset and maybe a start date (new), or the
+   * subscription to show (detail).
+   */
   data?: {
     preset?: Preset
     subscriptionId?: string
+    /** `YYYY-MM-DD`: a new subscription added from a Calendario day starts on it. */
+    firstBillDate?: string
   }
 }
 

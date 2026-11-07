@@ -177,11 +177,14 @@ function App() {
                   exit={{ x: '100%' }}
                   transition={{ type: 'spring', stiffness: 380, damping: 40 }}
                 >
-                  {overlay.type === 'preset-picker' && <PresetPicker />}
+                  {overlay.type === 'preset-picker' && (
+                    <PresetPicker firstBillDate={overlay.data?.firstBillDate} />
+                  )}
                   {overlay.type === 'subscription-form' && (
                     <SubscriptionFormPage
                       preset={overlay.data?.preset}
                       subscriptionId={overlay.data?.subscriptionId}
+                      firstBillDate={overlay.data?.firstBillDate}
                     />
                   )}
                 </motion.div>
