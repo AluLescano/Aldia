@@ -20,13 +20,14 @@ interface Props {
 }
 
 /**
- * One row of the subscription form: label on the left, control on the right, and
- * the control's hint or error underneath, across the whole row.
+ * One row of the subscription form: label on the left, control on the right (always on the
+ * same line: a value too long for it ends in "…"), and the control's hint or error underneath,
+ * across the whole row.
  * Shares the label and message slot with the control through `FieldRowContext`.
  * Uses the form's own `inputContainer` class, so it only looks right inside the form cards.
  */
 const FormRow = ({ label, children, controlId }: Props) => {
-  const { inputContainer, rowLabel, messageSlot: messageSlotClass } = styles
+  const { inputContainer, rowLabel, controlSlot, messageSlot: messageSlotClass } = styles
   const generatedId = useId()
   const labelId = `${generatedId}-label`
 
@@ -46,7 +47,8 @@ const FormRow = ({ label, children, controlId }: Props) => {
             {label}
           </Typography>
         </label>
-        {children}
+        {/* Takes the rest of the row, so a long value shrinks instead of dropping under the label */}
+        <div className={controlSlot}>{children}</div>
         <div ref={setMessageSlot} className={messageSlotClass} />
       </div>
     </FieldRowContext.Provider>

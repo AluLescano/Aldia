@@ -1,8 +1,12 @@
 .container {
-  display: flex;
+  display: block; // a block, so a value too long for the box ends in "…"
   flex: 1;
+  min-width: 0;
   padding: 0 0.75rem 0 0.75rem;
-  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background: none;
   border: none;
   outline: none;
@@ -26,4 +30,11 @@
   &:focus-visible {
     outline: none;
   }
+}
+
+// In an auto-width box (`width="auto"`) the box already pads both sides with 1rem: the
+// button's own 0.75rem on top made the pill 24px wider than its text, so long values didn't
+// fit beside their label
+.inAutoBox {
+  padding: 0;
 }
