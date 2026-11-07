@@ -1,34 +1,32 @@
 .container {
   position: fixed;
+  display: flex;
+  flex-direction: column;
   bottom: 0;
   left: 0;
   right: 0;
   max-width: 28rem;
   margin: 0 auto;
   padding-bottom: var(--safe-bottom);
+
   background-color: var(--bg-surface);
-  display: flex;
-  flex-direction: column;
+
   overflow: hidden;
-  // 2. Buttery smooth transition when snapping between collapsed and expanded
-  transition:
-    height 350ms cubic-bezier(0.32, 0.72, 0, 1),
-    border-radius 300ms ease;
+  // The height is animated by Motion in BottomSheet.tsx (in pixels); only the corners here
+  transition: border-radius 300ms ease;
 
   z-index: 70;
 }
 
-// Collapsed state: comfortable mobile half-sheet (~55% viewport)
+// Collapsed: as tall as its content, up to 55% of the screen (the height is set in the TSX)
 .collapsed {
-  height: 55vh;
   border-top-left-radius: 1.5rem;
   border-top-right-radius: 1.5rem;
 }
 
-// Expanded state: covers 100% of viewport, flush with top
+// Expanded: the whole screen, flush with the top
 .expanded {
   padding-top: var(--safe-top);
-  height: 100dvh;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
