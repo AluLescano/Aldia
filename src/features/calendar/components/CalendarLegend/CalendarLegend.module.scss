@@ -1,0 +1,33 @@
+// One centered row under the calendar; it wraps if more marks come (cards, later)
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.375rem 0.875rem;
+  margin-top: -0.75rem; // closer to the calendar than the page's 1.5rem gap
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--text-secondary);
+}
+
+// A tiny tile, drawn like the real ones
+.swatch {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  border-radius: 0.3125rem;
+  background-color: var(--bg-surface-raised);
+  border: 1px solid var(--border-card);
+}
+
+.today {
+  border: 1.5px solid var(--brand-on-subtle);
+}
+
+.trial {
+  background-image: linear-gradient(var(--wash-trial), var(--wash-trial));
+}

@@ -19,6 +19,7 @@ import MonthlyExpenses from '@/features/homepage/components/MonthlyExpenses/Mont
 import MonthNav from '@/features/calendar/components/MonthNav/MonthNav'
 import MonthGrid from '@/features/calendar/components/MonthGrid/MonthGrid'
 import DaySheet from '@/features/calendar/components/DaySheet/DaySheet'
+import CalendarLegend from '@/features/calendar/components/CalendarLegend/CalendarLegend'
 
 // ASSETS
 import styles from './CalendarPage.module.scss'
@@ -57,13 +58,16 @@ export const CalendarPage = () => {
 
   // What the shown month really charges: only its own days, not the neighbour months' days
   // the grid also shows. A yearly charge counts whole on its month (unlike Home's average)
+  const monthPrefix = `${view.year}-${String(view.month + 1).padStart(2, '0')}-` // "2026-11-"
   const monthTotal = useMemo(() => {
-    const prefix = `${view.year}-${String(view.month + 1).padStart(2, '0')}-` // "2026-11-"
     const monthCharges = [...byDay]
-      .filter(([date]) => date.startsWith(prefix))
+      .filter(([date]) => date.startsWith(monthPrefix))
       .flatMap(([, charges]) => charges)
     return chargesTotal(monthCharges, selectedCurrency, rates)
-  }, [byDay, view.year, view.month, selectedCurrency, rates])
+  }, [byDay, monthPrefix, selectedCurrency, rates])
+
+  // The legend lists only the marks this month has (the neighbour days don't count)
+  const monthHasTrial = [...trials.keys()].some((date) => date.startsWith(monthPrefix))
 
   const selectedCharges = selectedDate ? (byDay.get(selectedDate) ?? []) : []
 
@@ -104,6 +108,7 @@ export const CalendarPage = () => {
         trials={trials}
         onSelectDay={setSelectedDate}
       />
+      <CalendarLegend hasToday={isCurrentMonth} hasTrial={monthHasTrial} />
       <DaySheet
         isOpen={selectedDate !== null}
         date={selectedDate}
