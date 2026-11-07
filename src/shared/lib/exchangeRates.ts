@@ -1,4 +1,12 @@
+// UTILS
+import { formatDate } from './formatDate'
+import { daysBetween } from './isoDate'
+
+// TYPES
 import type { CurrencyCode } from '@/shared/types'
+
+/** Rates this many days old or more get mentioned under a converted total. */
+const STALE_RATES_DAYS = 2
 
 /** A day's exchange rates: how much of each currency one US dollar buys. */
 export interface ExchangeRates {
@@ -62,4 +70,27 @@ export function convert(
   const toRate = rates?.rates[to]
   if (!fromRate || !toRate) return null
   return (amount / fromRate) * toRate
+}
+
+/**
+ * The honest line under a converted total: says when part of it is missing (no rate) or
+ * uses old rates. `undefined` when there's nothing to say. Home's monthly total and the
+ * Calendario's month total both show it.
+ *
+ * @param converted how many amounts were converted (old rates only matter then).
+ * @param unconverted how many were left out for lack of a rate.
+ * @example
+ * ratesNote(0, 1, rates, '2026-11-07') // '1 sin sumar: faltan tasas de cambio'
+ * ratesNote(2, 0, { date: '2026-11-03', rates }, '2026-11-07') // 'Tasas del 03 Nov 26'
+ */
+export function ratesNote(
+  converted: number,
+  unconverted: number,
+  rates: ExchangeRates | null,
+  today: string,
+): string | undefined {
+  if (unconverted > 0) return `${unconverted} sin sumar: faltan tasas de cambio`
+  if (converted > 0 && rates && daysBetween(rates.date, today) >= STALE_RATES_DAYS)
+    return `Tasas del ${formatDate(rates.date)}`
+  return undefined
 }

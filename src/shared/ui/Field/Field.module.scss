@@ -57,6 +57,7 @@ $label-transition: 150ms ease;
 .widthAuto {
   width: fit-content;
   min-width: 0;
+  max-width: 100%; // in a tight row it shrinks with it (its value ends in "…")
   padding: 0 1rem;
 
   input {

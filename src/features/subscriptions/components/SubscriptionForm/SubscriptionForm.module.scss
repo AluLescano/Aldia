@@ -39,14 +39,30 @@ form {
       // FormRow: label and control on one line; the message slot wraps to its own line below
       .inputContainer {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: wrap; // only the message slot (flex-basis 100%) goes to a second line
         justify-content: space-between;
         align-items: center;
+        column-gap: 0.75rem;
         padding: 0.5rem 1rem;
       }
 
       .rowLabel {
+        flex-shrink: 0; // the label is always whole; the control gives way
         cursor: default;
+      }
+
+      // The rest of the row. Its basis is 0, so the label and the control always share one
+      // line; the control keeps its own width and only shrinks when it doesn't fit
+      .controlSlot {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        justify-content: flex-end;
+
+        > * {
+          min-width: 0;
+          max-width: 100%;
+        }
       }
 
       // Field sends its hint or error here (portal), so it gets the full row width

@@ -1,5 +1,8 @@
 import type { ButtonHTMLAttributes } from 'react'
 
+// UTILS
+import { cn } from '@/shared/lib/cn'
+
 // HOOKS
 import { useFieldControl, type FieldControlProps } from '@/shared/hooks/useFieldControl'
 
@@ -41,7 +44,7 @@ const InputSelect = ({
   errorMessage,
   ...rest
 }: Props) => {
-  const { container } = styles
+  const { container, inAutoBox } = styles
 
   const { fieldProps, controlProps, buttonLabelledBy } = useFieldControl({
     id,
@@ -63,7 +66,7 @@ const InputSelect = ({
         aria-labelledby={buttonLabelledBy ?? rest['aria-labelledby']}
         type="button"
         onClick={onClick}
-        className={container}
+        className={cn(container, width === 'auto' && inAutoBox)}
         aria-haspopup="dialog"
       >
         {value || placeholder}

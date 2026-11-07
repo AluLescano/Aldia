@@ -1,8 +1,16 @@
 // UTILS
+import { addDays } from '@/shared/lib/isoDate'
 import { addCycles, nextBillDate } from './billingCycle'
 
 // TYPES
-import type { BillingCycle, Pause, PriceChange, PriceHistory } from '@/shared/types'
+import type {
+  BillingCycle,
+  CurrencyCode,
+  Pause,
+  PriceChange,
+  PriceHistory,
+  Subscription,
+} from '@/shared/types'
 
 /**
  * The price in force on `date`: the last change that started on or before it. A date
@@ -150,4 +158,69 @@ export function pastCharges(
     dates.push(date)
   }
   return dates.reverse().slice(0, limit)
+}
+
+/** One charge of one subscription on one day: what the Calendario grid, the day list and the month total read. */
+export interface Charge {
+  subscriptionId: string
+  /** `YYYY-MM-DD`, the day it's charged. */
+  date: string
+  /** The price in force on `date` (a price change shows up from its day on), in `currency`. */
+  price: number
+  currency: CurrencyCode
+  /** Inside a pause: it won't be charged, shown greyed as "pausada". Kept on purpose, unlike reminders. */
+  isPaused: boolean
+  /** The charge that ends the free trial: the first one the user really pays. */
+  isTrialEnd: boolean
+}
+
+/**
+ * Every charge of a subscription between `from` and `to` (both included), oldest first.
+ * Jumps from charge to charge with `nextBillDate`, so it never drifts (a Jan 31 sub lands on
+ * each month's last day). Nothing after `endDate`. Paused charges stay in, flagged
+ * `isPaused`. A one-time payment gives none: the calendar doesn't show them, and
+ * `nextBillDate` never moves for one, so the loop would never end. Pure.
+ *
+ * @param from `YYYY-MM-DD`, e.g. the first day of the month grid.
+ * @param to `YYYY-MM-DD`, e.g. the last day of the month grid.
+ * @example
+ * // Monthly on the 15th, the November grid (Nov 1 to Dec 12)
+ * chargesBetween(netflix, '2026-11-01', '2026-12-12') // [{ date: '2026-11-15', ... }]
+ */
+export function chargesBetween(
+  sub: Pick<
+    Subscription,
+    | 'id'
+    | 'priceHistory'
+    | 'billingCycle'
+    | 'firstBillDate'
+    | 'endDate'
+    | 'trial'
+    | 'pauses'
+  >,
+  from: string,
+  to: string,
+): Charge[] {
+  const charges: Charge[] = []
+  /* One-Time Payments that shouldn't be shown */
+  if (sub.billingCycle.type === 'one-time') {
+    return charges
+  }
+
+  let date = nextBillDate(sub.firstBillDate, sub.billingCycle, from)
+
+  while (date <= to && (!sub.endDate || date <= sub.endDate)) {
+    const { price, currency } = priceOn(sub.priceHistory, date)
+    const charge: Charge = {
+      subscriptionId: sub.id,
+      date: date,
+      price: price,
+      currency: currency,
+      isPaused: isPausedOn(sub.pauses, date),
+      isTrialEnd: sub.trial?.endDate === date,
+    }
+    charges.push(charge)
+    date = nextBillDate(sub.firstBillDate, sub.billingCycle, addDays(date, 1))
+  }
+  return charges
 }

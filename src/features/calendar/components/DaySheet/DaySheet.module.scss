@@ -1,0 +1,43 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+  gap: 0.5rem;
+}
+
+// Each row's button: the same padding and corners as Home's cards
+.rowButton {
+  padding: 0.75rem;
+  border-radius: 1rem;
+}
+
+.mutedLine {
+  color: var(--text-muted);
+}
+
+// A free trial's line: the champagne of its tiles
+.trialLine {
+  color: var(--text-accent);
+}
+
+.emptyText {
+  padding: 2rem 0 1.5rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+// "Total del día": under the rows, the label on the left and the amount on the right
+.total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem 0;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 0.25rem;
+}
+
+.totalNote {
+  padding: 0 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+}

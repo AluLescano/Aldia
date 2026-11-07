@@ -100,7 +100,7 @@ export function useFieldControl({
     },
     /**
      * For controls that are `<button>`s (select, date): a `<label>` alone would replace the
-     * button's text as its name, so screen readers would say "Formato del Cobro" and skip
+     * button's text as its name, so screen readers would say "Cobro" and skip
      * "Mensual". Pointing at the row label and at the button itself reads both.
      * Inputs don't need it: the `<label htmlFor>` names them and their value is read anyway.
      */

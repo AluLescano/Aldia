@@ -37,15 +37,19 @@ src/
 ├── assets/icons/             # Icon* components on the shared Icon base (24px, stroke 2)
 │
 ├── features/                 # Domain-driven feature modules
+│   ├── calendar/
+│   │   ├── components/       # MonthNav (month row, "Hoy"), MonthGrid (42 tiles, swipe to change month), DayLogos, DaySheet (a day's charges and trials), CalendarLegend
+│   │   ├── hooks/            # useCalendarMonth (the shown month, moving it), useMonthCharges (its days, charges, trials and total)
+│   │   └── utils/            # chargesByDay, trialsByDay, chargesTotal (a month's or day's real cost, converted), chargeInCurrency, countText / daySummary
 │   ├── categories/
 │   │   ├── components/       # CategoryPicker, CategoryFooter
 │   │   ├── hooks/            # useCategoryEditor (add / rename / delete state)
 │   │   ├── store/            # categoryStore.ts (Zustand + persist, aldia/categories.json), OTHERS_ID
 │   │   └── utils/            # validateCategoryName
 │   ├── homepage/
-│   │   └── components/       # MonthlyExpenses, SubscriptionList (filters, "Ordenar por" sheet), SubscriptionCard, skeletons
+│   │   └── components/       # MonthlyExpenses (the total card, also used by the Calendario), SubscriptionList (filters, "Ordenar por" sheet), SubscriptionCard, skeletons
 │   ├── subscriptions/
-│   │   ├── components/       # SubscriptionForm (+ FormRow, SubscriptionFormSheets), BillingCyclePicker, PriceChangeSheet, PresetCard, PauseToggleIcon
+│   │   ├── components/       # SubscriptionForm (+ FormRow, SubscriptionFormSheets), SubscriptionRow (a sub's look in a list: Home's cards, the day sheet), BillingCyclePicker, PriceChangeSheet, PresetCard, PauseToggleIcon
 │   │   ├── data/             # presets.ts (the preset picker list)
 │   │   ├── hooks/            # useSubscriptionForm (form state), useSubscriptionActions (pause, delete)
 │   │   ├── store/            # subscriptionStore.ts (Zustand + persist, aldia/subscriptions.json, migrateSubscriptions)
@@ -60,7 +64,7 @@ src/
 │   │   └── store/            # settingsStore.ts (currencies, listSort, reminderTime, onboarding flags, persist, aldia/settings.json)
 │   └── navigation/
 │       └── components/       # BottomNavBar (glass bar with a notch, Motion)
-│   (planned: cards/, calendar/, statistics/)
+│   (planned: cards/, statistics/)
 │
 ├── pages/                    # Screen level views (orchestrate feature components)
 │   ├── home/HomePage.tsx
@@ -317,6 +321,7 @@ Each of these comes from a real bug in this codebase.
 - `useRatesStore` (`shared/store/ratesStore.ts`, persisted as `aldia_rates`) downloads once per local day: `App.tsx` calls `refreshIfStale()` on start and every time the app becomes visible again. Two calls at once share one download. If the download fails, the last saved rates stay in use.
 - Conversion is a pure function (`convert(amount, from, to, rates)`), so totals and statistics stay testable offline. The same currency never needs rates.
 - Home (`getMonthlyTotal` in `features/subscriptions/utils/monthlyTotal.ts`) adds only the `active` subscriptions (not paused, ended or in a trial), each at the price of its next charge, turned into a monthly cost (`monthlyEquivalent`) and converted: `monthlyPriceIn`, the same number the cards show and the price sorts compare. It says so when rates are 2 or more days old ("Tasas del ..."; 1 day behind is normal for a daily API) or when some subscriptions could not be converted ("N sin sumar").
+- The Calendario (`chargesTotal` in `features/calendar/utils/`) adds what a month (or a day) really charges instead: each charge at its own price, a yearly one whole on its day, paused ones left out, converted the same way. The day sheet's rows show each charge in the picked currency, with the original under it. Both totals use the same honest line (`ratesNote` in `exchangeRates.ts`) as Home.
 - Known limit: the API gives official rates. A USD subscription paid with an Argentine card is charged at the official rate plus taxes, so the ARS total can be lower than the real charge.
 
 ---
@@ -325,7 +330,7 @@ Each of these comes from a real bug in this codebase.
 
 Vitest (`npm test`, also run by CI on every pull request), in plain Node, test files next to their sources (`*.test.ts`).
 
-- **Pure functions first:** billing cycles and next charge dates, price history and pauses, the status, the list filters and sorts, validation, monthly totals, currency conversion, reminders, the calendar grid, category names. They hold most of the logic and need no browser.
+- **Pure functions first:** billing cycles and next charge dates, price history and pauses, the status, the list filters and sorts, validation, monthly totals, currency conversion, reminders, the calendar grid and its charges, trials and totals, category names. They hold most of the logic and need no browser.
 - **Migrations:** `subscriptionStore.test.ts` feeds `migrateSubscriptions` version 0 and 1 files and checks the version 2 result (with a fixed `today` for the pauses).
 - **Stores:** tested through their actions. Capacitor plugins don't work in Node, so a store test replaces `fileStorage` with an in-memory `Map` (`vi.mock`, see `subscriptionStore.test.ts`).
 - **`fileStorage`:** tested against a fake `@capacitor/filesystem` (`fileStorage.test.ts`) that behaves like the real plugin where it matters: missing files throw, rename deletes the destination first (like Android), and writes take a moment, so concurrent saves really interleave.

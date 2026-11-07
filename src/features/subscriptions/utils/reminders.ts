@@ -91,11 +91,11 @@ export function formatDaysBefore(days: number) {
   return `${days} ${days === 1 ? 'día' : 'días'} antes`
 }
 
-/** One notification to schedule: on which day, for which reminder, about which event. */
 /** What `getReminderTriggers` reads: the charge schedule plus the reminders. A `Subscription` fits. */
 export type ReminderSource = ChargeSchedule &
   Pick<Subscription, 'id' | 'pauses' | 'reminders'>
 
+/** One notification to schedule: on which day, for which reminder, about which event. */
 export interface ReminderTrigger {
   subscriptionId: string
   reminderId: string

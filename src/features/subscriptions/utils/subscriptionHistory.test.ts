@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   applyPriceEdit,
+  chargesBetween,
   endPause,
   isPausedOn,
   nextCharge,
@@ -235,6 +236,177 @@ describe('pastCharges', () => {
       '2027-10-05',
       '2027-09-05',
       '2027-08-05',
+    ])
+  })
+})
+
+describe('chargesBetween', () => {
+  // Monthly on the 15th since Aug 15, 9.99 until it went up to 12.99 on Nov 15
+  const netflix = {
+    id: 'netflix',
+    firstBillDate: '2026-08-15',
+    billingCycle: MONTHLY,
+    priceHistory: [
+      { from: '2026-08-15', price: 9.99, currency: 'USD' },
+      { from: '2026-11-15', price: 12.99, currency: 'USD' },
+    ] satisfies PriceHistory,
+    pauses: [] as Pause[],
+  }
+  const dates = (charges: { date: string }[]) => charges.map((charge) => charge.date)
+
+  it('finds the charges of a month grid (Nov 1 to Dec 12)', () => {
+    expect(chargesBetween(netflix, '2026-11-01', '2026-12-12')).toEqual([
+      {
+        subscriptionId: 'netflix',
+        date: '2026-11-15',
+        price: 12.99,
+        currency: 'USD',
+        isPaused: false,
+        isTrialEnd: false,
+      },
+    ])
+  })
+
+  it('gives each charge the price in force on its day, oldest first', () => {
+    const charges = chargesBetween(netflix, '2026-10-01', '2027-01-31')
+    expect(charges.map(({ date, price }) => [date, price])).toEqual([
+      ['2026-10-15', 9.99],
+      ['2026-11-15', 12.99], // the change starts on this charge
+      ['2026-12-15', 12.99],
+      ['2027-01-15', 12.99],
+    ])
+  })
+
+  it('keeps the currency of each price', () => {
+    const toPesos = {
+      ...netflix,
+      priceHistory: [
+        { from: '2026-08-15', price: 9.99, currency: 'USD' },
+        { from: '2026-11-15', price: 11300, currency: 'ARS' },
+      ] satisfies PriceHistory,
+    }
+    const charges = chargesBetween(toPesos, '2026-10-01', '2026-11-30')
+    expect(charges.map(({ currency }) => currency)).toEqual(['USD', 'ARS'])
+  })
+
+  it('includes charges on both ends of the range', () => {
+    expect(dates(chargesBetween(netflix, '2026-11-15', '2026-12-15'))).toEqual([
+      '2026-11-15',
+      '2026-12-15',
+    ])
+    expect(dates(chargesBetween(netflix, '2026-11-15', '2026-11-15'))).toEqual([
+      '2026-11-15',
+    ])
+  })
+
+  it('is empty when no charge falls in the range', () => {
+    expect(chargesBetween(netflix, '2026-11-16', '2026-12-14')).toEqual([])
+    // Before the first charge
+    expect(chargesBetween(netflix, '2026-07-01', '2026-08-14')).toEqual([])
+  })
+
+  it('keeps paused charges, flagged, and only the ones inside the pause', () => {
+    // Paused Dec 1, resumed Jan 3: only Dec 15 is skipped
+    const paused = { ...netflix, pauses: [{ from: '2026-12-01', to: '2027-01-03' }] }
+    const charges = chargesBetween(paused, '2026-11-01', '2027-01-31')
+    expect(charges.map(({ date, isPaused }) => [date, isPaused])).toEqual([
+      ['2026-11-15', false],
+      ['2026-12-15', true],
+      ['2027-01-15', false],
+    ])
+  })
+
+  it('flags every charge after a pause that is still open', () => {
+    const stillPaused = { ...netflix, pauses: [{ from: '2026-12-01' }] }
+    const charges = chargesBetween(stillPaused, '2026-11-01', '2027-01-31')
+    expect(charges.map(({ isPaused }) => isPaused)).toEqual([false, true, true])
+  })
+
+  it('stops at the end date, keeping a charge on that very day', () => {
+    const ending = { ...netflix, endDate: '2026-12-15' }
+    expect(dates(chargesBetween(ending, '2026-10-01', '2027-01-31'))).toEqual([
+      '2026-10-15',
+      '2026-11-15',
+      '2026-12-15',
+    ])
+  })
+
+  it('is empty when the subscription ended before the range', () => {
+    const ended = { ...netflix, endDate: '2026-10-20' }
+    expect(chargesBetween(ended, '2026-11-01', '2026-12-12')).toEqual([])
+  })
+
+  it('flags only the charge that ends the free trial', () => {
+    // A 14-day trial: the first charge is the day it ends
+    const withTrial = {
+      ...netflix,
+      firstBillDate: '2026-11-15',
+      priceHistory: [
+        { from: '2026-11-15', price: 12.99, currency: 'USD' },
+      ] satisfies PriceHistory,
+      trial: { startDate: '2026-11-01', endDate: '2026-11-15' },
+    }
+    const charges = chargesBetween(withTrial, '2026-11-01', '2027-01-31')
+    expect(charges.map(({ date, isTrialEnd }) => [date, isTrialEnd])).toEqual([
+      ['2026-11-15', true],
+      ['2026-12-15', false],
+      ['2027-01-15', false],
+    ])
+  })
+
+  it('gives nothing for a one-time payment, even inside the range (and ends)', () => {
+    const oneTime = {
+      ...netflix,
+      firstBillDate: '2026-11-20',
+      billingCycle: { type: 'one-time' } satisfies BillingCycle,
+    }
+    expect(chargesBetween(oneTime, '2026-11-01', '2026-12-12')).toEqual([])
+  })
+
+  it('lands on the last day of short months without drifting', () => {
+    const endOfMonth = {
+      ...netflix,
+      firstBillDate: '2026-01-31',
+      priceHistory: [
+        { from: '2026-01-31', price: 5, currency: 'USD' },
+      ] satisfies PriceHistory,
+    }
+    expect(dates(chargesBetween(endOfMonth, '2026-02-01', '2026-05-31'))).toEqual([
+      '2026-02-28',
+      '2026-03-31',
+      '2026-04-30',
+      '2026-05-31',
+    ])
+  })
+
+  it('finds every charge of a weekly subscription', () => {
+    const weekly = {
+      ...netflix,
+      firstBillDate: '2026-11-02', // a Monday
+      billingCycle: { type: 'every', interval: 1, unit: 'week' } satisfies BillingCycle,
+    }
+    expect(dates(chargesBetween(weekly, '2026-11-01', '2026-12-12'))).toEqual([
+      '2026-11-02',
+      '2026-11-09',
+      '2026-11-16',
+      '2026-11-23',
+      '2026-11-30',
+      '2026-12-07',
+    ])
+  })
+
+  // The tightest cycle: moving on from any day later than the next one would skip charges
+  it('finds every charge of a daily subscription', () => {
+    const daily = {
+      ...netflix,
+      firstBillDate: '2026-11-01',
+      billingCycle: { type: 'every', interval: 1, unit: 'day' } satisfies BillingCycle,
+    }
+    expect(dates(chargesBetween(daily, '2026-11-03', '2026-11-06'))).toEqual([
+      '2026-11-03',
+      '2026-11-04',
+      '2026-11-05',
+      '2026-11-06',
     ])
   })
 })
