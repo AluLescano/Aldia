@@ -1,0 +1,77 @@
+.row {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2rem auto -2rem -2rem;
+    width: 25%;
+    background: var(--image) center / cover;
+    filter: blur(50px) saturate(2);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .logo {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+
+    &::before {
+      content: none; // the card already glows behind the logo; the Avatar's own glow would double it
+    }
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+
+    // A long name ends in "…" instead of pushing the price out of the card
+    & > * {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  // Grows with the amount (no fixed width: "$ 15.130,69" did not fit in 5rem) and right-aligns,
+  // so prices still line up in a column
+  .price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    min-width: 0;
+    max-width: 50%;
+    white-space: nowrap;
+    gap: 0.5rem;
+  }
+
+  .centered {
+    padding-top: 0.5rem;
+  }
+
+  // What is really charged (own currency, cycle), under the monthly price. Cut with "…"
+  // past half the card, so it never squeezes the name
+  .note {
+    max-width: 100%;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .faded {
+    opacity: 0.5;
+  }
+}
