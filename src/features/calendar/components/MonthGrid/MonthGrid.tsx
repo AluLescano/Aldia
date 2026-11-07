@@ -1,5 +1,5 @@
 // UTILS
-import { WEEKDAYS } from '@/shared/lib/calendar'
+import { fullDate, WEEKDAYS } from '@/shared/lib/calendar'
 import { cn } from '@/shared/lib/cn'
 
 // TYPES
@@ -8,7 +8,8 @@ import type { Subscription } from '@/shared/types'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
-import DayLogos from '../DayLogos/DayLogos'
+import DayLogos, { MAX_LOGOS } from '../DayLogos/DayLogos'
+import Button from '@/shared/ui/Button/Button'
 
 // ASSETS
 import styles from './MonthGrid.module.scss'
@@ -24,6 +25,7 @@ interface Props {
   byDay: Map<string, Charge[]>
   /** Every subscription by id, to draw a charge's logo. */
   subsById: Map<string, Subscription>
+  onSelectDay: (day: string) => void
 }
 
 /**
@@ -36,8 +38,20 @@ interface Props {
  * // November 2026: Nov 1 (a Sunday) to Dec 12
  * <MonthGrid days={days} month={10} today="2026-11-07" byDay={byDay} subsById={subsById} />
  */
-const MonthGrid = ({ days, month, today, byDay, subsById }: Props) => {
-  const { container, weekdays, weekday, grid, dayCard, day, isToday, outside } = styles
+const MonthGrid = ({ days, month, today, byDay, subsById, onSelectDay }: Props) => {
+  const {
+    container,
+    weekdays,
+    weekday,
+    grid,
+    cell,
+    dayCard,
+    day,
+    isToday,
+    outside,
+    more,
+    fadedMore,
+  } = styles
 
   return (
     <div className={container}>
@@ -54,16 +68,31 @@ const MonthGrid = ({ days, month, today, byDay, subsById }: Props) => {
           // compare years: a grid spans 3 neighbour months, and even Dec / Jan differ
           const isOutside = Number(date.slice(5, 7)) - 1 !== month
           const charges = byDay.get(date) ?? []
+          const extra = charges.length - MAX_LOGOS
+
+          // "Sin cobros", "1 cobro", "3 cobros"
+          const countText = (count: number) =>
+            count === 0 ? 'Sin cobros' : `${count} ${count === 1 ? 'cobro' : 'cobros'}`
 
           return (
-            <div
-              key={date}
-              className={cn(dayCard, date === today && isToday, isOutside && outside)}
-            >
-              <DayLogos charges={charges} subsById={subsById} isOutside={isOutside} />
-              <Typography variant="label" size="sm" className={day}>
-                {Number(date.slice(8))}
-              </Typography>
+            <div key={date} className={cell}>
+              <Button
+                width="full"
+                size="medium"
+                variant="secondary"
+                type="button"
+                onClick={() => onSelectDay(date)}
+                aria-label={`${fullDate(date)}: ${countText(charges.length)}`}
+                className={cn(dayCard, date === today && isToday, isOutside && outside)}
+              >
+                <DayLogos charges={charges} subsById={subsById} isOutside={isOutside} />
+                <Typography variant="label" size="sm" className={day}>
+                  {Number(date.slice(8))}
+                </Typography>
+              </Button>
+              {extra > 0 && (
+                <span className={cn(more, isOutside && fadedMore)}>+{extra}</span>
+              )}
             </div>
           )
         })}

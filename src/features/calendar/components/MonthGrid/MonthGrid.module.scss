@@ -23,13 +23,39 @@
   color: var(--text-muted);
 }
 
+// One grid cell: the tile, plus the "+N" badge outside it (the Button clips its own
+// children, the badge has to hang over the corner)
+.cell {
+  position: relative;
+}
+
+.more {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  pointer-events: none; // a tap on the badge still reaches the tile under it
+  padding: 0 4px;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  line-height: 15px;
+  font-weight: 500;
+  background-color: var(--bg-surface-raised);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  z-index: 2; // above the neighbouring tiles
+}
+
+.fadedMore {
+  opacity: 0.45; // same fade as the outside days' logos
+}
+
 // Days of the month on the raised surface, a step above the container
 .dayCard {
   position: relative;
   height: 55px;
-  border-radius: 14px;
-  background-color: var(--bg-surface-raised);
+  border-radius: 0.75rem;
   border: 1px solid var(--border-card);
+  padding: 0;
 
   // The neighbour months' days sink into the screen color, a step below the container
   &.outside {

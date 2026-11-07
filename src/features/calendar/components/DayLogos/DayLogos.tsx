@@ -13,7 +13,7 @@ import Avatar from '@/shared/ui/Avatar/Avatar'
 import styles from './DayLogos.module.scss'
 
 /** A tile has room for 2 logos; the rest become "+N". */
-const MAX_LOGOS = 2
+export const MAX_LOGOS = 2
 
 interface Props {
   /** The day's charges, paused ones last (as `chargesByDay` sorts them). */
@@ -32,12 +32,11 @@ interface Props {
  * <DayLogos charges={byDay.get(date) ?? []} subsById={subsById} />
  */
 const DayLogos = ({ charges, subsById, isOutside }: Props) => {
-  const { container, faded, stack, logo, paused, more } = styles
+  const { container, faded, stack, logo, paused } = styles
   if (charges.length === 0) return null
 
   // Paused charges are already last, so the 2 spots go to real charges first
   const shown = charges.slice(0, MAX_LOGOS)
-  const extra = charges.length - shown.length
 
   return (
     <div className={cn(container, isOutside && faded)} aria-hidden="true">
@@ -53,7 +52,6 @@ const DayLogos = ({ charges, subsById, isOutside }: Props) => {
             />
           )
         })}
-        {extra > 0 && <span className={more}>+{extra}</span>}
       </div>
     </div>
   )

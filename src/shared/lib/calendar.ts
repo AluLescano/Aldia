@@ -1,5 +1,5 @@
 // UTILS
-import { toISODate } from './isoDate'
+import { parseISODate, toISODate } from './isoDate'
 
 /**
  * The 42 days (6 weeks of 7) a month calendar shows, as `YYYY-MM-DD`, starting on
@@ -27,3 +27,21 @@ export const MONTHS = Array.from({ length: 12 }, (_, month) => {
 })
 
 export const WEEKDAYS = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
+
+// What a screen reader says for a day: "martes, 13 de octubre de 2026"
+export const fullDate = (iso: string) =>
+  parseISODate(iso)?.toLocaleDateString('es-AR', { dateStyle: 'full' })
+
+/**
+ * A day without its year, as a title: "Domingo 15 de noviembre". For days of the month on
+ * screen, where the year goes without saying. `''` for a malformed date.
+ */
+export const dayAndMonth = (iso: string) => {
+  const text = parseISODate(iso)?.toLocaleDateString('es-AR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }) // "domingo, 15 de noviembre"
+  if (!text) return ''
+  return text.charAt(0).toUpperCase() + text.slice(1).replace(',', '')
+}

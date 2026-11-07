@@ -45,19 +45,3 @@
     box-shadow: 0 0 0 1.5px var(--bg-screen);
   }
 }
-
-// "+N": a badge on the top right of the stacked logos
-.more {
-  position: absolute;
-  left: calc(100% - 10px);
-  top: -5px;
-  z-index: 1;
-  padding: 0 4px;
-  border-radius: 7px;
-  font-size: 0.75rem;
-  line-height: 15px;
-  font-weight: 500;
-  background-color: var(--bg-surface-raised);
-  border: 1px solid var(--border-strong);
-  color: var(--text-secondary);
-}

@@ -22,6 +22,8 @@ interface PanelProps {
   onClose: () => void
   /** Big title under the drag handle; also the dialog's accessible name. */
   title?: string
+  /** A smaller line right under the title, above the divider (e.g. the day sheet's "3 cobros"). */
+  subtitle?: string
   /** The scrolling content. */
   children: ReactNode
   /** Fixed buttons under the content (they don't scroll with it). */
@@ -37,7 +39,7 @@ interface BottomSheetProps extends PanelProps {
 
 // Mounts when the sheet opens and unmounts after the exit animation,
 // so isExpanded starts at false every time without any effect
-const Panel = ({ onClose, title, children, footer, className }: PanelProps) => {
+const Panel = ({ onClose, title, subtitle, children, footer, className }: PanelProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const startYRef = useRef(0)
   const reduceMotion = useReducedMotion()
@@ -90,6 +92,11 @@ const Panel = ({ onClose, title, children, footer, className }: PanelProps) => {
           {title && (
             <Typography variant="title" size="lg">
               {title}
+            </Typography>
+          )}
+          {subtitle && (
+            <Typography variant="label" size="sm">
+              {subtitle}
             </Typography>
           )}
         </div>

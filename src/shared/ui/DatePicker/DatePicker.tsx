@@ -2,7 +2,7 @@
 import { useState } from 'react'
 
 // UTILS
-import { getMonthGrid, MONTHS, WEEKDAYS } from '@/shared/lib/calendar'
+import { fullDate, getMonthGrid, MONTHS, WEEKDAYS } from '@/shared/lib/calendar'
 import { parseISODate, todayISO } from '@/shared/lib/isoDate'
 import { cn } from '@/shared/lib/cn'
 
@@ -39,10 +39,6 @@ interface Props {
   /** Called with the tapped day as `YYYY-MM-DD`. */
   onSelect: (iso: string) => void
 }
-
-// What a screen reader says for a day: "martes, 13 de octubre de 2026"
-const fullDate = (iso: string) =>
-  parseISODate(iso)?.toLocaleDateString('es-AR', { dateStyle: 'full' })
 
 const monthOptions = MONTHS.map((label, value) => ({ value, label }))
 

@@ -10,6 +10,7 @@ import { chargesByDay } from '@/features/calendar/utils/chargesByDay'
 // COMPONENTS
 import MonthNav from '@/features/calendar/components/MonthNav/MonthNav'
 import MonthGrid from '@/features/calendar/components/MonthGrid/MonthGrid'
+import DaySheet from '@/features/calendar/components/DaySheet/DaySheet'
 
 // ASSETS
 import styles from './CalendarPage.module.scss'
@@ -23,6 +24,7 @@ export const CalendarPage = () => {
   // and the total will all read it
   const [view, setView] = useState({ year: start.getFullYear(), month: start.getMonth() })
   const subscriptions = useSubscriptionStore((state) => state.subscriptions)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   // Rebuilt only when the month or the subscriptions change, not on every render
   const days = useMemo(() => getMonthGrid(view.year, view.month), [view.year, view.month])
@@ -64,6 +66,13 @@ export const CalendarPage = () => {
         today={today}
         byDay={byDay}
         subsById={subsById}
+        onSelectDay={setSelectedDate}
+      />
+      <DaySheet
+        isOpen={selectedDate !== null}
+        date={selectedDate}
+        charges={selectedDate ? (byDay.get(selectedDate) ?? []) : []}
+        onClose={() => setSelectedDate(null)}
       />
     </div>
   )
