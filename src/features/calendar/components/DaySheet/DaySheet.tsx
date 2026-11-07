@@ -2,7 +2,8 @@
 import { countText } from '@/features/calendar/utils/countText'
 import { dayAndMonth } from '@/shared/lib/calendar'
 import { formatBillingCycle } from '@/features/subscriptions/utils/billingCycle'
-import { getCurrencySymbol } from '@/shared/lib/currencies'
+import { formatAmount, getCurrencySymbol } from '@/shared/lib/currencies'
+import { convert, type ExchangeRates } from '@/shared/lib/exchangeRates'
 
 // TYPES
 import type { Charge } from '@/features/subscriptions/utils/subscriptionHistory'
@@ -35,14 +36,17 @@ interface Props {
   onAddSub: (date: string) => void
   /** The day's charges added up in `currency` (`chargesTotal`). Shown with 2+ paying charges. */
   dayTotal: ChargesTotal
-  /** The selected currency, for the day total. */
+  /** The currency picked at the top: the rows and the day total show it. */
   currency: CurrencyCode
+  /** To convert each charge into `currency`. */
+  rates: ExchangeRates | null
 }
 
 /**
  * The tapped day's sheet in the Calendario: the date as its title, how many charges it has,
  * and one row per charge (`SubscriptionRow`, the same look as Home's cards). Each row shows
- * that charge's own price (a yearly sub its whole year, not a monthly share) and says
+ * that charge's own price (a yearly sub its whole year, not a monthly share) in the picked
+ * currency, with the original under it when it was converted, and says
  * "Pausada", "Fin de prueba: primer cobro" or the cycle. Tapping a row opens that
  * subscription to edit it. An empty day says so and offers to add a subscription starting
  * on it. With 2 or more paying charges, "Total del día" adds them up in the selected
@@ -69,6 +73,7 @@ const DaySheet = ({
   onAddSub,
   dayTotal,
   currency,
+  rates,
 }: Props) => {
   const { container, subscriptionList, rowButton, sublineClass, total, totalNote } =
     styles
@@ -105,6 +110,10 @@ const DaySheet = ({
                 : charge.isTrialEnd
                   ? 'Fin de prueba: primer cobro'
                   : formatBillingCycle(sub.billingCycle)
+              // In the picked currency, like Home's cards and the totals; what is really
+              // charged goes in the small line. No rate: the charge's own currency, as is
+              const converted = convert(charge.price, charge.currency, currency, rates)
+              const isConverted = converted !== null && charge.currency !== currency
               return (
                 <Button
                   key={charge.subscriptionId}
@@ -121,8 +130,15 @@ const DaySheet = ({
                         {subLine}
                       </Typography>
                     }
-                    amount={charge.price}
-                    currencySymbol={getCurrencySymbol(charge.currency)}
+                    amount={converted ?? charge.price}
+                    currencySymbol={getCurrencySymbol(
+                      converted === null ? charge.currency : currency,
+                    )}
+                    priceNote={
+                      isConverted
+                        ? `${getCurrencySymbol(charge.currency)} ${formatAmount(charge.price)}`
+                        : undefined
+                    }
                     isPaused={charge.isPaused}
                   />
                 </Button>

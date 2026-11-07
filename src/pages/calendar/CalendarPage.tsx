@@ -103,6 +103,7 @@ export const CalendarPage = () => {
         charges={selectedCharges}
         dayTotal={chargesTotal(selectedCharges, selectedCurrency, rates)}
         currency={selectedCurrency}
+        rates={rates}
         onClose={() => setSelectedDate(null)}
         subsById={subsById}
         onOpenSub={(id) => {
