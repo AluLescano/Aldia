@@ -231,10 +231,14 @@
   }
 }
 
+.subscriptionContainer .cardImg::before {
+  content: none; // the card already glows behind the logo; the Avatar's own glow would double it
+}
+
 .cardImg {
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 9999px;
+  border-radius: 50%;
   margin-right: 0.75rem;
   flex-shrink: 0;
 }

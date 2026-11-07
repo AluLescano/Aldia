@@ -124,7 +124,7 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
     isMonthly ? '' : ` ${formatCyclePhrase(cycle)}`
   }`
 
-  const { src: logo, iconKey } = iconSource(subscription.icon)
+  const { src: logo } = iconSource(subscription.icon)
 
   return (
     <div className={cardWrapper}>
@@ -162,19 +162,11 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
         className={cn(subscriptionContainer, isPaused && disabled)}
       >
         <div style={{ '--image': `url("${logo}")` } as CSSProperties}>
-          {logo ? (
-            <img
-              src={logo}
-              alt="" // decorative: the name is right next to it
-              className={cn(cardImg, isPaused && opacity50)}
-            />
-          ) : (
-            <Avatar
-              iconKey={iconKey}
-              name={subscription.name}
-              className={cn(cardImg, isPaused && opacity50)}
-            />
-          )}
+          <Avatar
+            {...iconSource(subscription.icon)}
+            name={subscription.name}
+            className={cn(cardImg, isPaused && opacity50)}
+          />
           <div className={cardInfo}>
             <Typography
               variant="label"
