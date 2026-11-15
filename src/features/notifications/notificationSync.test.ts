@@ -92,7 +92,7 @@ beforeEach(async () => {
   // The module keeps its channel flag and queue in memory: a fresh copy per test
   vi.resetModules()
   sync = await import('./notificationSync')
-  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
   vi.setSystemTime(new Date(2026, 9, 22, 8, 0))
 })
 
