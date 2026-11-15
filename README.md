@@ -85,6 +85,8 @@ npx cap run android                     # build and install on a connected phone
 npx cap open android                    # or open it in Android Studio
 ```
 
+**Debug builds install as "Aldia Dev"** (`com.katyadesign.aldia.dev`, set in `android/app/build.gradle` and `android/app/src/debug/res/values/strings.xml`): a separate app next to the release "Aldia", with its own data. Testing a debug build never touches the release app or forces an uninstall.
+
 Live reload on the phone: run `npm run dev -- --host` (the `--host` matters on Windows), then `npx cap run android -l --host localhost --port 5173 --forwardPorts 5173:5173`.
 
 **Release builds** are signed with a keystore that never enters the repo. Gradle reads its path and passwords from `android/keystore.properties` (gitignored, like `*.jks`):

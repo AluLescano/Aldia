@@ -264,7 +264,7 @@ An older build kept the stores in `localStorage` (`aldia_subscriptions_v1`, `ald
 
 **Durability:** the private folder is invisible to other apps, survives app updates, is deleted on uninstall, and is included in Android Auto Backup (`allowBackup="true"`). JSON export (below) is still the backup the user controls.
 
-**Looking at the files:** in the browser (`npm run dev`), the plugin stores them in IndexedDB (DevTools > Application > IndexedDB > Disc). On a phone with a debug build: `adb shell run-as com.katyadesign.aldia ls files/aldia` (and `cat files/aldia/<name>.json`).
+**Looking at the files:** in the browser (`npm run dev`), the plugin stores them in IndexedDB (DevTools > Application > IndexedDB > Disc). On a phone with a debug build (Aldia Dev): `adb shell run-as com.katyadesign.aldia.dev ls files/aldia` (and `cat files/aldia/<name>.json`). `run-as` only works on debug builds, so the release app's files can't be read this way.
 
 ### Backup JSON Format (planned)
 
