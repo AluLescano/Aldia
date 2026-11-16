@@ -1,4 +1,4 @@
-import type { SavedStore } from '../types'
+import type { Backup, SavedStore } from '../types'
 
 export function isSavedStore(value: unknown): value is SavedStore {
   if (value === null || typeof value !== 'object') {
@@ -13,4 +13,22 @@ export function isSavedStore(value: unknown): value is SavedStore {
     return false
   }
   return true
+}
+
+export function createBackup(
+  stores: Backup['stores'],
+  appVersion: string,
+  today: string,
+): Backup {
+  return {
+    app: 'aldia',
+    format: 1,
+    exportedOn: today,
+    appVersion,
+    stores,
+  }
+}
+
+export function backupFileName(today: string): string {
+  return `aldia-backup-${today}.json`
 }
