@@ -1,76 +1,56 @@
+// COMPONENTS
+import Typography from '@/shared/ui/Typography/Typography'
+import SettingsRow from '@/features/settings/components/SettingsRow/SettingsRow'
+
 // ASSETS
+import { IconDownload } from '@/assets/icons/IconDownload'
+import { IconUpload } from '@/assets/icons/IconUpload'
+
 import styles from './SettingsPage.module.scss'
 
-/** Placeholder until the screen is built (v1.x): describes what it will show. */
-export const SettingsPage = () => {
-  const {
-    container,
-    title,
-    subtitle,
-    section,
-    sectionTitle,
-    list,
-    listItem,
-    itemTitle,
-    itemDesc,
-    badge,
-    textValue,
-    badgeDisabled,
-    button,
-  } = styles
+/**
+ * The Ajustes tab: the title with the app version, then one group per topic. For now only
+ * "Nube y backup" (export / import a JSON backup); the rows get their actions in the
+ * export and import quests. More groups (Moneda, Interfaz, Notificaciones…) come later.
+ */
+const SettingsPage = () => {
+  const { container, header, version, group, label, card, footnote } = styles
 
   return (
     <div className={container}>
-      <div>
-        <h1 className={title}>Settings</h1>
-        <p className={subtitle}>Preferences, currencies, and backups</p>
+      <div className={header}>
+        <Typography variant="title" size="xl">
+          Ajustes
+        </Typography>
+        <Typography
+          variant="label"
+          size="xs"
+          className={version}
+        >{`v${__APP_VERSION__}`}</Typography>
       </div>
-
-      <div className={section}>
-        <span className={sectionTitle}>Currencies</span>
-        <div className={list}>
-          <div className={listItem}>
-            <div>
-              <p className={itemTitle}>Default Currency</p>
-              <p className={itemDesc}>Currency used for monthly cost sums</p>
-            </div>
-            <span className={badge}>USD ($)</span>
-          </div>
-
-          <div className={listItem}>
-            <div>
-              <p className={itemTitle}>Favorite Currencies</p>
-              <p className={itemDesc}>Top 5 currencies in quick switcher</p>
-            </div>
-            <span className={textValue}>USD, EUR, ARS, BRL, GBP</span>
-          </div>
+      <section className={group}>
+        <Typography variant="overline" size="xs" className={label}>
+          Nube & Backup
+        </Typography>
+        <div className={card}>
+          <SettingsRow
+            icon={<IconDownload />}
+            title="Exportar backup"
+            description="Guarda tus datos en un archivo"
+          />
+          <SettingsRow
+            icon={<IconUpload />}
+            title="Importar backup"
+            description="Reemplaza tus datos por los de un archivo"
+          />
         </div>
-      </div>
-
-      <div className={section}>
-        <span className={sectionTitle}>Data & Storage</span>
-        <div className={list}>
-          <div className={listItem}>
-            <div>
-              <p className={itemTitle}>Google Drive Backup</p>
-              <p className={itemDesc}>
-                Sync offline data to private Google Drive storage
-              </p>
-            </div>
-            <span className={badgeDisabled}>Not Connected</span>
-          </div>
-
-          <div className={listItem}>
-            <div>
-              <p className={itemTitle}>Export / Import JSON</p>
-              <p className={itemDesc}>Save your subscriptions to a local file</p>
-            </div>
-            <button type="button" className={button}>
-              Export
-            </button>
-          </div>
-        </div>
-      </div>
+        <Typography variant="body" size="xs" className={footnote}>
+          Tus datos se guardan solo en este teléfono. Exporta un backup para llevarlos a
+          otro teléfono o guardarlos donde quieras.
+        </Typography>
+      </section>
     </div>
   )
 }
+
+export default SettingsPage

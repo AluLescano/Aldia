@@ -2,104 +2,39 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding-bottom: calc(
-    var(--nav-height) + var(--safe-bottom) + 1rem
-  ); // room for the nav bar
-}
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 1rem);
 
-.title {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.025em;
-}
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-.subtitle {
-  font-size: 0.75rem;
-  line-height: 1rem;
-  color: var(--text-secondary);
-  margin-top: 0.25rem;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.sectionTitle {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-}
-
-.list {
-  border-radius: 1rem;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-card);
-
-  & > * + * {
-    border-top: 1px solid var(--border-subtle);
+    .version {
+      color: var(--text-muted);
+    }
   }
-}
 
-.listItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-}
+  .group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 
-.itemTitle {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
-}
+    .label {
+      color: var(--text-muted);
+    }
 
-.itemDesc {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
+    .card {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-surface);
+      border-radius: 1rem;
+      border: 1px solid var(--border-card);
 
-.badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.625rem;
-  background-color: var(--bg-surface-raised);
-  color: var(--text-secondary);
-  border-radius: 0.5rem;
-}
+      overflow: hidden;
+    }
 
-.textValue {
-  font-size: 0.75rem;
-  color: var(--icon-active);
-  font-weight: 500;
-}
-
-.badgeDisabled {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.625rem;
-  background-color: var(--bg-surface-raised);
-  color: var(--text-secondary);
-  border-radius: 0.5rem;
-}
-
-.button {
-  font-size: 0.75rem;
-  padding: 0.375rem 0.75rem;
-  background-color: var(--bg-surface-raised);
-  color: var(--text-primary);
-  font-weight: 500;
-  border-radius: 0.5rem;
-  transition: all 0.15s;
-  border: none;
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--bg-surface-sunken);
+    .footnote {
+      color: var(--text-muted);
+    }
   }
 }
