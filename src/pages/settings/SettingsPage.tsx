@@ -1,3 +1,6 @@
+// HOOKS
+import { useExportBackup } from '@/features/backup/hooks/useExportBackup'
+
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
 import SettingsRow from '@/features/settings/components/SettingsRow/SettingsRow'
@@ -16,6 +19,7 @@ import styles from './SettingsPage.module.scss'
 const SettingsPage = () => {
   const { container, header, version, group, label, card, footnote } = styles
 
+  const exportBackup = useExportBackup()
   return (
     <div className={container}>
       <div className={header}>
@@ -37,6 +41,7 @@ const SettingsPage = () => {
             icon={<IconDownload />}
             title="Exportar backup"
             description="Guarda tus datos en un archivo"
+            onClick={exportBackup}
           />
           <SettingsRow
             icon={<IconUpload />}
