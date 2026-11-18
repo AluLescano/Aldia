@@ -2,7 +2,8 @@
 import type { Preset } from '@/shared/types'
 
 /**
- * The ready-made subscriptions of the preset picker (shown in this order).
+ * The ready-made subscriptions of the preset picker, shown in this order: A-Z by name
+ * (`presets.test.ts` checks it, so a new one has to go in its spot).
  * `defaultCategoryId` must be one of the default category ids in `categoryStore`
  * (if the user deleted it, a new subscription falls back to "Otros").
  */
@@ -19,6 +20,12 @@ export const PRESET_SUBSCRIPTIONS: Preset[] = [
     keywords: ['aysa', 'absa', 'aguas andinas'],
     defaultCategoryId: 'bills',
     iconKey: 'water',
+  },
+  {
+    id: 'rent',
+    name: 'Alquiler',
+    defaultCategoryId: 'bills',
+    iconKey: 'rent',
   },
   {
     id: 'amazon-prime',
@@ -47,7 +54,7 @@ export const PRESET_SUBSCRIPTIONS: Preset[] = [
   {
     id: 'canva-pro',
     name: 'Canva Pro',
-    defaultCategoryId: 'entertainment',
+    defaultCategoryId: 'productivity',
     iconUrl: '/logos/logo_canva.webp',
   },
   {
@@ -247,12 +254,6 @@ export const PRESET_SUBSCRIPTIONS: Preset[] = [
     iconUrl: '/logos/logo_playstation.webp',
   },
   {
-    id: 'rent',
-    name: 'Alquiler',
-    defaultCategoryId: 'bills',
-    iconKey: 'rent',
-  },
-  {
     id: 'proton-vpn',
     name: 'Proton VPN',
     defaultCategoryId: 'technology',
@@ -271,16 +272,16 @@ export const PRESET_SUBSCRIPTIONS: Preset[] = [
     iconUrl: '/logos/logo_slack.webp',
   },
   {
-    id: 'spotify-premium',
-    name: 'Spotify Premium',
-    defaultCategoryId: 'entertainment',
-    iconUrl: '/logos/logo_spotify.webp',
-  },
-  {
     id: 'sportclub',
     name: 'Sportclub',
     defaultCategoryId: 'lifestyle',
     iconUrl: '/logos/logo_sportclub.webp',
+  },
+  {
+    id: 'spotify-premium',
+    name: 'Spotify Premium',
+    defaultCategoryId: 'entertainment',
+    iconUrl: '/logos/logo_spotify.webp',
   },
   {
     id: 'strava',

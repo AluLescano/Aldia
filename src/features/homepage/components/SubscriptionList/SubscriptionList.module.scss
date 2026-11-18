@@ -272,3 +272,11 @@
   height: 1.25rem;
   margin-left: auto;
 }
+
+// The skeleton's breathing. Declared here, not in index.css: CSS modules rename the
+// `pulse` in `animation` to this file's own name, so a global one would never match
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}

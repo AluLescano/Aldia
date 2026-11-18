@@ -25,7 +25,7 @@ interface Props {
   currencySymbol?: string
   /** A small grey line under the price, e.g. what is really charged: "€ 240,00 al año". */
   priceNote?: string
-  /** Logo, name and price at half opacity. */
+  /** Logo, name and price at half opacity: paused, or (on Home) ended too. */
   isPaused?: boolean
 }
 
