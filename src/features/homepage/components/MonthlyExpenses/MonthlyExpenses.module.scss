@@ -88,11 +88,12 @@
     gap: 0.375rem;
   }
 
+  // `fis` is the square artwork; a fixed square box keeps it a circle
   .flag {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    border-radius: 9999px;
     display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
   }
 
   .amounts {
@@ -105,5 +106,13 @@
   .currencyRate {
     color: var(--text-accent);
     margin: 0;
+  }
+}
+
+// The skeleton's breathing. Declared here, not in index.css: CSS modules rename the
+// `pulse` in `animation` to this file's own name, so a global one would never match
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
   }
 }

@@ -2,7 +2,9 @@
 
 ## Platform
 
-Android (portrait). Desktop (Electron or Tauri) later, so the web codebase must stay portable.
+web
+
+A web app (React + Vite) that ships to Android phones in portrait through Capacitor, inside a WebView, with its own design system instead of Material. Desktop (Electron or Tauri) later, so the web codebase must stay portable.
 
 ## Users
 

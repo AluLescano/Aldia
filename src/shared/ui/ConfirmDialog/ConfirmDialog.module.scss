@@ -1,0 +1,74 @@
+.dialog {
+  // The global reset sets `margin: 0` on everything, which cancels the browser's own
+  // centering of a modal <dialog>. `auto` brings it back.
+  margin: auto;
+  width: 100%;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 1.25rem;
+  border: 1px solid var(--border-card);
+  border-radius: 1.5rem;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+
+  // Only when open: setting `display` on a closed <dialog> would show it
+  &[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  // Without these two, a swipe on the dialog scrolls the screen behind it
+  &:modal {
+    overscroll-behavior: contain;
+  }
+
+  &::backdrop {
+    background-color: var(--overlay-scrim);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconTile {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background-color: var(--brand-subtle);
+  color: var(--brand-on-subtle);
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// Amber, not red: the tile warns, the button is the one that says "this replaces data"
+.iconTileDanger {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.text {
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+// Both buttons share the row equally
+.action {
+  flex: 1;
+}

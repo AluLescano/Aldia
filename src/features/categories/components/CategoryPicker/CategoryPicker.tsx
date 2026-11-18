@@ -7,6 +7,7 @@ import { useSubscriptionStore } from '@/features/subscriptions/store/subscriptio
 
 // UTILS
 import { cn } from '@/shared/lib/cn'
+import { sortCategories } from '../../utils/sortCategories'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -75,7 +76,7 @@ interface Props {
 }
 
 /**
- * The category sheet's list: tap a row to pick it, or use the pencil and trash on each
+ * The category sheet's list, A-Z with "Otros" last: tap a row to pick it, or use the pencil and trash on each
  * row to rename or delete ("Otros" can't be changed). The add / save / delete buttons
  * live in `CategoryFooter`.
  */
@@ -91,7 +92,7 @@ const CategoryPicker = ({ value, onSelect, editor }: Props) => {
     <ul className={list}>
       {/* popLayout takes an exiting row out of the flow, so the others glide up at once */}
       <AnimatePresence mode="popLayout" initial={false}>
-        {categories.map((category) => {
+        {sortCategories(categories).map((category) => {
           // What this row is doing right now. The <li> stays the same element in every
           // state (same key), so switching between them never counts as "leaving".
           const state =

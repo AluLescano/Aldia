@@ -65,7 +65,7 @@ export interface PaymentMethod {
 }
 
 // ==========================================
-// NOTIFICATIONS / REMINDERS
+// REMINDERS (the notifications before a charge)
 // ==========================================
 
 /** One notification before a charge or before a free trial ends. */

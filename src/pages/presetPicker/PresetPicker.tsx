@@ -30,11 +30,21 @@ interface Props {
 
 /**
  * Full-screen overlay for adding a subscription: search the presets (by name or by
- * company, ignoring accents and case) and tap one, or tap `+` for a custom one.
- * Either way it pushes the `subscription-form` overlay on top.
+ * company, ignoring accents and case) and tap one, or tap `+` for a custom one. A search
+ * with no match shows a card that creates a custom one too. Either way it pushes the
+ * `subscription-form` overlay on top.
  */
 export const PresetPicker = ({ firstBillDate }: Props) => {
-  const { container, aura, searchbar, listContainer, presetGrid } = styles
+  const {
+    container,
+    aura,
+    searchbar,
+    listContainer,
+    presetGrid,
+    emptyCard,
+    emptyIcon,
+    emptyHint,
+  } = styles
   const popOverlay = useUIStore((state) => state.popOverlay)
   const pushOverlay = useUIStore((state) => state.pushOverlay)
 
@@ -78,24 +88,47 @@ export const PresetPicker = ({ firstBillDate }: Props) => {
       </PageHeader>
 
       <div className={cn(listContainer, `no-scrollbar`)}>
-        <div>
-          <Typography variant="label" size="sm">
-            Subscripciones Populares
-          </Typography>
-        </div>
+        {filteredPresets.length === 0 ? (
+          // Nothing matches: offer the custom one right here (same as the header's +)
+          <button
+            type="button"
+            className={emptyCard}
+            onClick={() => pushOverlay('subscription-form', { firstBillDate })}
+          >
+            <span className={emptyIcon}>
+              <IconAdd />
+            </span>
+            <Typography variant="body" size="md">
+              {`No encontramos «${searchTerm.trim()}»`}
+            </Typography>
+            <Typography variant="body" size="sm" className={emptyHint}>
+              Créala como subscripción personalizada
+            </Typography>
+          </button>
+        ) : (
+          <>
+            <div>
+              <Typography variant="label" size="sm">
+                Subscripciones Populares
+              </Typography>
+            </div>
 
-        {/* Grid */}
-        <div className={presetGrid}>
-          {filteredPresets.map((preset) => (
-            <PresetCard
-              key={preset.id}
-              name={preset.name}
-              logo={preset.iconUrl}
-              iconKey={preset.iconKey}
-              onClick={() => pushOverlay('subscription-form', { preset, firstBillDate })}
-            />
-          ))}
-        </div>
+            {/* Grid */}
+            <div className={presetGrid}>
+              {filteredPresets.map((preset) => (
+                <PresetCard
+                  key={preset.id}
+                  name={preset.name}
+                  logo={preset.iconUrl}
+                  iconKey={preset.iconKey}
+                  onClick={() =>
+                    pushOverlay('subscription-form', { preset, firstBillDate })
+                  }
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

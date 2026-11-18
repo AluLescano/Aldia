@@ -9,8 +9,11 @@ import styles from './Button.module.scss'
 
 /** Everything a native `<button>` accepts, plus the look of the design system. */
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** `primary`: filled brand color, for the main action. `secondary`: quieter. Defaults to `primary`. */
-  variant?: 'primary' | 'secondary'
+  /**
+   * `primary`: filled brand color, for the main action. `secondary`: quieter. `danger`: soft
+   * red, for actions that destroy or replace data ("Reemplazar"). Defaults to `primary`.
+   */
+  variant?: 'primary' | 'secondary' | 'danger'
   /** Height and padding. Defaults to `large`. */
   size?: 'large' | 'medium' | 'small'
   /** `full` stretches to the container, `fit` hugs the content. Defaults to `fit`. */
@@ -28,6 +31,7 @@ interface Ripple {
 const {
   ButtonPrimary,
   ButtonSecondary,
+  ButtonDanger,
   sizeLarge,
   sizeMedium,
   sizeSmall,
@@ -40,7 +44,11 @@ const {
 // Built once when the file loads, not on every render
 const sizeClasses = { large: sizeLarge, medium: sizeMedium, small: sizeSmall }
 const widthClasses = { full: widthFull, fit: widthFit }
-const variantClasses = { primary: ButtonPrimary, secondary: ButtonSecondary }
+const variantClasses = {
+  primary: ButtonPrimary,
+  secondary: ButtonSecondary,
+  danger: ButtonDanger,
+}
 
 /**
  * The app's button for actions ("Guardar", "Agregar"...), with a ripple on every press.
