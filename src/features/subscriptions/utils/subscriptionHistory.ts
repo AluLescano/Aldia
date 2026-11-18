@@ -119,8 +119,9 @@ export function upcomingPrice(
 
 /**
  * The next charge on or after `today`, or `null` when there is none left: the end date
- * comes before it. The one place that knows about `endDate`, so the card, the total, the
- * sorts and the status all agree. Pure: pass `todayISO()`.
+ * comes before it. Only `statusFor` calls it, to tell an ended subscription; the card, the
+ * total and the sorts ask the status (`statusFor` / `isInactive`) and use plain
+ * `nextBillDate` for the date itself. Pure: pass `todayISO()`.
  *
  * @example
  * // Monthly on the 5th, ending Nov 20

@@ -89,8 +89,9 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
   // Calculated from today, so it never shows a date that already passed
   const today = todayISO()
   const status = statusFor(subscription, today)
-  // Paused or ended: greyed out, no next charge
-  const isPaused = status === 'inactive' || status === 'ended'
+  // Paused or ended: greyed out, no next charge. Not `isPaused`: an ended one isn't paused,
+  // it gets its own "Terminó el …" line below
+  const isInactive = status === 'inactive' || status === 'ended'
   const nextCharge = nextBillDate(
     subscription.firstBillDate,
     subscription.billingCycle,
@@ -151,19 +152,19 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
           // Past half the button, or a fast swipe: snap open. Otherwise snap closed.
           slideTo(info.offset.x < OPEN_X / 2 || info.velocity.x < -500)
         }}
-        className={cn(subscriptionContainer, isPaused && disabled)}
+        className={cn(subscriptionContainer, isInactive && disabled)}
       >
         <SubscriptionRow
           icon={subscription.icon}
           name={subscription.name}
-          isPaused={isPaused}
+          isPaused={isInactive}
           amount={shownAmount}
           currencySymbol={shownSymbol}
           // What is really charged (own currency, cycle), under the monthly price
           priceNote={showsCharge ? chargeText : undefined}
           subLine={
             <>
-              {!isPaused && (
+              {!isInactive && (
                 <Typography variant="label" size="sm">
                   {/* In a trial, say so: "En 7 días" alone reads like a charge */}
                   {subscription.trial && status === 'trial'
