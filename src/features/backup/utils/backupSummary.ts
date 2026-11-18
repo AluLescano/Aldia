@@ -20,7 +20,11 @@ function listIn(state: unknown, key: string): unknown[] {
 function isCustomCategory(category: unknown): boolean {
   if (typeof category !== 'object' || category === null) return false
   if ('isCustom' in category && category.isCustom === true) return true
-  return 'id' in category && typeof category.id === 'string' && category.id.startsWith('custom-')
+  return (
+    'id' in category &&
+    typeof category.id === 'string' &&
+    category.id.startsWith('custom-')
+  )
 }
 
 /**

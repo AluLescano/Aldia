@@ -92,7 +92,9 @@ export default function ConfirmDialog({
     >
       <div className={heading}>
         {icon && (
-          <span className={tone === 'danger' ? `${iconTile} ${iconTileDanger}` : iconTile}>
+          <span
+            className={tone === 'danger' ? `${iconTile} ${iconTileDanger}` : iconTile}
+          >
             {icon}
           </span>
         )}

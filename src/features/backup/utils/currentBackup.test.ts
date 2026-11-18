@@ -34,7 +34,11 @@ describe('currentBackup', () => {
     expect(backup.format).toBe(1)
     expect(backup.exportedOn).toBe('2026-11-17')
     expect(backup.appVersion).toBe(__APP_VERSION__)
-    expect(Object.keys(backup.stores)).toEqual(['subscriptions', 'categories', 'settings'])
+    expect(Object.keys(backup.stores)).toEqual([
+      'subscriptions',
+      'categories',
+      'settings',
+    ])
   })
 
   it('saves each store as persist does, with its own version', () => {
@@ -43,7 +47,10 @@ describe('currentBackup', () => {
 
     const { stores } = currentBackup('2026-11-17')
 
-    expect(stores.subscriptions).toEqual({ state: { subscriptions: [netflix] }, version: 2 })
+    expect(stores.subscriptions).toEqual({
+      state: { subscriptions: [netflix] },
+      version: 2,
+    })
     expect(stores.categories.version).toBe(0)
     expect(stores.settings.state).toMatchObject({ selectedCurrency: 'EUR' })
   })
