@@ -1,5 +1,6 @@
 // HOOKS
 import { useExportBackup } from '@/features/backup/hooks/useExportBackup'
+import { useImportBackup } from '@/features/backup/hooks/useImportBackup'
 
 // COMPONENTS
 import Typography from '@/shared/ui/Typography/Typography'
@@ -20,6 +21,8 @@ const SettingsPage = () => {
   const { container, header, version, group, label, card, footnote } = styles
 
   const exportBackup = useExportBackup()
+  const { inputRef, chooseFile, onFileChosen } = useImportBackup()
+
   return (
     <div className={container}>
       <div className={header}>
@@ -47,8 +50,10 @@ const SettingsPage = () => {
             icon={<IconUpload />}
             title="Importar backup"
             description="Reemplaza tus datos por los de un archivo"
+            onClick={chooseFile}
           />
         </div>
+        <input ref={inputRef} type="file" hidden onChange={onFileChosen} />
         <Typography variant="body" size="xs" className={footnote}>
           Tus datos se guardan solo en este teléfono. Exporta un backup para llevarlos a
           otro teléfono o guardarlos donde quieras.
