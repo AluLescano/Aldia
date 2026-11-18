@@ -50,7 +50,8 @@ const MonthlyExpenses = ({
   const { container, currencyPill, header, flagWrapper, flag, amounts, currencyRate } =
     styles
   const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const { selectedCurrency, setSelectedCurrency } = useSettingsStore()
+  const selectedCurrency = useSettingsStore((state) => state.selectedCurrency)
+  const setSelectedCurrency = useSettingsStore((state) => state.setSelectedCurrency)
   const ratesDate = useRatesStore((state) => state.rates?.date)
 
   // Rolls up or down when subscriptions change the total. Jumps instead when only the unit
@@ -77,7 +78,7 @@ const MonthlyExpenses = ({
           </Typography>
           <Pill onClick={() => setIsSheetOpen(true)} className={currencyPill}>
             <span className={flagWrapper}>
-              <span className={`fi fi-${currentCountryCode} fi ${flag}`} />
+              <span className={`fi fi-${currentCountryCode} fis ${flag}`} />
               <Typography variant="label" size="sm">
                 {selectedCurrency}
               </Typography>
