@@ -38,3 +38,24 @@
     }
   }
 }
+
+// Inside the import dialog (it lives in the top layer, outside .container)
+.backupChip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 1rem;
+  background-color: var(--bg-surface-sunken);
+
+  .backupChipIcon {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--text-accent);
+  }
+
+  .backupChipDetail {
+    color: var(--text-muted);
+  }
+}
