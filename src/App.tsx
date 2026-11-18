@@ -24,7 +24,7 @@ import { HomePage } from '@/pages/home/HomePage'
 import { CalendarPage } from '@/pages/calendar/CalendarPage'
 import { CardsPage } from '@/pages/cards/CardsPage'
 import { StatisticsPage } from '@/pages/statistics/StatisticsPage'
-import { SettingsPage } from '@/pages/settings/SettingsPage'
+import SettingsPage from '@/pages/settings/SettingsPage'
 import { PresetPicker } from '@/pages/presetPicker/PresetPicker'
 import { SubscriptionFormPage } from '@/pages/subscriptionForm/SubscriptionFormPage'
 

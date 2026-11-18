@@ -59,6 +59,13 @@
   }
 }
 
+// Tonal, not solid: white on the error red is only 3.8:1, too low for button text.
+// Red text on the soft red background passes in both themes.
+.ButtonDanger {
+  @include button-base(var(--error-bg), var(--error-text));
+  border: none;
+}
+
 .ripple {
   position: absolute;
   width: 20px;

@@ -266,20 +266,27 @@ An older build kept the stores in `localStorage` (`aldia_subscriptions_v1`, `ald
 
 **Looking at the files:** in the browser (`npm run dev`), the plugin stores them in IndexedDB (DevTools > Application > IndexedDB > Disc). On a phone with a debug build (Aldia Dev): `adb shell run-as com.katyadesign.aldia.dev ls files/aldia` (and `cat files/aldia/<name>.json`). `run-as` only works on debug builds, so the release app's files can't be read this way.
 
-### Backup JSON Format (planned)
+### Backup JSON Format
+
+A backup bundles the three store files exactly as `persist` saved them (`{ state, version }`), plus a label. Exchange rates stay out: they download again. The format and its checks live in `features/backup/` (`types.ts`, `utils/backup.ts`); export and import are not built yet.
 
 ```json
 {
-  "version": 1,
-  "exportedAt": "2026-09-04T19:00:00.000Z",
-  "data": {
-    "subscriptions": [...],
-    "cards": [...],
-    "categories": [...],
-    "settings": { ... }
+  "app": "aldia",
+  "format": 1,
+  "exportedOn": "2026-11-15",
+  "appVersion": "0.4.0",
+  "stores": {
+    "subscriptions": { "state": { "subscriptions": [...] }, "version": 2 },
+    "categories": { "state": { "categories": [...] }, "version": 0 },
+    "settings": { "state": { ... }, "version": 0 }
   }
 }
 ```
+
+- **Two kinds of version:** `format` is the shape of the wrapper; each store's `version` is its `persist` version. They change separately.
+- **`readBackup` checks before anything is imported** and answers `{ worked: true, backup }` or `{ worked: false, reason }`, with the reason in Spanish for the user: not JSON or not ours, a store missing or not `{ state, version }`, or a store newer than this app (it asks the user to update). It doesn't look inside `state`.
+- **Import goes through the app's start path (planned):** each store's `{ state, version }` is written with `fileStorage` and the stores are rehydrated, so each store's `migrate` upgrades an older backup the same way it upgrades the phone's own files.
 
 - **Drive Sync (planned, v1.1):** The user will authorize with Google OAuth2. The app simply uploads this versioned JSON blob to an app-private `appDataFolder` on Google Drive, requiring zero external database hosting.
 

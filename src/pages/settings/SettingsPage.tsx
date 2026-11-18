@@ -1,76 +1,125 @@
+// HOOKS
+import { useExportBackup } from '@/features/backup/hooks/useExportBackup'
+import { useImportBackup } from '@/features/backup/hooks/useImportBackup'
+
+// COMPONENTS
+import Typography from '@/shared/ui/Typography/Typography'
+import ConfirmDialog from '@/shared/ui/ConfirmDialog/ConfirmDialog'
+import SettingsRow from '@/features/settings/components/SettingsRow/SettingsRow'
+
+// UTILS
+import { formatDate } from '@/shared/lib/formatDate'
+import { backupSummary } from '@/features/backup/utils/backupSummary'
+
 // ASSETS
+import { IconDownload } from '@/assets/icons/IconDownload'
+import { IconUpload } from '@/assets/icons/IconUpload'
+import { IconReplace } from '@/assets/icons/IconReplace'
+import { IconFile } from '@/assets/icons/IconFile'
 import styles from './SettingsPage.module.scss'
 
-/** Placeholder until the screen is built (v1.x): describes what it will show. */
-export const SettingsPage = () => {
+// "1 suscripción" / "12 suscripciones"
+const plural = (count: number, one: string, many: string) =>
+  `${count} ${count === 1 ? one : many}`
+
+/**
+ * The Ajustes tab: the title with the app version, then one group per topic. For now only
+ * "Nube y backup": export a JSON backup, or import one after confirming in a dialog that
+ * shows what the file brings. More groups (Moneda, Interfaz, Notificaciones…) come later.
+ */
+const SettingsPage = () => {
   const {
     container,
-    title,
-    subtitle,
-    section,
-    sectionTitle,
-    list,
-    listItem,
-    itemTitle,
-    itemDesc,
-    badge,
-    textValue,
-    badgeDisabled,
-    button,
+    header,
+    version,
+    group,
+    label,
+    card,
+    footnote,
+    backupChip,
+    backupChipIcon,
+    backupChipDetail,
   } = styles
+
+  const exportBackup = useExportBackup()
+  const { inputRef, pending, chooseFile, cancel, onFileChosen, confirmImport } =
+    useImportBackup()
+
+  const summary = pending ? backupSummary(pending) : null
+  const counts = summary
+    ? [
+        plural(summary.subscriptions, 'suscripción', 'suscripciones'),
+        // The 12 default categories come with every install; only the user's own are news
+        summary.customCategories > 0 &&
+          plural(summary.customCategories, 'categoría propia', 'categorías propias'),
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : ''
 
   return (
     <div className={container}>
-      <div>
-        <h1 className={title}>Settings</h1>
-        <p className={subtitle}>Preferences, currencies, and backups</p>
+      <div className={header}>
+        <Typography variant="title" size="xl">
+          Ajustes
+        </Typography>
+        <Typography
+          variant="label"
+          size="xs"
+          className={version}
+        >{`v${__APP_VERSION__}`}</Typography>
       </div>
-
-      <div className={section}>
-        <span className={sectionTitle}>Currencies</span>
-        <div className={list}>
-          <div className={listItem}>
-            <div>
-              <p className={itemTitle}>Default Currency</p>
-              <p className={itemDesc}>Currency used for monthly cost sums</p>
-            </div>
-            <span className={badge}>USD ($)</span>
-          </div>
-
-          <div className={listItem}>
-            <div>
-              <p className={itemTitle}>Favorite Currencies</p>
-              <p className={itemDesc}>Top 5 currencies in quick switcher</p>
-            </div>
-            <span className={textValue}>USD, EUR, ARS, BRL, GBP</span>
-          </div>
+      <section className={group}>
+        <Typography variant="overline" size="xs" className={label}>
+          Nube & Backup
+        </Typography>
+        <div className={card}>
+          <SettingsRow
+            icon={<IconDownload />}
+            title="Exportar backup"
+            description="Guarda tus datos en un archivo"
+            onClick={exportBackup}
+          />
+          <SettingsRow
+            icon={<IconUpload />}
+            title="Importar backup"
+            description="Reemplaza tus datos por los de un archivo"
+            onClick={chooseFile}
+          />
         </div>
-      </div>
-
-      <div className={section}>
-        <span className={sectionTitle}>Data & Storage</span>
-        <div className={list}>
-          <div className={listItem}>
+        {/* No `accept`: some Android pickers grey out .json files from Drive */}
+        <input ref={inputRef} type="file" hidden onChange={onFileChosen} />
+        <Typography variant="body" size="xs" className={footnote}>
+          Tus datos se guardan solo en este teléfono. Exporta un backup para llevarlos a
+          otro teléfono o guardarlos donde quieras.
+        </Typography>
+      </section>
+      <ConfirmDialog
+        isOpen={pending !== null}
+        icon={<IconReplace />}
+        tone="danger"
+        title="¿Reemplazar tus datos?"
+        message="Tus datos de ahora se reemplazan por los de este backup."
+        confirmLabel="Reemplazar"
+        onCancel={cancel}
+        onConfirm={confirmImport}
+      >
+        {pending && (
+          <div className={backupChip}>
+            <IconFile className={backupChipIcon} />
             <div>
-              <p className={itemTitle}>Google Drive Backup</p>
-              <p className={itemDesc}>
-                Sync offline data to private Google Drive storage
-              </p>
+              <Typography variant="body" size="sm">
+                {`Backup del ${formatDate(pending.exportedOn)}`}
+              </Typography>
+              <Typography variant="body" size="xs" className={backupChipDetail}>
+                {counts}
+              </Typography>
             </div>
-            <span className={badgeDisabled}>Not Connected</span>
           </div>
-
-          <div className={listItem}>
-            <div>
-              <p className={itemTitle}>Export / Import JSON</p>
-              <p className={itemDesc}>Save your subscriptions to a local file</p>
-            </div>
-            <button type="button" className={button}>
-              Export
-            </button>
-          </div>
-        </div>
-      </div>
+        )}
+      </ConfirmDialog>
     </div>
   )
 }
+
+export default SettingsPage
