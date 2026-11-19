@@ -13,7 +13,6 @@ import { useSettingsStore } from './features/settings/store/settingsStore'
 import { useSubscriptionStore } from './features/subscriptions/store/subscriptionStore'
 
 // UTILS
-import { clearLegacyStorage } from './shared/lib/legacyStorage'
 import { startNotificationSync } from './features/notifications/notificationSync.ts'
 
 // ASSETS: global styles, loaded once for the whole app
@@ -27,9 +26,6 @@ import './index.css'
 const theme = document.documentElement.dataset.theme
 const style = theme === 'light' ? SystemBarsStyle.Light : SystemBarsStyle.Dark
 SystemBars.setStyle({ style })
-
-// Drop the old build's localStorage data, once per start, before any store touches storage
-clearLegacyStorage()
 
 /*
  * Load the saved data from the files before anything renders. The stores skip their own
