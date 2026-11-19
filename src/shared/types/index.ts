@@ -127,6 +127,23 @@ export interface PriceChange {
 export type PriceHistory = [PriceChange, ...PriceChange[]]
 
 /**
+ * A billing rhythm that applies to the charges from `from` on, until the next change.
+ * Read it with `cycleOn` / `nextScheduledCharge` (`schedule.ts`).
+ */
+export interface ScheduleChange {
+  /** `YYYY-MM-DD`. The first charge with this cycle; later ones are counted from it. */
+  from: string
+  billingCycle: BillingCycle
+}
+
+/**
+ * Every billing rhythm a subscription has had, oldest first. Never empty: the first
+ * entry starts on the first charge (the type guarantees at least one). A new entry is
+ * added when the user moves the charge day or changes the cycle.
+ */
+export type Schedule = [ScheduleChange, ...ScheduleChange[]]
+
+/**
  * A time the user paused a subscription: no charges in `[from, to)`. Recorded by
  * the Pause / Resume buttons (never typed in), and only kept if it skipped a charge.
  */
