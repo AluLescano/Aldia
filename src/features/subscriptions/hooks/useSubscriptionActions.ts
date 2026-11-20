@@ -33,7 +33,7 @@ export const useSubscriptionActions = (subscription: Subscription | undefined) =
     if (!subscription) return
 
     const pauses = isPaused
-      ? endPause(subscription.pauses, today, subscription)
+      ? endPause(subscription.pauses, today, subscription.schedule)
       : startPause(subscription.pauses, today)
     updateSubscription(subscription.id, { pauses })
     if (isPaused) showToast('Subscripción reanudada', 'success')

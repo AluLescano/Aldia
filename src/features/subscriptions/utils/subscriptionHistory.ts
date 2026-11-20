@@ -1,14 +1,14 @@
 // UTILS
 import { addDays } from '@/shared/lib/isoDate'
-import { addCycles, nextBillDate } from './billingCycle'
+import { cycleOn, nextScheduledCharge } from './schedule'
 
 // TYPES
 import type {
-  BillingCycle,
   CurrencyCode,
   Pause,
   PriceChange,
   PriceHistory,
+  Schedule,
   Subscription,
 } from '@/shared/types'
 
@@ -48,6 +48,7 @@ export function isPausedOn(pauses: Pause[], date: string): boolean {
  * first charge hasn't happened), the history is just the new price.
  *
  * @param from `YYYY-MM-DD`, a charge day: the next charge, or one the user picks.
+ * @param firstBillDate `YYYY-MM-DD`, the first charge (`schedule[0].from`).
  * @example
  * // 11.300 from Sep 5, then the user saves 11.768 with the next charge on Nov 5
  * applyPriceEdit(history, { from: '2026-11-05', price: 11768, currency: 'ARS' }, '2026-09-05')
@@ -85,18 +86,10 @@ export function startPause(pauses: Pause[], today: string): Pause[] {
  * charge fell inside it (paused and resumed between two charges, or the same day), it
  * changed nothing, so it isn't kept.
  */
-export function endPause(
-  pauses: Pause[],
-  today: string,
-  schedule: { firstBillDate: string; billingCycle: BillingCycle },
-): Pause[] {
+export function endPause(pauses: Pause[], today: string, schedule: Schedule): Pause[] {
   return pauses.flatMap((pause) => {
     if (pause.to) return [pause]
-    const firstCharge = nextBillDate(
-      schedule.firstBillDate,
-      schedule.billingCycle,
-      pause.from,
-    )
+    const firstCharge = nextScheduledCharge(schedule, pause.from)
     const skippedACharge = firstCharge < today
     return skippedACharge ? [{ from: pause.from, to: today }] : []
   })
@@ -108,20 +101,17 @@ export function endPause(
  * waiting for that day. Pure: pass `todayISO()`.
  */
 export function upcomingPrice(
-  sub: { priceHistory: PriceHistory; firstBillDate: string; billingCycle: BillingCycle },
+  sub: Pick<Subscription, 'priceHistory' | 'schedule'>,
   today: string,
 ): PriceChange {
-  return priceOn(
-    sub.priceHistory,
-    nextBillDate(sub.firstBillDate, sub.billingCycle, today),
-  )
+  return priceOn(sub.priceHistory, nextScheduledCharge(sub.schedule, today))
 }
 
 /**
  * The next charge on or after `today`, or `null` when there is none left: the end date
  * comes before it. Only `statusFor` calls it, to tell an ended subscription; the card, the
  * total and the sorts ask the status (`statusFor` / `isInactive`) and use plain
- * `nextBillDate` for the date itself. Pure: pass `todayISO()`.
+ * `nextScheduledCharge` for the date itself. Pure: pass `todayISO()`.
  *
  * @example
  * // Monthly on the 5th, ending Nov 20
@@ -129,34 +119,35 @@ export function upcomingPrice(
  * nextCharge(claro, '2026-11-06') // null: Dec 5 is after the end
  */
 export function nextCharge(
-  sub: { firstBillDate: string; billingCycle: BillingCycle; endDate?: string },
+  sub: Pick<Subscription, 'schedule' | 'endDate'>,
   today: string,
 ): string | null {
-  const date = nextBillDate(sub.firstBillDate, sub.billingCycle, today)
+  const date = nextScheduledCharge(sub.schedule, today)
   return sub.endDate && date > sub.endDate ? null : date
 }
 
 /**
  * The charges that already happened (before `today`), newest first, at most `limit`: the
  * days a price change can start on besides the next charge ("¿Desde cuándo?" sheet).
+ * Walks the schedule charge by charge from the first one, so a moved charge day or a
+ * new cycle is followed.
  *
  * @example
  * // Monthly on the 5th since Sep 5, today Nov 3
  * pastCharges(claro, '2026-11-03') // ['2026-10-05', '2026-09-05']
  */
 export function pastCharges(
-  sub: { firstBillDate: string; billingCycle: BillingCycle },
+  sub: Pick<Subscription, 'schedule'>,
   today: string,
   limit = 12,
 ): string[] {
-  if (sub.billingCycle.type === 'one-time') {
-    return sub.firstBillDate < today ? [sub.firstBillDate] : []
-  }
   const dates: string[] = []
-  for (let count = 0; ; count++) {
-    const date = addCycles(sub.firstBillDate, sub.billingCycle, count)
-    if (date >= today) break
+  let date = sub.schedule[0].from
+  while (date < today) {
     dates.push(date)
+    const next = nextScheduledCharge(sub.schedule, addDays(date, 1))
+    if (next <= date) break // a one-time charge: nothing comes after it
+    date = next
   }
   return dates.reverse().slice(0, limit)
 }
@@ -177,10 +168,10 @@ export interface Charge {
 
 /**
  * Every charge of a subscription between `from` and `to` (both included), oldest first.
- * Jumps from charge to charge with `nextBillDate`, so it never drifts (a Jan 31 sub lands on
- * each month's last day). Nothing after `endDate`. Paused charges stay in, flagged
- * `isPaused`. A one-time payment gives none: the calendar doesn't show them, and
- * `nextBillDate` never moves for one, so the loop would never end. Pure.
+ * Jumps from charge to charge with `nextScheduledCharge`, so it never drifts (a Jan 31 sub
+ * lands on each month's last day) and follows a moved charge day or a new cycle. Nothing
+ * after `endDate`. Paused charges stay in, flagged `isPaused`. One-time charges are left
+ * out: the calendar doesn't show them. Pure.
  *
  * @param from `YYYY-MM-DD`, e.g. the first day of the month grid.
  * @param to `YYYY-MM-DD`, e.g. the last day of the month grid.
@@ -191,37 +182,37 @@ export interface Charge {
 export function chargesBetween(
   sub: Pick<
     Subscription,
-    | 'id'
-    | 'priceHistory'
-    | 'billingCycle'
-    | 'firstBillDate'
-    | 'endDate'
-    | 'trial'
-    | 'pauses'
+    'id' | 'priceHistory' | 'schedule' | 'endDate' | 'trial' | 'pauses'
   >,
   from: string,
   to: string,
 ): Charge[] {
   const charges: Charge[] = []
-  /* One-Time Payments that shouldn't be shown */
-  if (sub.billingCycle.type === 'one-time') {
-    return charges
-  }
-
-  let date = nextBillDate(sub.firstBillDate, sub.billingCycle, from)
+  let date = nextScheduledCharge(sub.schedule, from)
 
   while (date <= to && (!sub.endDate || date <= sub.endDate)) {
-    const { price, currency } = priceOn(sub.priceHistory, date)
-    const charge: Charge = {
-      subscriptionId: sub.id,
-      date: date,
-      price: price,
-      currency: currency,
-      isPaused: isPausedOn(sub.pauses, date),
-      isTrialEnd: sub.trial?.endDate === date,
-    }
-    charges.push(charge)
-    date = nextBillDate(sub.firstBillDate, sub.billingCycle, addDays(date, 1))
+    const next = nextScheduledCharge(sub.schedule, addDays(date, 1))
+    // A one-time charge isn't shown, and nothing comes after the last one
+    const isOneTime = cycleOn(sub.schedule, date).billingCycle.type === 'one-time'
+    if (!isOneTime) charges.push(chargeOn(sub, date))
+    if (next <= date) break
+    date = next
   }
   return charges
+}
+
+// The charge of `sub` on `date`, with the price in force that day
+function chargeOn(
+  sub: Pick<Subscription, 'id' | 'priceHistory' | 'trial' | 'pauses'>,
+  date: string,
+): Charge {
+  const { price, currency } = priceOn(sub.priceHistory, date)
+  return {
+    subscriptionId: sub.id,
+    date,
+    price,
+    currency,
+    isPaused: isPausedOn(sub.pauses, date),
+    isTrialEnd: sub.trial?.endDate === date,
+  }
 }

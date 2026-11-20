@@ -64,6 +64,7 @@ function cycleStep(cycle: BillingCycle) {
  * The date `count` cycles after `date`. Months keep the day when they can and clamp
  * to the month's last day when they can't (Jan 31 + 1 month = Feb 28, or 29 in a leap year).
  * Always counts from the original date, so a clamp never "drifts" into later months.
+ * A negative `count` goes back.
  *
  * @example
  * addCycles('2026-01-31', { type: 'every', interval: 1, unit: 'month' }, 1) // '2026-02-28'
@@ -82,7 +83,7 @@ export function addCycles(date: string, cycle: BillingCycle, count: number) {
   if (months > 0) {
     const total = parsed.getMonth() + months * count
     const year = parsed.getFullYear() + Math.floor(total / 12)
-    const month = total % 12
+    const month = ((total % 12) + 12) % 12 // a negative total (going back) still gives 0-11
     const lastDay = new Date(year, month + 1, 0).getDate() // day 0 of next month = last day of this one
     return toISODate(new Date(year, month, Math.min(parsed.getDate(), lastDay)))
   }

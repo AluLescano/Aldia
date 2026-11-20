@@ -18,8 +18,9 @@ const netflix: Subscription = {
   id: 'b1',
   name: 'Netflix',
   priceHistory: [{ from: '2026-10-01', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: '2026-10-01',
+  schedule: [
+    { from: '2026-10-01', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [],
   pauses: [],
@@ -49,7 +50,7 @@ describe('currentBackup', () => {
 
     expect(stores.subscriptions).toEqual({
       state: { subscriptions: [netflix] },
-      version: 2,
+      version: 3,
     })
     expect(stores.categories.version).toBe(0)
     expect(stores.settings.state).toMatchObject({ selectedCurrency: 'EUR' })

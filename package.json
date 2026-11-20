@@ -1,7 +1,7 @@
 {
   "name": "aldia",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.1",
+    "@eslint-react/eslint-plugin": "^5.30.5",
     "@eslint/js": "^10.0.1",
     "@types/colorthief": "^2.6.1",
     "@types/node": "^24.13.3",

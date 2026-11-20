@@ -9,11 +9,11 @@ const NEWER =
   'Este backup es de una versión más nueva de Aldia. Actualiza la app para importarlo.'
 
 // The versions this app's stores are on today
-const CURRENT = { subscriptions: 2, categories: 0, settings: 0 }
+const CURRENT = { subscriptions: 3, categories: 0, settings: 0 }
 
 // Three stores as persist saves them; categories and settings are on version 0
 const STORES: Backup['stores'] = {
-  subscriptions: { state: { subscriptions: [] }, version: 2 },
+  subscriptions: { state: { subscriptions: [] }, version: 3 },
   categories: { state: { categories: [] }, version: 0 },
   settings: { state: { selectedCurrency: 'ARS' }, version: 0 },
 }
@@ -76,7 +76,7 @@ describe('readBackup', () => {
   })
 
   it('accepts stores older than the app (their migrate upgrades them)', () => {
-    const old = storesWith({ subscriptions: { state: {}, version: 1 } })
+    const old = storesWith({ subscriptions: { state: {}, version: 2 } })
     expect(readBackup(old, CURRENT).worked).toBe(true)
   })
 
@@ -113,7 +113,7 @@ describe('readBackup', () => {
   })
 
   it.each([
-    ['subscriptions', storesWith({ subscriptions: { state: {}, version: 3 } })],
+    ['subscriptions', storesWith({ subscriptions: { state: {}, version: 4 } })],
     ['categories', storesWith({ categories: { state: {}, version: 1 } })],
     ['settings', storesWith({ settings: { state: {}, version: 1 } })],
   ])('refuses %s saved by a newer app', (_, text) => {

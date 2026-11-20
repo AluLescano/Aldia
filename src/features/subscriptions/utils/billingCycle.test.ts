@@ -16,6 +16,17 @@ const every = (interval: number, unit: BillingUnit): BillingCycle => ({
 })
 const ONE_TIME: BillingCycle = { type: 'one-time' }
 
+describe('addCycles going back', () => {
+  it.each([
+    ['one month back, across a year', '2026-01-15', every(1, 'month'), -1, '2025-12-15'],
+    ['clamps to a shorter month', '2026-03-31', every(1, 'month'), -1, '2026-02-28'],
+    ['a year back', '2026-10-10', every(1, 'year'), -1, '2025-10-10'],
+    ['weeks back', '2026-11-02', every(1, 'week'), -2, '2026-10-19'],
+  ])('%s', (_, date, cycle, count, expected) => {
+    expect(addCycles(date, cycle, count)).toBe(expected)
+  })
+})
+
 describe('addCycles', () => {
   it.each([
     [

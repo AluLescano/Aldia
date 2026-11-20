@@ -4,10 +4,9 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 // UTILS
 import { fileStorage } from '@/shared/lib/fileStorage'
-import { todayISO } from '@/shared/lib/isoDate'
 
 // TYPES
-import type { CurrencyCode, IconKey, Subscription } from '@/shared/types'
+import type { BillingCycle, Subscription } from '@/shared/types'
 
 interface SubscriptionState {
   subscriptions: Subscription[]
@@ -25,71 +24,36 @@ interface SubscriptionState {
 }
 
 /**
- * Upgrades a saved file to the current shape, one version step at a time
- * (`persist` calls it when the file's `version` is older than the store's).
- * - 0 -> 1: the stored `status` becomes `isPaused`; the old stored `nextBillDate` is dropped.
- * - 1 -> 2: `price` + `currency` become the first entry of `priceHistory` (from the first
- *   charge), `isPaused` becomes `pauses` and `iconUrl` / `iconKey` become `icon`.
- *
- * @param today `YYYY-MM-DD`: a paused subscription's pause starts on the day it's upgraded,
- * since version 1 never saved when it was paused. Tests pass a fixed day.
+ * Upgrades a saved file to the current shape, one version step at a time (`persist` calls
+ * it when the file's `version` is older than the store's). Version 2 is the oldest shape
+ * left on any phone (the 0 -> 1 -> 2 steps went in 0.6.0, after every tester had opened
+ * 0.4.0), and backups only exist since 0.5.0 (also version 2).
+ * - 2 -> 3: `firstBillDate` + `billingCycle` become the first entry of `schedule`.
  *
  * A step can be deleted once every phone has opened a build that ran it (the file is saved
- * in the new shape right after). Only the testers ever had version 0 or 1 data: both steps
- * go once they've opened 0.3.0 (tracked in the vault's Active Priorities).
+ * in the new shape right after). Add the next one as `if (version < 4)`, after this one.
  */
-export function migrateSubscriptions(
-  persisted: unknown,
-  version: number,
-  today: string = todayISO(),
-) {
+export function migrateSubscriptions(persisted: unknown, version: number) {
   let state = persisted as { subscriptions: unknown[] }
-  if (version < 1) {
-    state = { subscriptions: (state.subscriptions as SubscriptionV0[]).map(toVersion1) }
-  }
-  if (version < 2) {
-    state = {
-      subscriptions: (state.subscriptions as SubscriptionV1[]).map((sub) =>
-        toVersion2(sub, today),
-      ),
-    }
+  if (version < 3) {
+    state = { subscriptions: (state.subscriptions as SubscriptionV2[]).map(toVersion3) }
   }
   return state as { subscriptions: Subscription[] }
 }
 
-/** A subscription as version 1 saved it: one price, a paused flag, two icon fields. */
-type SubscriptionV1 = Omit<Subscription, 'priceHistory' | 'pauses' | 'icon'> & {
-  price: number
-  currency: CurrencyCode
-  isPaused: boolean
-  iconUrl?: string
-  iconKey?: IconKey
+/** A subscription as version 2 saved it: one first charge and one cycle for its whole life. */
+type SubscriptionV2 = Omit<Subscription, 'schedule'> & {
+  firstBillDate: string
+  billingCycle: BillingCycle
 }
 
-/** A subscription as version 0 saved it. */
-type SubscriptionV0 = Omit<SubscriptionV1, 'isPaused'> & {
-  status: string
-  nextBillDate?: string
-}
-
-const toVersion1 = ({ status, ...sub }: SubscriptionV0): SubscriptionV1 => {
-  const upgraded = { ...sub, isPaused: status === 'inactive' }
-  delete upgraded.nextBillDate
-  return upgraded
-}
-
-const toVersion2 = (
-  { price, currency, isPaused, iconUrl, iconKey, ...sub }: SubscriptionV1,
-  today: string,
-): Subscription => ({
+const toVersion3 = ({
+  firstBillDate,
+  billingCycle,
+  ...sub
+}: SubscriptionV2): Subscription => ({
   ...sub,
-  priceHistory: [{ from: sub.firstBillDate, price, currency }],
-  pauses: isPaused ? [{ from: today }] : [],
-  icon: iconUrl
-    ? { kind: 'preset', path: iconUrl }
-    : iconKey
-      ? { kind: 'key', key: iconKey }
-      : undefined,
+  schedule: [{ from: firstBillDate, billingCycle }],
 })
 
 /** All the user's subscriptions, saved on the device as `aldia/subscriptions.json`. */
@@ -132,8 +96,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       storage: createJSONStorage(() => fileStorage),
       partialize: (state) => ({ subscriptions: state.subscriptions }),
       // Bump it, and add a step to `migrateSubscriptions`, whenever the saved shape changes
-      version: 2,
-      // persist passes (file, version): `today` takes its default
+      version: 3,
       migrate: (persisted, version) => migrateSubscriptions(persisted, version),
       // main.tsx loads it before the first render
       skipHydration: true,

@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useCategoryStore } from '@/features/categories/store/categoryStore'
 
 // UTILS
-import { cn } from '@/shared/lib/cn'
 import {
   filterKey,
   filterSubscriptions,
@@ -27,6 +26,7 @@ import Typography from '@/shared/ui/Typography/Typography'
 import Pill from '@/shared/ui/Pill/Pill'
 import Button from '@/shared/ui/Button/Button'
 import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
+import OptionRow from '@/shared/ui/OptionRow/OptionRow'
 
 // TYPES
 import type { Subscription } from '@/shared/types'
@@ -34,7 +34,6 @@ import type { IconProps } from '@/assets/icons/Icon'
 
 // ASSETS
 import { IconAddEmpty } from '@/assets/icons/IconAddEmpty'
-import { IconCheck } from '@/assets/icons/IconCheck'
 import { IconSort } from '@/assets/icons/IconSort'
 import { IconCalendarClock } from '@/assets/icons/IconCalendarClock'
 import { IconSortAZ } from '@/assets/icons/IconSortAZ'
@@ -112,10 +111,6 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
     cardMotionWrapper,
     sortIcon,
     sortList,
-    sortRow,
-    sortRowSelected,
-    sortRowIcon,
-    sortCheck,
   } = styles
 
   const [chosenFilter, setChosenFilter] = useState<ListFilter>({ type: 'all' })
@@ -249,23 +244,17 @@ const SubscriptionList = ({ subscriptions, isLoading, onDelete }: Props) => {
           {SORT_OPTIONS.map(({ sort: optionSort, label, Icon }) => {
             const isSelected = optionSort === currentSort.sort
             return (
-              <button
+              <OptionRow
                 key={optionSort}
-                type="button"
-                role="radio"
-                aria-checked={isSelected}
+                icon={<Icon />}
+                title={label}
+                highlighted={isSelected}
+                checked={isSelected}
                 onClick={() => {
                   setListSort(optionSort)
                   setIsSortOpen(false)
                 }}
-                className={cn(sortRow, isSelected && sortRowSelected)}
-              >
-                <Icon className={sortRowIcon} />
-                <Typography variant="label" size="md">
-                  {label}
-                </Typography>
-                {isSelected && <IconCheck className={sortCheck} />}
-              </button>
+              />
             )
           })}
         </div>

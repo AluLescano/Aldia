@@ -11,7 +11,7 @@ function backupWith(subscriptionsState: unknown, categoriesState: unknown): Back
     exportedOn: '2026-11-17',
     appVersion: '0.4.0',
     stores: {
-      subscriptions: { state: subscriptionsState, version: 2 },
+      subscriptions: { state: subscriptionsState, version: 3 },
       categories: { state: categoriesState, version: 0 },
       settings: { state: {}, version: 0 },
     },

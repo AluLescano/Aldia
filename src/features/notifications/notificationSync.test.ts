@@ -70,8 +70,9 @@ const netflix: Subscription = {
   id: 'netflix',
   name: 'Netflix',
   priceHistory: [{ from: '2026-01-15', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: '2026-01-15',
+  schedule: [
+    { from: '2026-01-15', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [{ id: 'r3', daysBefore: 3, isEnabled: true }],
   pauses: [],
