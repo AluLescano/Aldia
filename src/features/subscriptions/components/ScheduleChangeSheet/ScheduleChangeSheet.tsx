@@ -4,17 +4,7 @@ import { formatBillingCycle } from '../../utils/billingCycle'
 import { landsOn, type ScheduleEdit } from '../../utils/scheduleEdit'
 
 // COMPONENTS
-import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
-import Typography from '@/shared/ui/Typography/Typography'
-
-// ASSETS
-import { IconCalendarClock } from '@/assets/icons/IconCalendarClock'
-import { IconCalendar } from '@/assets/icons/IconCalendar'
-
-// Same rows as the price's "¿Desde cuándo?", so both questions look alike
-import styles from '../PriceChangeSheet/PriceChangeSheet.module.scss'
-
-const { intro, list, row, rowIcon, rowText, mutedText, sectionLabel } = styles
+import ChangeFromSheet from '../ChangeFromSheet/ChangeFromSheet'
 
 interface Props {
   isOpen: boolean
@@ -57,43 +47,18 @@ const ScheduleChangeSheet = ({
   }
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} title="¿Desde cuándo?">
-      <Typography variant="body" size="sm" className={intro}>
-        Elige el primer cobro que cambia. Los anteriores quedan igual.
-      </Typography>
-      <div className={list}>
-        <button type="button" className={row} onClick={() => onPick(nextCharge)}>
-          <IconCalendarClock className={rowIcon} />
-          <span className={rowText}>
-            <Typography variant="label" size="md">
-              Desde el próximo cobro
-            </Typography>
-            <Typography variant="label" size="sm" className={mutedText}>
-              {`${formatDate(nextCharge)} · ${effect(nextCharge)}`}
-            </Typography>
-          </span>
-        </button>
-
-        {pastCharges.length > 0 && (
-          <Typography variant="label" size="sm" className={sectionLabel}>
-            O desde un cobro anterior
-          </Typography>
-        )}
-        {pastCharges.map((date) => (
-          <button key={date} type="button" className={row} onClick={() => onPick(date)}>
-            <IconCalendar className={rowIcon} />
-            <span className={rowText}>
-              <Typography variant="label" size="md">
-                {`Cobro del ${formatDate(date)}`}
-              </Typography>
-              <Typography variant="label" size="sm" className={mutedText}>
-                {date === firstCharge ? `${effect(date)} · corrige todo` : effect(date)}
-              </Typography>
-            </span>
-          </button>
-        ))}
-      </div>
-    </BottomSheet>
+    <ChangeFromSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      intro="Elige el primer cobro que cambia. Los anteriores quedan igual."
+      nextCharge={nextCharge}
+      nextDescription={`${formatDate(nextCharge)} · ${effect(nextCharge)}`}
+      pastCharges={pastCharges}
+      describePast={(date) =>
+        date === firstCharge ? `${effect(date)} · corrige todo` : effect(date)
+      }
+      onPick={onPick}
+    />
   )
 }
 

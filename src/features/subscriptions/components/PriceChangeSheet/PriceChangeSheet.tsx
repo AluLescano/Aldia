@@ -2,16 +2,7 @@
 import { formatDate } from '@/shared/lib/formatDate'
 
 // COMPONENTS
-import BottomSheet from '@/shared/ui/BottomSheet/BottomSheet'
-import Typography from '@/shared/ui/Typography/Typography'
-
-// ASSETS
-import { IconCalendarClock } from '@/assets/icons/IconCalendarClock'
-import { IconCalendar } from '@/assets/icons/IconCalendar'
-
-import styles from './PriceChangeSheet.module.scss'
-
-const { intro, list, row, rowIcon, rowText, mutedText, sectionLabel } = styles
+import ChangeFromSheet from '../ChangeFromSheet/ChangeFromSheet'
 
 interface Props {
   isOpen: boolean
@@ -37,40 +28,15 @@ const PriceChangeSheet = ({
   pastCharges,
   onPick,
 }: Props) => (
-  <BottomSheet isOpen={isOpen} onClose={onClose} title="¿Desde cuándo?">
-    <Typography variant="body" size="sm" className={intro}>
-      Los cobros anteriores mantienen su precio.
-    </Typography>
-    <div className={list}>
-      <button type="button" className={row} onClick={() => onPick(nextCharge)}>
-        <IconCalendarClock className={rowIcon} />
-        <span className={rowText}>
-          <Typography variant="label" size="md">
-            Desde el próximo cobro
-          </Typography>
-          <Typography variant="label" size="sm" className={mutedText}>
-            {formatDate(nextCharge)}
-          </Typography>
-        </span>
-      </button>
-
-      {pastCharges.length > 0 && (
-        <Typography variant="label" size="sm" className={sectionLabel}>
-          O desde un cobro anterior
-        </Typography>
-      )}
-      {pastCharges.map((date) => (
-        <button key={date} type="button" className={row} onClick={() => onPick(date)}>
-          <IconCalendar className={rowIcon} />
-          <span className={rowText}>
-            <Typography variant="label" size="md">
-              {`Cobro del ${formatDate(date)}`}
-            </Typography>
-          </span>
-        </button>
-      ))}
-    </div>
-  </BottomSheet>
+  <ChangeFromSheet
+    isOpen={isOpen}
+    onClose={onClose}
+    intro="Los cobros anteriores mantienen su precio."
+    nextCharge={nextCharge}
+    nextDescription={formatDate(nextCharge)}
+    pastCharges={pastCharges}
+    onPick={onPick}
+  />
 )
 
 export default PriceChangeSheet
