@@ -45,10 +45,10 @@ describe('storeSnapshot', () => {
     expect(storeSnapshot(store).version).toBe(0)
   })
 
-  it('reads the real subscriptions store: the list only, version 2', () => {
+  it('reads the real subscriptions store: the list only, version 3', () => {
     const snapshot = storeSnapshot(useSubscriptionStore)
 
-    expect(snapshot.version).toBe(2)
+    expect(snapshot.version).toBe(3)
     expect(Object.keys(snapshot.state as object)).toEqual(['subscriptions'])
   })
 

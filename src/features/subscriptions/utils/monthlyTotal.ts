@@ -2,6 +2,7 @@
 import { convert, type ExchangeRates } from '@/shared/lib/exchangeRates'
 import { statusFor } from './subscriptionStatus'
 import { upcomingPrice } from './subscriptionHistory'
+import { upcomingCycle } from './schedule'
 
 // TYPES
 import type {
@@ -39,13 +40,14 @@ export function monthlyEquivalent(price: number, cycle: BillingCycle): number {
  * Uses the price of the next charge from `today` on (pass `todayISO()`), like the card.
  */
 export function monthlyPriceIn(
-  sub: Pick<Subscription, 'priceHistory' | 'billingCycle' | 'firstBillDate'>,
+  sub: Pick<Subscription, 'priceHistory' | 'schedule'>,
   currency: CurrencyCode,
   rates: ExchangeRates | null,
   today: string,
 ): number | null {
   const { price, currency: from } = upcomingPrice(sub, today)
-  return convert(monthlyEquivalent(price, sub.billingCycle), from, currency, rates)
+  const cycle = upcomingCycle(sub.schedule, today)
+  return convert(monthlyEquivalent(price, cycle), from, currency, rates)
 }
 
 /** The result of `getMonthlyTotal`. */

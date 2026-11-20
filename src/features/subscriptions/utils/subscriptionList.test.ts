@@ -19,8 +19,9 @@ const sub = (name: string, isPaused: boolean, categoryId: string) =>
     name,
     pauses: isPaused ? PAUSED : [],
     categoryId,
-    firstBillDate: '2026-01-01',
-    billingCycle: { type: 'every', interval: 1, unit: 'month' },
+    schedule: [
+      { from: '2026-01-01', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+    ],
   }) as unknown as Subscription
 
 const list = [
@@ -139,13 +140,12 @@ describe('sortSubscriptions', () => {
     ])
   })
 
-  // Monthly, first charged on `firstBillDate`; today is Nov 3
-  const charged = (name: string, firstBillDate: string, isPaused = false) =>
+  // Monthly, first charged on `from`; today is Nov 3
+  const charged = (name: string, from: string, isPaused = false) =>
     ({
       name,
       pauses: isPaused ? PAUSED : [],
-      firstBillDate,
-      billingCycle: { type: 'every', interval: 1, unit: 'month' },
+      schedule: [{ from, billingCycle: { type: 'every', interval: 1, unit: 'month' } }],
     }) as unknown as Subscription
 
   it('next-charge: the soonest charge first, counting today', () => {
@@ -190,9 +190,10 @@ describe('sortSubscriptions', () => {
     ({
       name,
       priceHistory: [{ from: '2026-01-01', price, currency }],
-      firstBillDate: '2026-01-01',
+      schedule: [
+        { from: '2026-01-01', billingCycle: { type: 'every', interval: 1, unit } },
+      ],
       pauses: isPaused ? PAUSED : [],
-      billingCycle: { type: 'every', interval: 1, unit },
     }) as unknown as Subscription
 
   const prices = [

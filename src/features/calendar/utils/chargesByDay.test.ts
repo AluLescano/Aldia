@@ -12,8 +12,9 @@ const sub = (
   id,
   name: id,
   priceHistory: [{ from: firstBillDate, price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate,
+  schedule: [
+    { from: firstBillDate, billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [],
   pauses: [],

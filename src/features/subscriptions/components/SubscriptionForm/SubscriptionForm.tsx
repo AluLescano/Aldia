@@ -40,6 +40,8 @@ interface Props {
   submitLabel: string
   /** View mode: every control is disabled and the submit button is hidden. */
   readOnly?: boolean
+  /** Label of the date row without a trial. A saved subscription shows its next charge there. */
+  dateLabel?: string
   /** Called with the values only when the whole form is valid. */
   onSubmit: (values: SubscriptionFormValues) => void
 }
@@ -48,7 +50,13 @@ interface Props {
  * The subscription form used to create, view and edit a subscription.
  * Its state and rules live in `useSubscriptionForm`; its pickers in `SubscriptionFormSheets`.
  */
-const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Props) => {
+const SubscriptionForm = ({
+  initialValues,
+  submitLabel,
+  readOnly,
+  dateLabel = 'Inicio del Cobro',
+  onSubmit,
+}: Props) => {
   const {
     fieldSet,
     fieldGroup,
@@ -123,7 +131,7 @@ const SubscriptionForm = ({ initialValues, submitLabel, readOnly, onSubmit }: Pr
               />
             </FormRow>
             {/* With a trial, the date is when it starts; the first charge is the day it ends */}
-            <FormRow label={values.trial ? 'Inicio de la prueba' : 'Inicio del Cobro'}>
+            <FormRow label={values.trial ? 'Inicio de la prueba' : dateLabel}>
               <InputDate
                 size="medium"
                 width="fit"

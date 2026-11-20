@@ -2,10 +2,13 @@
 import { nextBillDate } from './billingCycle'
 
 // TYPES
-import type { Schedule, ScheduleChange } from '@/shared/types'
+import type { BillingCycle, Schedule, ScheduleChange } from '@/shared/types'
+
+/** The day an entry took over from the one before it: `since`, or its first charge. */
+const takesOver = (entry: ScheduleChange) => entry.since ?? entry.from
 
 /**
- * The schedule entry in force on `date`: the last one that started on or before it. A
+ * The schedule entry in force on `date`: the last one that took over on or before it. A
  * date before the first entry gets the first one. Same shape as `priceOn`. Pure: pass
  * `todayISO()` for "now".
  *
@@ -18,7 +21,7 @@ import type { Schedule, ScheduleChange } from '@/shared/types'
 export function cycleOn(schedule: Schedule, date: string): ScheduleChange {
   let current = schedule[0]
   for (const change of schedule) {
-    if (change.from > date) break // oldest first: every later one starts later too
+    if (takesOver(change) > date) break // oldest first: every later one starts later too
     current = change
   }
   return current
@@ -26,8 +29,8 @@ export function cycleOn(schedule: Schedule, date: string): ScheduleChange {
 
 /**
  * The next charge on or after `today`, following a schedule that can change. Each entry
- * only owns its charges before the next entry starts: if its next charge would land on
- * or after the switch, the next entry is asked instead. A one-time entry that already
+ * only owns its charges before the next entry takes over (its `since`, or its first
+ * charge): if its next charge would land on or after that, the next entry is asked instead. A one-time entry that already
  * happened is skipped too, unless it's the last one (then its past date comes back, as
  * with `nextBillDate`, so `statusFor` can call it ended). Pure: pass `todayISO()` for "now".
  *
@@ -42,10 +45,23 @@ export function nextScheduledCharge(schedule: Schedule, today: string): string {
     const entry = schedule[i]
     const nextEntry = schedule[i + 1]
     const date = nextBillDate(entry.from, entry.billingCycle, today)
-    if (!nextEntry || (date < nextEntry.from && date >= today)) return date
+    if (!nextEntry || (date < takesOver(nextEntry) && date >= today)) return date
   }
 
   // Never reached (the last entry always returns above), but TypeScript can't tell
   const last = schedule[schedule.length - 1]
   return nextBillDate(last.from, last.billingCycle, today)
+}
+
+/**
+ * The billing cycle of the next charge on or after `today`: what the card's "/mes", the
+ * monthly total and the reminders go by. Like `upcomingPrice`, a change saved for the next
+ * charge shows up right away. Pure: pass `todayISO()`.
+ *
+ * @example
+ * // monthly from Jan 10, yearly from Jun 10
+ * upcomingCycle(schedule, '2026-05-11') // yearly: the next charge is Jun 10
+ */
+export function upcomingCycle(schedule: Schedule, today: string): BillingCycle {
+  return cycleOn(schedule, nextScheduledCharge(schedule, today)).billingCycle
 }

@@ -13,6 +13,7 @@ import IconButton from '@/shared/ui/IconButton/IconButton'
 import SubscriptionForm from '@/features/subscriptions/components/SubscriptionForm/SubscriptionForm'
 import PauseToggleIcon from '@/features/subscriptions/components/PauseToggleIcon/PauseToggleIcon'
 import PriceChangeSheet from '@/features/subscriptions/components/PriceChangeSheet/PriceChangeSheet'
+import ScheduleChangeSheet from '@/features/subscriptions/components/ScheduleChangeSheet/ScheduleChangeSheet'
 
 // HOOKS
 import { useSubscriptionActions } from '@/features/subscriptions/hooks/useSubscriptionActions'
@@ -21,7 +22,12 @@ import { useBackHandler } from '@/shared/hooks/useBackHandler'
 // UTILS
 import { createId } from '@/shared/lib/id'
 import { todayISO } from '@/shared/lib/isoDate'
-import { nextBillDate } from '@/features/subscriptions/utils/billingCycle'
+import { nextScheduledCharge } from '@/features/subscriptions/utils/schedule'
+import {
+  applyScheduleEdit,
+  editAnchor,
+  sameCycle,
+} from '@/features/subscriptions/utils/scheduleEdit'
 import {
   applyPriceEdit,
   pastCharges,
@@ -36,7 +42,7 @@ import {
 
 // TYPES
 import type { SubscriptionFormValues } from '@/features/subscriptions/types'
-import type { Preset } from '@/shared/types'
+import type { Preset, Schedule } from '@/shared/types'
 
 // ASSETS
 import { IconEdit } from '@/assets/icons/IconEdit'
@@ -92,45 +98,74 @@ export const SubscriptionFormPage = ({
 
   useBackHandler(() => setIsEditing(false), isEditing)
 
-  // An edit waiting for the "¿Desde cuándo?" answer (only when the price changed)
-  const [pendingEdit, setPendingEdit] = useState<SubscriptionData | null>(null)
+  /*
+   * An edit waiting for an answer. Up to two "¿Desde cuándo?" questions, one after the
+   * other: first the schedule (when the charge day or the cycle changed), then the price.
+   * `schedule` is null while the schedule question is open, and the new schedule after.
+   */
+  const [pending, setPending] = useState<{
+    data: SubscriptionData
+    schedule: Schedule | null
+  } | null>(null)
 
-  // Saves an edit. The new price starts on `from` (a charge day); the charges before keep
-  // theirs. `fields` has no `pauses`, so a paused subscription stays paused when it is edited
-  const saveEdit = (data: SubscriptionData, from: string) => {
+  const today = todayISO()
+
+  // Saves an edit. The new price starts on `priceFrom` (a charge day); the charges before
+  // keep theirs. `fields` has no `pauses`, so a paused subscription stays paused when edited
+  const saveEdit = (data: SubscriptionData, schedule: Schedule, priceFrom: string) => {
     if (!existing) return
     const { price, currency, ...fields } = data
     updateSubscription(existing.id, {
       ...fields,
+      schedule,
       priceHistory: applyPriceEdit(
         existing.priceHistory,
-        { from, price, currency },
-        fields.firstBillDate,
+        { from: priceFrom, price, currency },
+        schedule[0].from,
       ),
     })
-    setPendingEdit(null)
+    setPending(null)
     showToast('Cambios guardados', 'success')
     setIsEditing(false)
   }
 
-  const today = todayISO()
-  const editNextCharge = pendingEdit
-    ? nextBillDate(pendingEdit.firstBillDate, pendingEdit.billingCycle, today)
-    : ''
+  // Second step: ask about the price only when it changed and there are past charges to
+  // pick from; otherwise it starts on the next charge
+  const continueWithPrice = (data: SubscriptionData, schedule: Schedule) => {
+    if (!existing) return
+    const shown = upcomingPrice(existing, today)
+    const priceChanged = data.price !== shown.price || data.currency !== shown.currency
+    if (priceChanged && pastCharges({ schedule }, today).length > 0) {
+      setPending({ data, schedule })
+      return
+    }
+    saveEdit(data, schedule, nextScheduledCharge(schedule, today))
+  }
+
+  // What the form showed as the date and cycle, to tell whether they changed
+  const anchor = existing ? editAnchor(existing, today) : null
 
   const handleSubmit = (values: SubscriptionFormValues) => {
     const data = formValuesToSubscriptionData(values)
     if (!data) return
 
-    if (existing) {
-      const shown = upcomingPrice(existing, today)
-      const priceChanged = data.price !== shown.price || data.currency !== shown.currency
-      // Only ask when there are past charges to pick from; otherwise it's the next one
-      if (priceChanged && pastCharges(data, today).length > 0) {
-        setPendingEdit(data)
+    if (existing && anchor) {
+      // First step: the schedule. The form gives one date and one cycle
+      const [edit] = data.schedule
+      const scheduleChanged =
+        edit.from !== anchor.date || !sameCycle(edit.billingCycle, anchor.billingCycle)
+      if (!scheduleChanged) {
+        continueWithPrice(data, existing.schedule)
         return
       }
-      saveEdit(data, nextBillDate(data.firstBillDate, data.billingCycle, today))
+      // Only ask when it's the next charge that moved and there are past charges to keep.
+      // Otherwise (a trial, an ended one, nothing charged yet) the form's date is the first
+      // charge itself: one rhythm from there
+      if (anchor.kind === 'next' && pastCharges(existing, today).length > 0) {
+        setPending({ data, schedule: null })
+        return
+      }
+      continueWithPrice(data, [edit])
       return
     }
 
@@ -138,7 +173,7 @@ export const SubscriptionFormPage = ({
 
     addSubscription({
       ...fields,
-      priceHistory: [{ from: fields.firstBillDate, price, currency }],
+      priceHistory: [{ from: fields.schedule[0].from, price, currency }],
       id: createId(),
       pauses: [],
       createdAt: new Date().toISOString(),
@@ -182,18 +217,49 @@ export const SubscriptionFormPage = ({
         <SubscriptionForm
           key={isEditing ? 'edit' : 'view'} // see handleBack
           initialValues={initialValues}
+          dateLabel={anchor?.kind === 'next' ? 'Próximo cobro' : undefined}
           submitLabel={existing ? 'Guardar' : 'Agregar Subscripción'}
           readOnly={readOnly}
           onSubmit={handleSubmit}
         />
       </div>
 
+      <ScheduleChangeSheet
+        isOpen={pending !== null && pending.schedule === null}
+        onClose={() => setPending(null)}
+        edit={
+          pending
+            ? {
+                date: pending.data.schedule[0].from,
+                billingCycle: pending.data.schedule[0].billingCycle,
+              }
+            : null
+        }
+        nextCharge={anchor?.date ?? ''}
+        pastCharges={existing ? pastCharges(existing, today) : []}
+        firstCharge={existing?.schedule[0].from ?? ''}
+        onPick={(from) => {
+          if (!existing || !pending) return
+          const [edit] = pending.data.schedule
+          const schedule = applyScheduleEdit(
+            existing.schedule,
+            { date: edit.from, billingCycle: edit.billingCycle },
+            from,
+          )
+          continueWithPrice(pending.data, schedule)
+        }}
+      />
+
       <PriceChangeSheet
-        isOpen={pendingEdit !== null}
-        onClose={() => setPendingEdit(null)}
-        nextCharge={editNextCharge}
-        pastCharges={pendingEdit ? pastCharges(pendingEdit, today) : []}
-        onPick={(from) => pendingEdit && saveEdit(pendingEdit, from)}
+        isOpen={pending !== null && pending.schedule !== null}
+        onClose={() => setPending(null)}
+        nextCharge={pending?.schedule ? nextScheduledCharge(pending.schedule, today) : ''}
+        pastCharges={
+          pending?.schedule ? pastCharges({ schedule: pending.schedule }, today) : []
+        }
+        onPick={(from) =>
+          pending?.schedule && saveEdit(pending.data, pending.schedule, from)
+        }
       />
     </div>
   )

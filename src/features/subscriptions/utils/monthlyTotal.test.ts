@@ -21,8 +21,7 @@ const sub = (
 ) =>
   ({
     priceHistory: [{ from: '2026-01-01', price, currency }],
-    firstBillDate: '2026-01-01',
-    billingCycle,
+    schedule: [{ from: '2026-01-01', billingCycle }],
     pauses: [],
     ...extra,
   }) as Subscription

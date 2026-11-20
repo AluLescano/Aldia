@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cycleOn, nextScheduledCharge } from './schedule'
+import { cycleOn, nextScheduledCharge, upcomingCycle } from './schedule'
 import type { BillingCycle, BillingUnit, Schedule } from '@/shared/types'
 
 const every = (interval: number, unit: BillingUnit): BillingCycle => ({
@@ -73,5 +73,38 @@ describe('cycleOn', () => {
     ['after the switch: the new cycle', '2027-01-01', YEARLY],
   ])('%s', (_, date, expected) => {
     expect(cycleOn(MONTHLY_THEN_YEARLY, date).billingCycle).toEqual(expected)
+  })
+})
+
+describe('upcomingCycle', () => {
+  it('is the cycle of the next charge', () => {
+    expect(upcomingCycle(MONTHLY_THEN_YEARLY, '2026-03-01')).toEqual(MONTHLY)
+  })
+
+  it('shows the new cycle as soon as the next charge is the switch', () => {
+    // May 11: the next charge is Jun 10, the first yearly one
+    expect(upcomingCycle(MONTHLY_THEN_YEARLY, '2026-05-11')).toEqual(YEARLY)
+  })
+})
+
+describe('since (the day a rhythm took over)', () => {
+  // Monthly on the 10th, then on Nov 5 the next charge moved to Nov 14
+  const MOVED_EARLY: Schedule = [
+    { from: '2026-10-10', billingCycle: MONTHLY },
+    { from: '2026-11-14', billingCycle: MONTHLY, since: '2026-11-05' },
+  ]
+
+  it('the old rhythm stops on that day, even before the new first charge', () => {
+    // Without `since`, Nov 10 would still belong to the old rhythm
+    expect(nextScheduledCharge(MOVED_EARLY, '2026-11-06')).toBe('2026-11-14')
+  })
+
+  it('charges before it keep the old rhythm', () => {
+    expect(nextScheduledCharge(MOVED_EARLY, '2026-10-01')).toBe('2026-10-10')
+  })
+
+  it('cycleOn switches on that day', () => {
+    expect(cycleOn(MOVED_EARLY, '2026-11-04').from).toBe('2026-10-10')
+    expect(cycleOn(MOVED_EARLY, '2026-11-05').from).toBe('2026-11-14')
   })
 })

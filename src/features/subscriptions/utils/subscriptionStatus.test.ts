@@ -7,8 +7,9 @@ const trial = (endDate: string) => ({ startDate: '2026-10-01', endDate })
 
 // Monthly on the 5th, no trial, no pauses, no end, unless a test says otherwise
 const sub = (extra: Partial<StatusSource> = {}): StatusSource => ({
-  firstBillDate: '2026-01-05',
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
+  schedule: [
+    { from: '2026-01-05', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   pauses: [],
   ...extra,
 })

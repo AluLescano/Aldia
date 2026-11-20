@@ -25,8 +25,9 @@ const subscription = (id: string, name: string): Subscription => ({
   id,
   name,
   priceHistory: [{ from: '2026-10-01', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: '2026-10-01',
+  schedule: [
+    { from: '2026-10-01', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [],
   pauses: [],
@@ -59,25 +60,89 @@ describe('saving', () => {
   it('saves the list through fileStorage after every change', () => {
     useSubscriptionStore.getState().deleteSubscription('1')
     const saved = JSON.parse(savedFiles.get('subscriptions') ?? 'null')
-    expect(saved).toEqual({ state: { subscriptions: [spotify] }, version: 2 })
+    expect(saved).toEqual({ state: { subscriptions: [spotify] }, version: 3 })
   })
 })
 
 describe('migrateSubscriptions', () => {
-  it('leaves a current file alone', () => {
-    const current = { subscriptions: [netflix] }
-    expect(migrateSubscriptions(current)).toEqual(current)
+  // Netflix the way version 2 saved it: one first charge and one cycle
+  const { schedule, ...rest } = netflix
+  const netflixV2 = {
+    ...rest,
+    firstBillDate: schedule[0].from,
+    billingCycle: schedule[0].billingCycle,
+  }
+
+  describe('2 -> 3', () => {
+    it('turns the first charge and the cycle into the first entry of the schedule', () => {
+      const { subscriptions } = migrateSubscriptions(
+        { subscriptions: [{ ...netflixV2, billingCycle: { type: 'one-time' } }] },
+        2,
+      )
+      expect(subscriptions[0].schedule).toEqual([
+        { from: '2026-10-01', billingCycle: { type: 'one-time' } },
+      ])
+    })
+
+    it('drops the old fields and keeps everything else as it was', () => {
+      const { subscriptions } = migrateSubscriptions(
+        {
+          subscriptions: [
+            {
+              ...netflixV2,
+              endDate: '2027-01-01',
+              pauses: [{ from: '2026-11-01' }],
+              reminders: [{ id: 'r', daysBefore: 1, isEnabled: true }],
+            },
+          ],
+        },
+        2,
+      )
+      const upgraded = subscriptions[0] as unknown as Record<string, unknown>
+      expect(upgraded).not.toHaveProperty('firstBillDate')
+      expect(upgraded).not.toHaveProperty('billingCycle')
+      expect(upgraded).toMatchObject({
+        id: '1',
+        name: 'Netflix',
+        priceHistory: netflix.priceHistory,
+        endDate: '2027-01-01',
+        pauses: [{ from: '2026-11-01' }],
+        reminders: [{ id: 'r', daysBefore: 1, isEnabled: true }],
+        createdAt: '2026-10-01T00:00:00.000Z',
+      })
+    })
+
+    it('upgrades every subscription in the file', () => {
+      const { subscriptions } = migrateSubscriptions(
+        {
+          subscriptions: [
+            netflixV2,
+            { ...netflixV2, id: '2', firstBillDate: '2026-10-15' },
+          ],
+        },
+        2,
+      )
+      expect(subscriptions.map((sub) => sub.schedule[0].from)).toEqual([
+        '2026-10-01',
+        '2026-10-15',
+      ])
+    })
   })
 
-  it('loads a version 2 file as it is', async () => {
+  it('runs when the store loads a version 2 file', async () => {
     // Empty the store first: setState saves too, and would write over the planted file
     useSubscriptionStore.setState({ subscriptions: [] })
     savedFiles.set(
       'subscriptions',
-      JSON.stringify({ state: { subscriptions: [netflix] }, version: 2 }),
+      JSON.stringify({ state: { subscriptions: [netflixV2] }, version: 2 }),
     )
     await useSubscriptionStore.persist.rehydrate()
     expect(useSubscriptionStore.getState().subscriptions).toEqual([netflix])
+  })
+
+  it('leaves a current file alone', () => {
+    const current = { subscriptions: [netflix] }
+    expect(migrateSubscriptions(current, 3)).toEqual(current)
   })
 })
 

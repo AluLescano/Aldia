@@ -1,5 +1,5 @@
 import type { CurrencyCode, Subscription } from '@/shared/types'
-import { nextBillDate } from './billingCycle'
+import { nextScheduledCharge } from './schedule'
 import type { ExchangeRates } from '@/shared/lib/exchangeRates'
 import { monthlyPriceIn } from './monthlyTotal'
 import { isInactive } from './subscriptionStatus'
@@ -67,7 +67,7 @@ export function sortSubscriptions(
   context: SortContext,
 ): Subscription[] {
   const nextCharge = (sub: Subscription) =>
-    nextBillDate(sub.firstBillDate, sub.billingCycle, context.today)
+    nextScheduledCharge(sub.schedule, context.today)
 
   const byName = (subA: Subscription, subB: Subscription) =>
     subA.name.localeCompare(subB.name)
