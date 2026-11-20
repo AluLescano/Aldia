@@ -5,10 +5,7 @@ import type { Subscription, SubscriptionStatus } from '@/shared/types'
 import { isPausedOn, nextCharge } from './subscriptionHistory'
 
 /** What `statusFor` reads. A `Subscription` fits. */
-export type StatusSource = Pick<
-  Subscription,
-  'pauses' | 'trial' | 'firstBillDate' | 'billingCycle' | 'endDate'
->
+export type StatusSource = Pick<Subscription, 'pauses' | 'trial' | 'schedule' | 'endDate'>
 
 /**
  * The status of a subscription today: `ended` when no charge is left before its end date,

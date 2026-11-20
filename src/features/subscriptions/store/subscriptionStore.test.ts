@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { migrateSubscriptions, useSubscriptionStore } from './subscriptionStore'
 import { useToastStore } from '@/shared/store/toastStore'
-import { todayISO } from '@/shared/lib/isoDate'
 import type { Subscription } from '@/shared/types'
 
 // The real fileStorage needs the Capacitor plugin, which only works in a browser or on the
@@ -26,8 +25,9 @@ const subscription = (id: string, name: string): Subscription => ({
   id,
   name,
   priceHistory: [{ from: '2026-10-01', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: '2026-10-01',
+  schedule: [
+    { from: '2026-10-01', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [],
   pauses: [],
@@ -60,112 +60,53 @@ describe('saving', () => {
   it('saves the list through fileStorage after every change', () => {
     useSubscriptionStore.getState().deleteSubscription('1')
     const saved = JSON.parse(savedFiles.get('subscriptions') ?? 'null')
-    expect(saved).toEqual({ state: { subscriptions: [spotify] }, version: 2 })
+    expect(saved).toEqual({ state: { subscriptions: [spotify] }, version: 3 })
   })
 })
 
 describe('migrateSubscriptions', () => {
-  const TODAY = '2026-11-03'
-
-  // Netflix the way version 1 saved it: one price, a paused flag, a logo path
-  const netflixV1 = (extra: Record<string, unknown> = {}) => {
-    const old: Record<string, unknown> = {
-      ...netflix,
-      price: 10,
-      currency: 'USD',
-      isPaused: false,
-      iconUrl: '/logos/logo_netflix.webp',
-      ...extra,
-    }
-    delete old.priceHistory
-    delete old.pauses
-    delete old.icon
-    return old
-  }
-
-  // The same, the way version 0 saved it: a stored status and nextBillDate
-  const netflixV0 = (status: string) => {
-    const old = netflixV1({ status, nextBillDate: '2026-11-01' })
-    delete old.isPaused
-    return old
-  }
-
+  // Netflix the way version 2 saved it: one first charge and one cycle
+  const { schedule, ...rest } = netflix
   const netflixV2 = {
-    ...netflix,
-    icon: { kind: 'preset', path: '/logos/logo_netflix.webp' },
+    ...rest,
+    firstBillDate: schedule[0].from,
+    billingCycle: schedule[0].billingCycle,
   }
 
-  describe('1 -> 2', () => {
-    it('turns the price into the first entry of the history, from the first charge', () => {
+  describe('2 -> 3', () => {
+    it('turns the first charge and the cycle into the first entry of the schedule', () => {
       const { subscriptions } = migrateSubscriptions(
-        { subscriptions: [netflixV1({ price: 11300, currency: 'ARS' })] },
-        1,
-        TODAY,
+        { subscriptions: [{ ...netflixV2, billingCycle: { type: 'one-time' } }] },
+        2,
       )
-      expect(subscriptions[0].priceHistory).toEqual([
-        { from: '2026-10-01', price: 11300, currency: 'ARS' },
+      expect(subscriptions[0].schedule).toEqual([
+        { from: '2026-10-01', billingCycle: { type: 'one-time' } },
       ])
-    })
-
-    it('a paused subscription gets an open pause starting on the upgrade day', () => {
-      const { subscriptions } = migrateSubscriptions(
-        { subscriptions: [netflixV1({ isPaused: true })] },
-        1,
-        TODAY,
-      )
-      expect(subscriptions[0].pauses).toEqual([{ from: TODAY }])
-    })
-
-    it('a running one gets no pauses', () => {
-      const { subscriptions } = migrateSubscriptions(
-        { subscriptions: [netflixV1()] },
-        1,
-        TODAY,
-      )
-      expect(subscriptions[0].pauses).toEqual([])
-    })
-
-    it.each([
-      [
-        { iconUrl: '/logos/logo_netflix.webp' },
-        { kind: 'preset', path: '/logos/logo_netflix.webp' },
-      ],
-      [
-        { iconUrl: undefined, iconKey: 'water' },
-        { kind: 'key', key: 'water' },
-      ],
-      [{ iconUrl: undefined }, undefined],
-    ])('turns %o into the icon %o', (fields, icon) => {
-      const { subscriptions } = migrateSubscriptions(
-        { subscriptions: [netflixV1(fields)] },
-        1,
-        TODAY,
-      )
-      expect(subscriptions[0].icon).toEqual(icon)
     })
 
     it('drops the old fields and keeps everything else as it was', () => {
       const { subscriptions } = migrateSubscriptions(
         {
           subscriptions: [
-            netflixV1({
+            {
+              ...netflixV2,
               endDate: '2027-01-01',
+              pauses: [{ from: '2026-11-01' }],
               reminders: [{ id: 'r', daysBefore: 1, isEnabled: true }],
-            }),
+            },
           ],
         },
-        1,
-        TODAY,
+        2,
       )
       const upgraded = subscriptions[0] as unknown as Record<string, unknown>
-      for (const old of ['price', 'currency', 'isPaused', 'iconUrl', 'iconKey']) {
-        expect(upgraded).not.toHaveProperty(old)
-      }
+      expect(upgraded).not.toHaveProperty('firstBillDate')
+      expect(upgraded).not.toHaveProperty('billingCycle')
       expect(upgraded).toMatchObject({
         id: '1',
         name: 'Netflix',
+        priceHistory: netflix.priceHistory,
         endDate: '2027-01-01',
-        categoryId: 'entertainment',
+        pauses: [{ from: '2026-11-01' }],
         reminders: [{ id: 'r', daysBefore: 1, isEnabled: true }],
         createdAt: '2026-10-01T00:00:00.000Z',
       })
@@ -175,50 +116,33 @@ describe('migrateSubscriptions', () => {
       const { subscriptions } = migrateSubscriptions(
         {
           subscriptions: [
-            netflixV1(),
-            netflixV1({ id: '2', name: 'Spotify', isPaused: true }),
+            netflixV2,
+            { ...netflixV2, id: '2', firstBillDate: '2026-10-15' },
           ],
         },
-        1,
-        TODAY,
+        2,
       )
-      expect(subscriptions.map((sub) => sub.pauses)).toEqual([[], [{ from: TODAY }]])
+      expect(subscriptions.map((sub) => sub.schedule[0].from)).toEqual([
+        '2026-10-01',
+        '2026-10-15',
+      ])
     })
   })
 
-  describe('0 -> 1 -> 2', () => {
-    it('a paused status ends as an open pause, without the old fields', () => {
-      expect(
-        migrateSubscriptions({ subscriptions: [netflixV0('inactive')] }, 0, TODAY),
-      ).toEqual({ subscriptions: [{ ...netflixV2, pauses: [{ from: TODAY }] }] })
-    })
-
-    it.each(['active', 'trial'])('"%s" ends with no pauses', (status) => {
-      expect(
-        migrateSubscriptions({ subscriptions: [netflixV0(status)] }, 0, TODAY),
-      ).toEqual({
-        subscriptions: [netflixV2],
-      })
-    })
-  })
-
-  it('runs when the store loads a version 1 file', async () => {
+  it('runs when the store loads a version 2 file', async () => {
+    // Empty the store first: setState saves too, and would write over the planted file
+    useSubscriptionStore.setState({ subscriptions: [] })
     savedFiles.set(
       'subscriptions',
-      JSON.stringify({
-        state: { subscriptions: [netflixV1({ isPaused: true })] },
-        version: 1,
-      }),
+      JSON.stringify({ state: { subscriptions: [netflixV2] }, version: 2 }),
     )
     await useSubscriptionStore.persist.rehydrate()
-    expect(useSubscriptionStore.getState().subscriptions).toEqual([
-      { ...netflixV2, pauses: [{ from: todayISO() }] },
-    ])
+    expect(useSubscriptionStore.getState().subscriptions).toEqual([netflix])
   })
 
   it('leaves a current file alone', () => {
     const current = { subscriptions: [netflix] }
-    expect(migrateSubscriptions(current, 2, TODAY)).toEqual(current)
+    expect(migrateSubscriptions(current, 3)).toEqual(current)
   })
 })
 

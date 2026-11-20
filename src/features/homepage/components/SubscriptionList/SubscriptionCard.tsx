@@ -16,10 +16,11 @@ import {
   monthlyEquivalent,
   monthlyPriceIn,
 } from '@/features/subscriptions/utils/monthlyTotal'
+import { formatCyclePhrase } from '@/features/subscriptions/utils/billingCycle'
 import {
-  formatCyclePhrase,
-  nextBillDate,
-} from '@/features/subscriptions/utils/billingCycle'
+  nextScheduledCharge,
+  upcomingCycle,
+} from '@/features/subscriptions/utils/schedule'
 import { statusFor } from '@/features/subscriptions/utils/subscriptionStatus'
 import { upcomingPrice } from '@/features/subscriptions/utils/subscriptionHistory'
 
@@ -92,13 +93,9 @@ const SubscriptionCard = ({ subscription, onDelete }: Props) => {
   // Paused or ended: greyed out, no next charge. Not `isPaused`: an ended one isn't paused,
   // it gets its own "Terminó el …" line below
   const isInactive = status === 'inactive' || status === 'ended'
-  const nextCharge = nextBillDate(
-    subscription.firstBillDate,
-    subscription.billingCycle,
-    today,
-  )
+  const nextCharge = nextScheduledCharge(subscription.schedule, today)
 
-  const cycle = subscription.billingCycle
+  const cycle = upcomingCycle(subscription.schedule, today)
   const isMonthly =
     cycle.type === 'every' && cycle.interval === 1 && cycle.unit === 'month'
   // Big: what it costs per month in the Home currency, the same number the total adds up

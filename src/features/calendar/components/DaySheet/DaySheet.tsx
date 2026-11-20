@@ -11,6 +11,7 @@ import { ratesNote } from '@/shared/lib/exchangeRates'
 import { formatDayMonth } from '@/shared/lib/formatDate'
 import { todayISO } from '@/shared/lib/isoDate'
 import { formatBillingCycle } from '@/features/subscriptions/utils/billingCycle'
+import { cycleOn } from '@/features/subscriptions/utils/schedule'
 import {
   chargeInCurrency,
   type ShownPrice,
@@ -166,7 +167,7 @@ const DaySheet = ({
               ? 'Pausada'
               : charge.isTrialEnd
                 ? 'Fin de prueba: primer cobro'
-                : formatBillingCycle(sub.billingCycle)
+                : formatBillingCycle(cycleOn(sub.schedule, charge.date).billingCycle)
             return (
               <DayRow
                 key={charge.subscriptionId}

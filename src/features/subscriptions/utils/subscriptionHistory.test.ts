@@ -11,9 +11,14 @@ import {
   startPause,
   upcomingPrice,
 } from './subscriptionHistory'
-import type { BillingCycle, Pause, PriceHistory } from '@/shared/types'
+import type { BillingCycle, Pause, PriceHistory, Schedule } from '@/shared/types'
 
 const MONTHLY: BillingCycle = { type: 'every', interval: 1, unit: 'month' }
+
+// A one-entry schedule: one rhythm since `from`
+const scheduleFrom = (from: string, billingCycle: BillingCycle = MONTHLY): Schedule => [
+  { from, billingCycle },
+]
 
 describe('priceOn', () => {
   const history: PriceHistory = [
@@ -144,8 +149,7 @@ describe('applyPriceEdit', () => {
 
 describe('upcomingPrice', () => {
   const claro = {
-    firstBillDate: '2026-09-05',
-    billingCycle: MONTHLY,
+    schedule: scheduleFrom('2026-09-05'),
     priceHistory: [
       { from: '2026-09-05', price: 11500, currency: 'ARS' },
       { from: '2026-11-05', price: 11768, currency: 'ARS' },
@@ -162,7 +166,7 @@ describe('upcomingPrice', () => {
 })
 
 describe('startPause / endPause', () => {
-  const schedule = { firstBillDate: '2026-01-10', billingCycle: MONTHLY } // the 10th
+  const schedule = scheduleFrom('2026-01-10') // the 10th
 
   it('pausing opens a pause from today', () => {
     expect(startPause([], '2026-03-08')).toEqual([{ from: '2026-03-08' }])
@@ -199,7 +203,7 @@ describe('startPause / endPause', () => {
 })
 
 describe('nextCharge', () => {
-  const claro = { firstBillDate: '2026-09-05', billingCycle: MONTHLY } // the 5th
+  const claro = { schedule: scheduleFrom('2026-09-05') } // the 5th
 
   it('is the next charge on or after today', () => {
     expect(nextCharge(claro, '2026-11-03')).toBe('2026-11-05')
@@ -217,7 +221,7 @@ describe('nextCharge', () => {
 })
 
 describe('pastCharges', () => {
-  const claro = { firstBillDate: '2026-09-05', billingCycle: MONTHLY }
+  const claro = { schedule: scheduleFrom('2026-09-05') }
 
   it('lists the charges before today, newest first', () => {
     expect(pastCharges(claro, '2026-11-03')).toEqual(['2026-10-05', '2026-09-05'])
@@ -229,6 +233,27 @@ describe('pastCharges', () => {
 
   it('is empty before the first charge', () => {
     expect(pastCharges(claro, '2026-09-01')).toEqual([])
+  })
+
+  it('follows a charge day moved earlier', () => {
+    // Monthly on the 10th, then the charge day moved to the 7th from Nov 7
+    const moved = {
+      schedule: [
+        { from: '2026-10-10', billingCycle: MONTHLY },
+        { from: '2026-11-07', billingCycle: MONTHLY },
+      ] satisfies Schedule,
+    }
+    expect(pastCharges(moved, '2026-12-20')).toEqual([
+      '2026-12-07',
+      '2026-11-07',
+      '2026-10-10',
+    ])
+  })
+
+  it('a one-time charge is the only past one, and nothing comes after it', () => {
+    const once = { schedule: scheduleFrom('2026-09-05', { type: 'one-time' }) }
+    expect(pastCharges(once, '2026-11-03')).toEqual(['2026-09-05'])
+    expect(pastCharges(once, '2026-09-05')).toEqual([])
   })
 
   it('keeps only the newest ones', () => {
@@ -244,8 +269,7 @@ describe('chargesBetween', () => {
   // Monthly on the 15th since Aug 15, 9.99 until it went up to 12.99 on Nov 15
   const netflix = {
     id: 'netflix',
-    firstBillDate: '2026-08-15',
-    billingCycle: MONTHLY,
+    schedule: scheduleFrom('2026-08-15'),
     priceHistory: [
       { from: '2026-08-15', price: 9.99, currency: 'USD' },
       { from: '2026-11-15', price: 12.99, currency: 'USD' },
@@ -340,7 +364,7 @@ describe('chargesBetween', () => {
     // A 14-day trial: the first charge is the day it ends
     const withTrial = {
       ...netflix,
-      firstBillDate: '2026-11-15',
+      schedule: scheduleFrom('2026-11-15'),
       priceHistory: [
         { from: '2026-11-15', price: 12.99, currency: 'USD' },
       ] satisfies PriceHistory,
@@ -357,16 +381,48 @@ describe('chargesBetween', () => {
   it('gives nothing for a one-time payment, even inside the range (and ends)', () => {
     const oneTime = {
       ...netflix,
-      firstBillDate: '2026-11-20',
-      billingCycle: { type: 'one-time' } satisfies BillingCycle,
+      schedule: scheduleFrom('2026-11-20', { type: 'one-time' }),
     }
     expect(chargesBetween(oneTime, '2026-11-01', '2026-12-12')).toEqual([])
+  })
+
+  it('follows a schedule change: monthly, then yearly', () => {
+    const toYearly = {
+      ...netflix,
+      schedule: [
+        { from: '2026-08-15', billingCycle: MONTHLY },
+        {
+          from: '2026-10-15',
+          billingCycle: { type: 'every', interval: 1, unit: 'year' },
+        },
+      ] satisfies Schedule,
+    }
+    expect(dates(chargesBetween(toYearly, '2026-08-01', '2027-12-31'))).toEqual([
+      '2026-08-15',
+      '2026-09-15',
+      '2026-10-15', // the yearly one starts here
+      '2027-10-15',
+    ])
+  })
+
+  it('skips a one-time charge but keeps the monthly ones after it', () => {
+    const thenMonthly = {
+      ...netflix,
+      schedule: [
+        { from: '2026-09-05', billingCycle: { type: 'one-time' } },
+        { from: '2026-11-01', billingCycle: MONTHLY },
+      ] satisfies Schedule,
+    }
+    expect(dates(chargesBetween(thenMonthly, '2026-09-01', '2026-12-31'))).toEqual([
+      '2026-11-01',
+      '2026-12-01',
+    ])
   })
 
   it('lands on the last day of short months without drifting', () => {
     const endOfMonth = {
       ...netflix,
-      firstBillDate: '2026-01-31',
+      schedule: scheduleFrom('2026-01-31'),
       priceHistory: [
         { from: '2026-01-31', price: 5, currency: 'USD' },
       ] satisfies PriceHistory,
@@ -382,8 +438,8 @@ describe('chargesBetween', () => {
   it('finds every charge of a weekly subscription', () => {
     const weekly = {
       ...netflix,
-      firstBillDate: '2026-11-02', // a Monday
-      billingCycle: { type: 'every', interval: 1, unit: 'week' } satisfies BillingCycle,
+      // a Monday
+      schedule: scheduleFrom('2026-11-02', { type: 'every', interval: 1, unit: 'week' }),
     }
     expect(dates(chargesBetween(weekly, '2026-11-01', '2026-12-12'))).toEqual([
       '2026-11-02',
@@ -399,8 +455,7 @@ describe('chargesBetween', () => {
   it('finds every charge of a daily subscription', () => {
     const daily = {
       ...netflix,
-      firstBillDate: '2026-11-01',
-      billingCycle: { type: 'every', interval: 1, unit: 'day' } satisfies BillingCycle,
+      schedule: scheduleFrom('2026-11-01', { type: 'every', interval: 1, unit: 'day' }),
     }
     expect(dates(chargesBetween(daily, '2026-11-03', '2026-11-06'))).toEqual([
       '2026-11-03',

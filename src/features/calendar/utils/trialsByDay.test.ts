@@ -7,8 +7,12 @@ const sub = (id: string, trial?: Subscription['trial']): Subscription => ({
   id,
   name: id,
   priceHistory: [{ from: '2026-01-01', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: trial?.endDate ?? '2026-01-01',
+  schedule: [
+    {
+      from: trial?.endDate ?? '2026-01-01',
+      billingCycle: { type: 'every', interval: 1, unit: 'month' },
+    },
+  ],
   categoryId: 'entertainment',
   reminders: [],
   pauses: [],

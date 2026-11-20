@@ -251,7 +251,7 @@ Every file holds Zustand's format, `{ "state": { ... }, "version": N }` (subscri
 
 The exchange rates are the exception: `useRatesStore` stays in `localStorage` (`aldia_rates`). It's a download cache, so losing it only costs one download.
 
-An older build kept the stores in `localStorage` (`aldia_subscriptions_v1`, `aldia_categories_v1`, `aldia_settings`). That data is not imported: `clearLegacyStorage()` (`shared/lib/legacyStorage.ts`) deletes those keys on every start, before the stores load, and leaves `aldia_rates` alone.
+An older build kept the stores in `localStorage`. That data was never imported, and the startup cleanup that deleted its keys was removed in 0.6.0, once every tester had opened a newer build.
 
 **How `fileStorage` keeps the data safe:**
 
@@ -313,7 +313,7 @@ Each of these comes from a real bug in this codebase.
 - **One helper per question.** `endDate` was only read by the reminders, so a subscription past its end date kept counting in the total and showing a next charge. Now `nextCharge` answers "is there a charge left?" and the status, card, total and sorts all ask it.
 - **Keep the history, don't overwrite it.** One `price` field meant a price rise rewrote what every past charge cost. A change is a new `priceHistory` entry from a charge day; read it with `priceOn` / `upcomingPrice`, never `priceHistory[0]`.
 - **Dates are `YYYY-MM-DD` strings in local time.** Use `shared/lib/isoDate.ts` (`parseISODate`, `toISODate`, `todayISO`); never `toISOString()`, which works in UTC and can move a date to the day before in Argentina.
-- **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update. Example: `migrateSubscriptions` in `subscriptionStore.ts` (1: `status` became `isPaused`; 2: `price` + `currency` became `priceHistory`, `isPaused` became `pauses`, `iconUrl` / `iconKey` became `icon`); add one step per version there and test it with a planted old file. A step can be deleted once every phone has opened a build that ran it.
+- **Persisted data carries a version.** Changing the shape of a stored object must come with a Zustand `persist` `version` + `migrate`, or users lose their data on update. Example: `migrateSubscriptions` in `subscriptionStore.ts`; add one `if (version < N)` step per version there and test it with a planted old file. A step can be deleted once every phone has opened a build that ran it: the 0 → 1 → 2 steps (`status` → `isPaused`, `price` → `priceHistory`, `isPaused` → `pauses`, `iconUrl` / `iconKey` → `icon`) went in 0.6.0.
 - **Load the data before rendering.** A store that saves before it has loaded writes its empty defaults over the user's file. Persisted stores use `skipHydration`, and `main.tsx` awaits them before `createRoot`.
 - **One way out with the Android back button.** Back closes the top-most layer first (bottom sheet, edit mode, overlay), then goes back to Home, and only leaves the app from Home (`useBackHandler` + the Capacitor App plugin's `backButton` listener in `App.tsx`).
 - **A control inside `Field` is a plain `<input>` or `<button>`.** `Field` owns the look; the `Button` component is for actions and brings its own styles and ripple.
@@ -338,6 +338,6 @@ Each of these comes from a real bug in this codebase.
 Vitest (`npm test`, also run by CI on every pull request), in plain Node, test files next to their sources (`*.test.ts`).
 
 - **Pure functions first:** billing cycles and next charge dates, price history and pauses, the status, the list filters and sorts, validation, monthly totals, currency conversion, reminders, the calendar grid and its charges, trials and totals, category names. They hold most of the logic and need no browser.
-- **Migrations:** `subscriptionStore.test.ts` feeds `migrateSubscriptions` version 0 and 1 files and checks the version 2 result (with a fixed `today` for the pauses).
+- **Migrations:** `subscriptionStore.test.ts` plants a saved file in the fake `fileStorage`, rehydrates, and checks what the store holds. Each migration step gets a test with a file in the old shape.
 - **Stores:** tested through their actions. Capacitor plugins don't work in Node, so a store test replaces `fileStorage` with an in-memory `Map` (`vi.mock`, see `subscriptionStore.test.ts`).
 - **`fileStorage`:** tested against a fake `@capacitor/filesystem` (`fileStorage.test.ts`) that behaves like the real plugin where it matters: missing files throw, rename deletes the destination first (like Android), and writes take a moment, so concurrent saves really interleave.

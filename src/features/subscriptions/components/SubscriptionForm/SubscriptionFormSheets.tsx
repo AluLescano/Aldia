@@ -147,7 +147,12 @@ const SubscriptionFormSheets = ({ form, openSheet, onClose, readOnly }: Props) =
       content: (
         <ReminderPicker
           reminders={values.reminders}
-          schedule={values}
+          // The form edits one rhythm: the "Próxima" line reads it as a one-entry schedule
+          schedule={{
+            schedule: [{ from: values.firstBillDate, billingCycle: values.billingCycle }],
+            endDate: values.endDate,
+            trial: values.trial,
+          }}
           reminderTime={reminderTime}
           maxDays={maxDaysBefore(values.billingCycle)}
           hasTrial={values.trial !== undefined}

@@ -7,7 +7,8 @@ import type { SubscriptionFormValues } from '../types'
 /**
  * Everything a form can produce. The id, the pauses and the creation date are not form
  * fields, and the form edits one price, not the history: the screen turns `price` +
- * `currency` into the history (a new one, or `applyPriceEdit` on the saved one).
+ * `currency` into the history (a new one, or `applyPriceEdit` on the saved one). The form
+ * also edits one billing rhythm, which becomes a one-entry `schedule`.
  */
 export type SubscriptionData = Omit<
   Subscription,
@@ -30,8 +31,8 @@ export const formValuesToSubscriptionData = (
     name: values.name.trim(),
     price,
     currency: values.currency,
-    billingCycle: values.billingCycle,
-    firstBillDate: values.firstBillDate,
+    // A new subscription's schedule. An edit merges it into the saved one (applyScheduleEdit)
+    schedule: [{ from: values.firstBillDate, billingCycle: values.billingCycle }],
     // Keys that stay `undefined` (not missing) so that updating really clears them
     endDate: values.endDate || undefined,
     paymentMethodId: values.paymentMethodId || undefined,

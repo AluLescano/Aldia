@@ -10,7 +10,18 @@ import {
   nextReminderDate,
   type ReminderTrigger,
 } from './reminders'
-import type { Subscription, SubscriptionReminder } from '@/shared/types'
+import type {
+  BillingCycle,
+  Schedule,
+  Subscription,
+  SubscriptionReminder,
+} from '@/shared/types'
+
+// A one-entry schedule: one rhythm since `from` (monthly unless a test says otherwise)
+const scheduleFrom = (
+  from: string,
+  billingCycle: BillingCycle = { type: 'every', interval: 1, unit: 'month' },
+): Schedule => [{ from, billingCycle }]
 
 // Planning window used everywhere: from Oct 22 to Dec 21 (about 60 days)
 const TODAY = '2026-10-22'
@@ -27,8 +38,9 @@ const sub = (extra: Partial<Subscription> = {}): Subscription => ({
   id: 'netflix',
   name: 'Netflix',
   priceHistory: [{ from: '2026-01-15', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: '2026-01-15',
+  schedule: [
+    { from: '2026-01-15', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [reminder(3)],
   pauses: [],
@@ -58,13 +70,15 @@ describe('getReminderTriggers', () => {
   it('skips a notify day that already passed, but keeps the next charges', () => {
     // Charge on Oct 24: 3 days before is Oct 21, yesterday
     expect(
-      summary(getReminderTriggers(sub({ firstBillDate: '2026-10-24' }), TODAY, UNTIL)),
+      summary(
+        getReminderTriggers(sub({ schedule: scheduleFrom('2026-10-24') }), TODAY, UNTIL),
+      ),
     ).toEqual(['2026-11-21 > 2026-11-24 : billing', '2026-12-21 > 2026-12-24 : billing'])
   })
 
   it('includes a notify day on the last day of the window', () => {
     const triggers = getReminderTriggers(
-      sub({ firstBillDate: '2026-10-24' }),
+      sub({ schedule: scheduleFrom('2026-10-24') }),
       TODAY,
       UNTIL,
     )
@@ -91,7 +105,7 @@ describe('getReminderTriggers', () => {
   })
 
   it('lands on the last day of short months without drifting', () => {
-    const jan31 = sub({ firstBillDate: '2026-01-31', reminders: [reminder(0)] })
+    const jan31 = sub({ schedule: scheduleFrom('2026-01-31'), reminders: [reminder(0)] })
     expect(summary(getReminderTriggers(jan31, TODAY, UNTIL))).toEqual([
       '2026-10-31 > 2026-10-31 : billing',
       '2026-11-30 > 2026-11-30 : billing',
@@ -101,7 +115,7 @@ describe('getReminderTriggers', () => {
   it('labels only the charge that ends the trial as trial_end', () => {
     // The form makes the trial end the first charge
     const crunchyroll = sub({
-      firstBillDate: '2026-11-19',
+      schedule: scheduleFrom('2026-11-19'),
       trial: { startDate: '2026-10-20', endDate: '2026-11-19' },
       reminders: [reminder(2)],
     })
@@ -125,7 +139,7 @@ describe('getReminderTriggers', () => {
     ['a paused subscription', sub({ pauses: [{ from: '2026-10-01' }] })],
     [
       'a one-time payment',
-      sub({ billingCycle: { type: 'one-time' }, firstBillDate: '2026-11-01' }),
+      sub({ schedule: scheduleFrom('2026-11-01', { type: 'one-time' }) }),
     ],
     ['a disabled reminder', sub({ reminders: [reminder(3, false)] })],
     ['no reminders at all', sub({ reminders: [] })],
@@ -181,7 +195,7 @@ describe('groupTriggersByDay', () => {
 
   it('groups what getReminderTriggers gives for several subscriptions', () => {
     const netflix = sub()
-    const spotify = sub({ id: 'spotify', firstBillDate: '2026-02-15' }) // also the 15th
+    const spotify = sub({ id: 'spotify', schedule: scheduleFrom('2026-02-15') }) // also the 15th
     const triggers = [netflix, spotify].flatMap((s) =>
       getReminderTriggers(s, TODAY, UNTIL),
     )
@@ -266,14 +280,20 @@ describe('nextReminderDate', () => {
   it('skips to the next charge when this one is too close', () => {
     // Charge on Oct 24: 3 days before was yesterday
     expect(
-      nextReminderDate(sub({ firstBillDate: '2026-10-24' }), reminder(3), TODAY),
+      nextReminderDate(sub({ schedule: scheduleFrom('2026-10-24') }), reminder(3), TODAY),
     ).toBe('2026-11-21')
   })
 
   it('finds it for a yearly charge, far away', () => {
     expect(
       nextReminderDate(
-        sub({ billingCycle: { type: 'every', interval: 1, unit: 'year' } }),
+        sub({
+          schedule: scheduleFrom('2026-01-15', {
+            type: 'every',
+            interval: 1,
+            unit: 'year',
+          }),
+        }),
         reminder(3),
         TODAY,
       ),

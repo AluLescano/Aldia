@@ -1,5 +1,5 @@
 // UTILS
-import { addCycles, nextBillDate } from './billingCycle'
+import { cycleOn, nextScheduledCharge } from './schedule'
 import { isPausedOn } from './subscriptionHistory'
 import { addDays } from '@/shared/lib/isoDate'
 
@@ -52,10 +52,7 @@ export function nextFreeDaysBefore(
 }
 
 /** The parts of a subscription that decide when its charges, and so its reminders, fall. */
-export type ChargeSchedule = Pick<
-  Subscription,
-  'billingCycle' | 'firstBillDate' | 'endDate' | 'trial'
->
+export type ChargeSchedule = Pick<Subscription, 'schedule' | 'endDate' | 'trial'>
 
 /**
  * `YYYY-MM-DD`, the next day this reminder rings, or null if it never will again (the
@@ -71,8 +68,8 @@ export function nextReminderDate(
   reminder: SubscriptionReminder,
   today: string,
 ) {
-  const nextCharge = nextBillDate(schedule.firstBillDate, schedule.billingCycle, today)
-  const until = addCycles(nextCharge, schedule.billingCycle, 1)
+  const nextCharge = nextScheduledCharge(schedule.schedule, today)
+  const until = nextScheduledCharge(schedule.schedule, addDays(nextCharge, 1))
   // Enabled on purpose: the question is when it would ring, even while it's switched off
   const source = {
     ...schedule,
@@ -136,21 +133,21 @@ export function getReminderTriggers(
   const triggerList: ReminderTrigger[] = []
 
   const subReminders = sub.reminders
-  // A one-time payment: no reminders (a paused charge is skipped below)
-  if (sub.billingCycle.type === 'one-time') return triggerList
 
   subReminders.forEach((reminder) => {
     if (!reminder.isEnabled) return
 
     // Starts at the next charge on or after today; earlier ones would notify in the past
-    let chargeDate = nextBillDate(sub.firstBillDate, sub.billingCycle, today)
+    let chargeDate = nextScheduledCharge(sub.schedule, today)
     let notifyWhen = addDays(chargeDate, -reminder.daysBefore)
 
     // Stops when the notify day leaves the window or the subscription has ended
     while (notifyWhen <= until && (!sub.endDate || chargeDate <= sub.endDate)) {
       // A notify day that already passed is skipped, but the loop goes on to the next charge.
-      // A charge inside a pause won't happen: no reminder (still paused = none at all)
-      if (notifyWhen >= today && !isPausedOn(sub.pauses, chargeDate)) {
+      // A charge inside a pause won't happen: no reminder (still paused = none at all).
+      // A one-time charge won't come back: nothing to remind
+      const isOneTime = cycleOn(sub.schedule, chargeDate).billingCycle.type === 'one-time'
+      if (notifyWhen >= today && !isOneTime && !isPausedOn(sub.pauses, chargeDate)) {
         const trigger: ReminderTrigger = {
           subscriptionId: sub.id,
           reminderId: reminder.id,
@@ -161,13 +158,11 @@ export function getReminderTriggers(
         }
         triggerList.push(trigger)
       }
-      // The charge after this one. `nextBillDate` counts from `firstBillDate`, so a Jan 31
+      // The charge after this one. Each schedule entry counts from its own start, so a Jan 31
       // subscription lands on each month's last day without drifting
-      chargeDate = nextBillDate(
-        sub.firstBillDate,
-        sub.billingCycle,
-        addDays(chargeDate, 1),
-      )
+      const next = nextScheduledCharge(sub.schedule, addDays(chargeDate, 1))
+      if (next <= chargeDate) break // a one-time charge: nothing comes after it
+      chargeDate = next
       notifyWhen = addDays(chargeDate, -reminder.daysBefore)
     }
   })

@@ -27,22 +27,23 @@ const netflix: Subscription = {
   id: 'b1',
   name: 'Netflix',
   priceHistory: [{ from: '2026-10-01', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: '2026-10-01',
+  schedule: [
+    { from: '2026-10-01', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [],
   pauses: [],
   createdAt: '2026-10-01T00:00:00.000Z',
 }
 
-// A backup made by this app version: subscriptions on 2, categories and settings on 0
+// A backup made by this app version: subscriptions on 3, categories and settings on 0
 const backup: Backup = {
   app: 'aldia',
   format: 1,
   exportedOn: '2026-11-17',
   appVersion: '0.4.0',
   stores: {
-    subscriptions: { state: { subscriptions: [netflix] }, version: 2 },
+    subscriptions: { state: { subscriptions: [netflix] }, version: 3 },
     categories: {
       state: { categories: [{ id: 'others', name: 'Otros', color: '#8E9FAF' }] },
       version: 0,
@@ -97,10 +98,30 @@ describe('applyBackup', () => {
       'b1',
     ])
   })
+
+  it('upgrades a 0.5.0 backup (subscriptions on version 2) through the migration', async () => {
+    const { schedule, ...rest } = netflix
+    const netflixV2 = {
+      ...rest,
+      firstBillDate: schedule[0].from,
+      billingCycle: schedule[0].billingCycle,
+    }
+    const old: Backup = {
+      ...backup,
+      stores: {
+        ...backup.stores,
+        subscriptions: { state: { subscriptions: [netflixV2] }, version: 2 },
+      },
+    }
+
+    await applyBackup(old)
+
+    expect(useSubscriptionStore.getState().subscriptions).toEqual([netflix])
+  })
 })
 
 describe('currentVersions', () => {
   it('reads each store’s persist version (Zustand’s default 0 when it never set one)', () => {
-    expect(currentVersions()).toEqual({ subscriptions: 2, categories: 0, settings: 0 })
+    expect(currentVersions()).toEqual({ subscriptions: 3, categories: 0, settings: 0 })
   })
 })

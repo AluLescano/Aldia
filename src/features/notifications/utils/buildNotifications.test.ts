@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 
 import { buildNotifications, PLANNING_DAYS } from './buildNotifications'
 import { toISODate } from '@/shared/lib/isoDate'
-import type { Subscription } from '@/shared/types'
+import type { BillingCycle, Schedule, Subscription } from '@/shared/types'
+
+// A one-entry schedule: one rhythm since `from` (monthly unless a test says otherwise)
+const scheduleFrom = (
+  from: string,
+  billingCycle: BillingCycle = { type: 'every', interval: 1, unit: 'month' },
+): Schedule => [{ from, billingCycle }]
 
 // Oct 22, 2026 at 08:00, local time
 const NOW = new Date(2026, 9, 22, 8, 0)
@@ -12,8 +18,9 @@ const sub = (extra: Partial<Subscription> = {}): Subscription => ({
   id: 'netflix',
   name: 'Netflix',
   priceHistory: [{ from: '2026-01-15', price: 10, currency: 'USD' }],
-  billingCycle: { type: 'every', interval: 1, unit: 'month' },
-  firstBillDate: '2026-01-15',
+  schedule: [
+    { from: '2026-01-15', billingCycle: { type: 'every', interval: 1, unit: 'month' } },
+  ],
   categoryId: 'entertainment',
   reminders: [{ id: 'r3', daysBefore: 3, isEnabled: true }],
   pauses: [],
@@ -66,7 +73,7 @@ describe('buildNotifications', () => {
       id: 'crunchyroll',
       name: 'Crunchyroll',
       priceHistory: [{ from: '2026-11-19', price: 5, currency: 'USD' }],
-      firstBillDate: '2026-11-19',
+      schedule: scheduleFrom('2026-11-19'),
       trial: { startDate: '2026-10-20', endDate: '2026-11-19' },
       reminders: [{ id: 'r2', daysBefore: 2, isEnabled: true }],
     })
@@ -79,7 +86,11 @@ describe('buildNotifications', () => {
   })
 
   it('says when in the summary if they all charge the same day', () => {
-    const spotify = sub({ id: 'spotify', name: 'Spotify', firstBillDate: '2026-02-15' })
+    const spotify = sub({
+      id: 'spotify',
+      name: 'Spotify',
+      schedule: scheduleFrom('2026-02-15'),
+    })
     const [day] = buildNotifications([sub(), spotify], NOW, '09:00')
     expect(day).toMatchObject({
       title: '2 subscripciones se cobran en 3 días',
@@ -88,11 +99,15 @@ describe('buildNotifications', () => {
   })
 
   it('turns several subscriptions on one day into one summary', () => {
-    const spotify = sub({ id: 'spotify', name: 'Spotify', firstBillDate: '2026-02-15' })
+    const spotify = sub({
+      id: 'spotify',
+      name: 'Spotify',
+      schedule: scheduleFrom('2026-02-15'),
+    })
     const disney = sub({
       id: 'disney',
       name: 'Disney+',
-      firstBillDate: '2026-02-12',
+      schedule: scheduleFrom('2026-02-12'),
       reminders: [{ id: 'r0', daysBefore: 0, isEnabled: true }],
     })
     const [day] = buildNotifications([sub(), spotify, disney], NOW, '09:00')
@@ -106,7 +121,7 @@ describe('buildNotifications', () => {
   it('leaves out today when the time already passed', () => {
     // A reminder for today (charge on Oct 22, same day), but it's 10:00 and they ring at 09:00
     const today = sub({
-      firstBillDate: '2026-01-22',
+      schedule: scheduleFrom('2026-01-22'),
       reminders: [{ id: 'r0', daysBefore: 0, isEnabled: true }],
     })
     const late = new Date(2026, 9, 22, 10, 0)
@@ -118,7 +133,7 @@ describe('buildNotifications', () => {
 
   it('stays inside the planning window', () => {
     const daily = sub({
-      billingCycle: { type: 'every', interval: 1, unit: 'day' },
+      schedule: scheduleFrom('2026-01-15', { type: 'every', interval: 1, unit: 'day' }),
       reminders: [{ id: 'r0', daysBefore: 0, isEnabled: true }],
     })
     const notifications = buildNotifications([daily], NOW, '09:00')
